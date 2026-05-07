@@ -533,7 +533,8 @@ function bindAuth(){
     if(!pw||pw.length<8){ setErr('err-pw','비밀번호는 8자 이상이어야 합니다'); ok=false; }
     if(!type){ setErr('err-type','고용형태를 선택하세요'); ok=false; }
     if(!ok) return;
-    if(_users.find(u=>u.email===email)){ setErr('err-email','이미 사용 중인 이메일입니다'); return; }
+    const {data: existing} = await supa.from('onboarding_users').select('id').eq('email', email).maybeSingle();
+    if(existing){ setErr('err-email','이미 사용 중인 이메일입니다'); return; }
     const newUser = {
       id: Date.now(), name, email, password: pw,
       role: 'user', employeeType: type,
