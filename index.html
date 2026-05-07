@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HectoQ&M 온보딩 허브</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -218,37 +219,85 @@ async function sendApprovalEmail(user){
 }
 
 /* ════════════════════════════════════════
+   SUPABASE CONFIG
+════════════════════════════════════════ */
+const SUPA_CFG = {
+  url: 'https://lzsfdbspvypljsyviakh.supabase.co',
+  key: 'sb_publishable_pEMmU4vVPtn7EteLHpOByw_nJZiCpQc',
+};
+const supa = supabase.createClient(SUPA_CFG.url, SUPA_CFG.key);
+
+/* ════════════════════════════════════════
    DATA LAYER
 ════════════════════════════════════════ */
+let _users = [];
+
+function rowToUser(r){
+  return {
+    id:           r.id,
+    name:         r.name,
+    email:        r.email,
+    password:     r.password,
+    role:         r.role,
+    employeeType: r.employee_type,
+    status:       r.status,
+    mustChangePw: r.must_change_pw,
+    createdAt:    r.created_at,
+  };
+}
+
+function userToRow(u){
+  return {
+    id:             u.id,
+    name:           u.name,
+    email:          u.email,
+    password:       u.password,
+    role:           u.role || 'user',
+    employee_type:  u.employeeType || null,
+    status:         u.status || 'pending',
+    must_change_pw: u.mustChangePw || false,
+    created_at:     u.createdAt || new Date().toISOString(),
+  };
+}
+
 const DB = {
-  getUsers(){ return JSON.parse(localStorage.getItem('hq_users')||'[]') },
-  saveUsers(u){ localStorage.setItem('hq_users',JSON.stringify(u)) },
+  getUsers(){ return _users },
   getCurrent(){ return JSON.parse(localStorage.getItem('hq_cur')||'null') },
   setCurrent(u){ localStorage.setItem('hq_cur',JSON.stringify(u)) },
   clearCurrent(){ localStorage.removeItem('hq_cur') },
-  init(){
-    let u = this.getUsers();
-    // 구 관리자 계정 제거 (마이그레이션)
-    u = u.filter(x => x.email !== 'admin@hecto.com');
-    if(!u.find(x => x.email === 'admin@hectoqnm.co.kr')){
-      u.push({
-        id: Date.now(), name: '관리자',
-        email: 'admin@hectoqnm.co.kr', password: 'hecto12!@',
-        role: 'admin', employeeType: null,
-        status: 'approved', createdAt: new Date().toISOString()
-      });
-    }
-    this.saveUsers(u);
-    // 구 관리자로 로그인돼 있으면 로그아웃
-    const cur = this.getCurrent();
-    if(cur && cur.email === 'admin@hecto.com') this.clearCurrent();
+  getPendingCount(){ return _users.filter(u=>u.status==='pending').length },
+
+  async loadUsers(){
+    const {data, error} = await supa.from('onboarding_users').select('*');
+    if(error){ console.error('[Supabase] load error:', error); return; }
+    _users = data.map(rowToUser);
   },
-  getPendingCount(){ return this.getUsers().filter(u=>u.status==='pending').length },
-  updateUser(id, patch){
-    let u = this.getUsers(); const i = u.findIndex(x=>x.id===id);
-    if(i>-1){ u[i]={...u[i],...patch}; this.saveUsers(u); }
-    if(this.getCurrent()?.id===id) this.setCurrent({...this.getCurrent(),...patch});
-  }
+
+  async addUser(u){
+    const {error} = await supa.from('onboarding_users').insert(userToRow(u));
+    if(error) throw error;
+    _users.push(u);
+  },
+
+  async updateUser(id, patch){
+    const dbPatch = {};
+    if('status'       in patch) dbPatch.status         = patch.status;
+    if('password'     in patch) dbPatch.password        = patch.password;
+    if('mustChangePw' in patch) dbPatch.must_change_pw  = patch.mustChangePw;
+    if('employeeType' in patch) dbPatch.employee_type   = patch.employeeType;
+    const {error} = await supa.from('onboarding_users').update(dbPatch).eq('id', id);
+    if(error){ console.error('[Supabase] update error:', error); return; }
+    const i = _users.findIndex(x=>x.id===id);
+    if(i>-1) _users[i] = {..._users[i], ...patch};
+    const cur = this.getCurrent();
+    if(cur?.id===id) this.setCurrent({...cur, ...patch});
+  },
+
+  async deleteUser(id){
+    const {error} = await supa.from('onboarding_users').delete().eq('id', id);
+    if(error){ console.error('[Supabase] delete error:', error); return; }
+    _users = _users.filter(u=>u.id!==id);
+  },
 };
 
 /* ════════════════════════════════════════
@@ -437,7 +486,7 @@ function renderChangePassword(){
 
 function bindChangePw(){
   document.getElementById('cpw-logout')?.addEventListener('click', logout);
-  document.getElementById('cpw-btn')?.addEventListener('click', ()=>{
+  document.getElementById('cpw-btn')?.addEventListener('click', async ()=>{
     const newPw     = document.getElementById('cpw-new').value;
     const confirmPw = document.getElementById('cpw-confirm').value;
     let ok = true;
@@ -446,7 +495,7 @@ function bindChangePw(){
     if(newPw !== confirmPw){ document.getElementById('err-cpw-confirm').textContent='비밀번호가 일치하지 않습니다'; ok=false; }
     if(!ok) return;
     const user = DB.getCurrent();
-    DB.updateUser(user.id, {password: newPw, mustChangePw: false});
+    await DB.updateUser(user.id, {password: newPw, mustChangePw: false});
     render();
   });
 }
@@ -459,8 +508,7 @@ function bindAuth(){
   document.getElementById('login-btn')?.addEventListener('click', ()=>{
     const email = document.getElementById('l-email').value.trim();
     const pw    = document.getElementById('l-pw').value;
-    const users = DB.getUsers();
-    const user  = users.find(u=>u.email===email && u.password===pw);
+    const user  = _users.find(u=>u.email===email && u.password===pw);
     if(!user){ showMsg('login-msg','error','이메일 또는 비밀번호가 올바르지 않습니다.'); return; }
     if(user.status==='rejected'){ showMsg('login-msg','error','계정이 거절되었습니다. 인사팀에 문의하세요.'); return; }
     DB.setCurrent(user);
@@ -468,7 +516,7 @@ function bindAuth(){
   });
   document.getElementById('l-pw')?.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-btn').click(); });
 
-  document.getElementById('reg-btn')?.addEventListener('click', ()=>{
+  document.getElementById('reg-btn')?.addEventListener('click', async ()=>{
     const name  = document.getElementById('r-name').value.trim();
     const email = document.getElementById('r-email').value.trim();
     const pw    = document.getElementById('r-pw').value;
@@ -480,18 +528,21 @@ function bindAuth(){
     if(!pw||pw.length<8){ setErr('err-pw','비밀번호는 8자 이상이어야 합니다'); ok=false; }
     if(!type){ setErr('err-type','고용형태를 선택하세요'); ok=false; }
     if(!ok) return;
-    const users = DB.getUsers();
-    if(users.find(u=>u.email===email)){ setErr('err-email','이미 사용 중인 이메일입니다'); return; }
+    if(_users.find(u=>u.email===email)){ setErr('err-email','이미 사용 중인 이메일입니다'); return; }
     const newUser = {
       id: Date.now(), name, email, password: pw,
       role: 'user', employeeType: type,
       status: 'pending', createdAt: new Date().toISOString()
     };
-    users.push(newUser);
-    DB.saveUsers(users);
-    DB.setCurrent(newUser);
-    sendRegistrationEmail(newUser); // 관리자에게 알림 이메일 발송
-    render();
+    try {
+      await DB.addUser(newUser);
+      DB.setCurrent(newUser);
+      sendRegistrationEmail(newUser);
+      render();
+    } catch(e) {
+      if(e.code==='23505') setErr('err-email','이미 사용 중인 이메일입니다');
+      else showMsg('reg-msg','error','가입 처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
+    }
   });
 }
 
@@ -1113,26 +1164,26 @@ function bindPageActions(){
     el.addEventListener('click', ()=>nav(el.dataset.nav));
   });
   document.querySelectorAll('[data-action]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
+    btn.addEventListener('click', async ()=>{
       const id     = parseInt(btn.dataset.id);
       const action = btn.dataset.action;
       const name   = btn.dataset.name || '';
       if(action==='approve'){
-        DB.updateUser(id, {status:'approved'});
-        const approvedUser = DB.getUsers().find(u=>u.id===id);
+        await DB.updateUser(id, {status:'approved'});
+        const approvedUser = _users.find(u=>u.id===id);
         if(approvedUser) sendApprovalEmail(approvedUser);
       }
-      if(action==='reject') DB.updateUser(id, {status:'rejected'});
+      if(action==='reject') await DB.updateUser(id, {status:'rejected'});
       if(action==='reset-pw'){
         const tempPw = 'Hecto' + Math.floor(1000 + Math.random()*9000) + '!';
-        DB.updateUser(id, {password: tempPw, mustChangePw: true});
+        await DB.updateUser(id, {password: tempPw, mustChangePw: true});
         alert(`🔑 ${name}님의 임시 비밀번호\n\n${tempPw}\n\n이 비밀번호를 사용자에게 직접 전달해 주세요.\n사용자는 로그인 후 새 비밀번호를 설정해야 합니다.`);
+        render();
         return;
       }
       if(action==='delete-user'){
         if(!confirm(`⚠️ ${name}님의 계정을 삭제하시겠습니까?\n\n삭제 후에는 복구할 수 없습니다.`)) return;
-        const users = DB.getUsers().filter(u=>u.id!==id);
-        DB.saveUsers(users);
+        await DB.deleteUser(id);
       }
       render();
     });
@@ -1156,20 +1207,37 @@ function formatDate(iso){
 /* ════════════════════════════════════════
    INIT
 ════════════════════════════════════════ */
-DB.init();
+(async function init(){
+  document.getElementById('app').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F3F4F6">
+      <div style="text-align:center">
+        <img src="logo-vertical.png" style="height:64px;margin-bottom:20px;opacity:.7">
+        <div style="color:#6B7280;font-size:14px">로딩 중...</div>
+      </div>
+    </div>`;
 
-const cur = DB.getCurrent();
-if(cur){
-  const fresh = DB.getUsers().find(u=>u.id===cur.id);
-  if(fresh) DB.setCurrent(fresh);
-}
+  // 구 localStorage 데이터 정리
+  localStorage.removeItem('hq_users');
+  const oldCur = DB.getCurrent();
+  if(oldCur && oldCur.email === 'admin@hecto.com') DB.clearCurrent();
 
-const initUser = DB.getCurrent();
-if(!initUser)                          state.page = 'login';
-else if(initUser.role==='admin')       state.page = 'admin-users';
-else                                   state.page = 'dashboard';
+  await DB.loadUsers();
 
-render();
+  // 세션 갱신 (최신 DB 상태 반영)
+  const cur = DB.getCurrent();
+  if(cur){
+    const fresh = _users.find(u=>u.id===cur.id);
+    if(fresh) DB.setCurrent(fresh);
+    else DB.clearCurrent();
+  }
+
+  const initUser = DB.getCurrent();
+  if(!initUser)                          state.page = 'login';
+  else if(initUser.role==='admin')       state.page = 'admin-users';
+  else                                   state.page = 'dashboard';
+
+  render();
+})();
 </script>
 </body>
 </html>
