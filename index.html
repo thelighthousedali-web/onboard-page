@@ -190,7 +190,7 @@ const EMAIL_CFG = {
 };
 
 const EMAIL_READY = EMAIL_CFG.publicKey !== 'YOUR_PUBLIC_KEY';
-if(EMAIL_READY) emailjs.init(EMAIL_CFG.publicKey);
+if(EMAIL_READY) emailjs.init({ publicKey: EMAIL_CFG.publicKey });
 
 /* ════════════════════════════════════════
    EMAIL FUNCTIONS
@@ -206,7 +206,7 @@ async function sendRegistrationEmail(user){
       applied_at:    new Date().toLocaleDateString('ko-KR'),
       login_url:     window.location.href,
     });
-  } catch(e){ console.warn('[EmailJS] 가입 알림 발송 실패:', e); }
+  } catch(e){ console.error('[EmailJS] 가입 알림 발송 실패:', e); }
 }
 
 async function sendApprovalEmail(user){
@@ -217,7 +217,7 @@ async function sendApprovalEmail(user){
       to_name:   user.name,
       login_url: window.location.href,
     });
-  } catch(e){ console.warn('[EmailJS] 승인 알림 발송 실패:', e); }
+  } catch(e){ console.error('[EmailJS] 승인 알림 발송 실패:', e); }
 }
 
 /* ════════════════════════════════════════
