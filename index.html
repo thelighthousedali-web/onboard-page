@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HectoQ&M 온보딩 허브</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#FF5500;--primary-dark:#D94700;--primary-light:#FFF0EB;
+  --dark:#1A1A2E;--gray:#6B7280;--light:#F3F4F6;--white:#fff;
+  --border:#E5E7EB;--success:#10B981;--warn:#F59E0B;--error:#EF4444;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','맑은 고딕',sans-serif;background:var(--light);color:var(--dark);min-height:100vh}
+
+/* ── AUTH ── */
+.auth-wrap{min-height:100vh;display:flex}
+.auth-hero{flex:1;overflow:hidden;position:relative}
+.auth-hero img{width:100%;height:100%;object-fit:cover;display:block}
+.auth-panel{width:500px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:48px 48px;background:#fff;overflow-y:auto}
+.auth-card{width:100%;max-width:400px}
+.auth-logo{text-align:center;margin-bottom:32px}
+.auth-logo-img{height:72px;width:auto;object-fit:contain}
+.auth-logo .tagline{font-size:13px;color:var(--gray);margin-top:10px}
+.auth-h{font-size:22px;font-weight:700;margin-bottom:5px}
+.auth-sub{font-size:14px;color:var(--gray);margin-bottom:26px}
+.fgroup{margin-bottom:18px}
+.flabel{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151}
+.finput,.fselect{width:100%;padding:12px 15px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;outline:none;font-family:inherit;transition:border .2s}
+.finput:focus,.fselect:focus{border-color:var(--primary)}
+.fselect{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") right 13px center no-repeat;cursor:pointer}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-full{width:100%;padding:14px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-sm{padding:6px 14px;font-size:13px}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--error);color:#fff}
+.btn-ghost{background:var(--light);color:var(--dark)}
+.btn-ghost:hover{background:var(--border)}
+.auth-footer{text-align:center;margin-top:18px;font-size:13px;color:var(--gray)}
+.auth-footer a{color:var(--primary);font-weight:600;cursor:pointer;text-decoration:none}
+.msg{padding:11px 15px;border-radius:8px;font-size:13px;margin-bottom:16px}
+.msg-warn{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+.msg-success{background:#D1FAE5;color:#065F46;border:1px solid #A7F3D0}
+.msg-error{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA}
+.msg-info{background:#DBEAFE;color:#1E40AF;border:1px solid #BFDBFE}
+.err{color:var(--error);font-size:12px;margin-top:5px}
+@media(max-width:768px){
+  .auth-hero{display:none}
+  .auth-panel{width:100%;padding:32px 24px}
+}
+
+/* ── LAYOUT ── */
+.layout{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:256px;background:var(--dark);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+.sb-head{padding:16px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-logo-wrap{background:#fff;border-radius:8px;padding:7px 12px;display:inline-block}
+.sb-logo-wrap img{height:26px;width:auto;display:block}
+.sb-tagline{font-size:10px;color:rgba(255,255,255,.35);margin-top:8px;letter-spacing:.3px}
+.sb-user{padding:14px 18px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-user-name{font-size:14px;font-weight:600}
+.sb-user-type{font-size:11px;color:var(--primary);margin-top:2px;font-weight:500}
+.sb-nav{padding:12px 0;flex:1}
+.nav-sec{font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;padding:12px 18px 5px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 18px;cursor:pointer;transition:all .15s;font-size:13.5px;color:rgba(255,255,255,.65);border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.active{background:rgba(255,85,0,.18);color:var(--primary);border-left-color:var(--primary)}
+.nav-item .ni{font-size:15px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--primary);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px}
+.sb-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08)}
+.logout-btn{display:flex;align-items:center;gap:9px;width:100%;padding:10px 12px;background:rgba(255,255,255,.04);border:none;border-radius:8px;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;font-family:inherit;transition:all .2s}
+.logout-btn:hover{background:rgba(239,68,68,.2);color:#FCA5A5}
+
+/* ── MAIN ── */
+.main{margin-left:256px;flex:1;padding:30px 36px;min-height:100vh}
+.page-head{margin-bottom:24px}
+.page-title{font-size:24px;font-weight:700}
+.page-sub{font-size:13px;color:var(--gray);margin-top:4px}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray);margin-bottom:6px}
+.breadcrumb .cur{color:var(--dark);font-weight:500}
+
+/* ── DASHBOARD ── */
+.welcome-banner{background:linear-gradient(135deg,var(--primary) 0%,#FF8C42 100%);border-radius:14px;padding:28px 32px;color:#fff;margin-bottom:24px;position:relative;overflow:hidden}
+.welcome-banner::after{content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;background:rgba(255,255,255,.09);border-radius:50%}
+.wb-title{font-size:22px;font-weight:700;position:relative;z-index:1}
+.wb-sub{font-size:14px;opacity:.9;margin-top:5px;position:relative;z-index:1}
+.wb-badge{display:inline-block;background:rgba(255,255,255,.22);padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-top:12px;position:relative;z-index:1}
+.wb-slogan{position:absolute;right:28px;bottom:18px;opacity:.18;z-index:0;pointer-events:none}
+.wb-slogan img{height:18px;filter:brightness(0) invert(1)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:24px}
+.card{background:#fff;border-radius:12px;padding:22px;border:1px solid var(--border);cursor:pointer;transition:all .2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.1);border-color:var(--primary)}
+.card-icon{font-size:26px;margin-bottom:10px}
+.card-title{font-size:14px;font-weight:600;margin-bottom:5px}
+.card-desc{font-size:12px;color:var(--gray);line-height:1.55}
+.card-tag{display:inline-block;background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;margin-top:9px}
+.exclusive-tag{background:#FEF3C7;color:#92400E}
+
+/* ── CONTENT PAGES ── */
+.content-block{background:#fff;border-radius:12px;padding:28px 32px;border:1px solid var(--border);margin-bottom:18px}
+.sec-title{font-size:17px;font-weight:700;color:var(--primary);margin-bottom:15px;padding-bottom:11px;border-bottom:2px solid var(--primary-light);display:flex;align-items:center;gap:8px}
+.blist{list-style:none;display:flex;flex-direction:column;gap:9px}
+.blist li{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;background:var(--light);border-radius:8px;font-size:13.5px;line-height:1.6}
+.blist li::before{content:'✓';color:var(--primary);font-weight:700;flex-shrink:0;margin-top:1px}
+.blist .sub{margin-top:5px;padding-left:14px;color:var(--gray);font-size:12.5px;line-height:1.7}
+.highlight{border-left:4px solid var(--primary);background:var(--primary-light);padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0}
+.highlight p{font-size:13.5px;line-height:1.65}
+.highlight strong{color:var(--primary)}
+.exc-badge{display:inline-flex;align-items:center;gap:5px;background:var(--primary);color:#fff;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:14px}
+.exc-badge-gold{background:linear-gradient(135deg,#F59E0B,#D97706)}
+.step-list{display:flex;flex-direction:column;gap:13px}
+.step{display:flex;gap:14px;padding:14px;background:var(--light);border-radius:10px;align-items:flex-start}
+.step-num{width:30px;height:30px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.step-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.step-desc{font-size:13px;color:var(--gray);line-height:1.6}
+.note{font-size:12.5px;color:var(--gray);background:#F8F9FA;padding:10px 14px;border-radius:7px;margin-top:12px;border:1px solid var(--border)}
+.note::before{content:'※ ';color:var(--warn);font-weight:700}
+.t-wrap{overflow-x:auto;margin-top:10px}
+table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.info-tbl th{background:var(--dark);color:#fff;padding:11px 14px;text-align:left;font-weight:600}
+.info-tbl th:first-child{border-radius:8px 0 0 0}
+.info-tbl th:last-child{border-radius:0 8px 0 0}
+.info-tbl td{padding:10px 14px;border-bottom:1px solid var(--border)}
+.info-tbl tr:last-child td{border-bottom:none}
+.info-tbl tr:hover td{background:var(--light)}
+.point-card{background:linear-gradient(135deg,var(--dark),#2D3748);border-radius:12px;padding:22px;color:#fff;margin-bottom:12px}
+.point-card .pc-label{font-size:12px;opacity:.6;margin-bottom:4px}
+.point-card .pc-val{font-size:26px;font-weight:700;color:var(--primary)}
+.point-card .pc-desc{font-size:12px;opacity:.7;margin-top:6px}
+
+/* ── ADMIN ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:12px;padding:20px 22px;border:1px solid var(--border)}
+.stat-label{font-size:12px;color:var(--gray);margin-bottom:7px;font-weight:500}
+.stat-val{font-size:30px;font-weight:700}
+.stat-val.orange{color:var(--primary)}
+.stat-val.green{color:var(--success)}
+.stat-val.blue{color:#3B82F6}
+.utbl{width:100%;border-collapse:collapse;font-size:13px}
+.utbl th{text-align:left;padding:11px 14px;background:var(--light);font-weight:600;border-bottom:2px solid var(--border);color:var(--gray);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.utbl td{padding:13px 14px;border-bottom:1px solid var(--border)}
+.utbl tr:last-child td{border-bottom:none}
+.utbl tr:hover td{background:var(--light)}
+.sbadge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.s-pending{background:#FEF3C7;color:#92400E}
+.s-approved{background:#D1FAE5;color:#065F46}
+.s-rejected{background:#FEE2E2;color:#991B1B}
+.tbadge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600}
+.t-regular{background:#DBEAFE;color:#1E40AF}
+.t-contract{background:#F3E8FF;color:#6B21A8}
+.btn-gap{display:flex;gap:6px}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:768px){.two-col{grid-template-columns:1fr}.main{margin-left:0;padding:20px}.sidebar{transform:translateX(-100%)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════
+   EMAIL CONFIG (EmailJS 설정)
+   ─────────────────────────────────────
+   설정 방법:
+   1. https://www.emailjs.com 무료 계정 생성
+   2. Email Services → 이메일 계정 연결 → SERVICE_ID 복사
+   3. Email Templates → 아래 두 개 템플릿 생성:
+      [관리자 알림] 변수: {{user_name}}, {{user_email}}, {{employee_type}}, {{applied_at}}, {{login_url}}
+      [사용자 승인] 변수: {{to_name}}, {{login_url}}
+   4. Account > General → Public Key 복사
+   ─────────────────────────────────────
+   ※ publicKey가 설정되지 않으면 이메일 기능은 조용히 비활성화됩니다.
+════════════════════════════════════════ */
+const EMAIL_CFG = {
+  publicKey:  'v4mknyDcTBnBShfID',
+  serviceId:  'service_y0mxlz7',
+  adminTplId: 'template_68vq5vc',
+  userTplId:  'template_uoxbi4a',
+  adminEmail: 'admin@hectoqnm.co.kr',
+};
+
+const EMAIL_READY = EMAIL_CFG.publicKey !== 'YOUR_PUBLIC_KEY';
+if(EMAIL_READY) emailjs.init(EMAIL_CFG.publicKey);
+
+/* ════════════════════════════════════════
+   EMAIL FUNCTIONS
+════════════════════════════════════════ */
+async function sendRegistrationEmail(user){
+  if(!EMAIL_READY) return;
+  try {
+    await emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.adminTplId, {
+      to_email:      EMAIL_CFG.adminEmail,
+      user_name:     user.name,
+      user_email:    user.email,
+      employee_type: user.employeeType === 'regular' ? '정규직' : '계약직',
+      applied_at:    new Date().toLocaleDateString('ko-KR'),
+      login_url:     window.location.href,
+    });
+  } catch(e){ console.warn('[EmailJS] 가입 알림 발송 실패:', e); }
+}
+
+async function sendApprovalEmail(user){
+  if(!EMAIL_READY) return;
+  try {
+    await emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.userTplId, {
+      to_email:  user.email,
+      to_name:   user.name,
+      login_url: window.location.href,
+    });
+  } catch(e){ console.warn('[EmailJS] 승인 알림 발송 실패:', e); }
+}
+
+/* ════════════════════════════════════════
+   DATA LAYER
+════════════════════════════════════════ */
+const DB = {
+  getUsers(){ return JSON.parse(localStorage.getItem('hq_users')||'[]') },
+  saveUsers(u){ localStorage.setItem('hq_users',JSON.stringify(u)) },
+  getCurrent(){ return JSON.parse(localStorage.getItem('hq_cur')||'null') },
+  setCurrent(u){ localStorage.setItem('hq_cur',JSON.stringify(u)) },
+  clearCurrent(){ localStorage.removeItem('hq_cur') },
+  init(){
+    let u = this.getUsers();
+    // 구 관리자 계정 제거 (마이그레이션)
+    u = u.filter(x => x.email !== 'admin@hecto.com');
+    if(!u.find(x => x.email === 'admin@hectoqnm.co.kr')){
+      u.push({
+        id: Date.now(), name: '관리자',
+        email: 'admin@hectoqnm.co.kr', password: 'hecto12!@',
+        role: 'admin', employeeType: null,
+        status: 'approved', createdAt: new Date().toISOString()
+      });
+    }
+    this.saveUsers(u);
+    // 구 관리자로 로그인돼 있으면 로그아웃
+    const cur = this.getCurrent();
+    if(cur && cur.email === 'admin@hecto.com') this.clearCurrent();
+  },
+  getPendingCount(){ return this.getUsers().filter(u=>u.status==='pending').length },
+  updateUser(id, patch){
+    let u = this.getUsers(); const i = u.findIndex(x=>x.id===id);
+    if(i>-1){ u[i]={...u[i],...patch}; this.saveUsers(u); }
+    if(this.getCurrent()?.id===id) this.setCurrent({...this.getCurrent(),...patch});
+  }
+};
+
+/* ════════════════════════════════════════
+   STATE & ROUTER
+════════════════════════════════════════ */
+let state = {page:'login', sub:null};
+
+function nav(page, sub=null){
+  state = {page, sub};
+  render();
+}
+
+/* ════════════════════════════════════════
+   RENDER DISPATCHER
+════════════════════════════════════════ */
+function render(){
+  const user = DB.getCurrent();
+  const app  = document.getElementById('app');
+
+  if(!user){
+    if(state.page==='register') app.innerHTML = renderRegister();
+    else app.innerHTML = renderLogin();
+    bindAuth();
+    return;
+  }
+
+  if(user.status==='pending'){
+    app.innerHTML = renderPending();
+    bindAuth();
+    return;
+  }
+
+  if(user.role==='admin'){
+    app.innerHTML = renderLayout(user, renderAdminPage());
+  } else {
+    app.innerHTML = renderLayout(user, renderUserPage(user));
+  }
+  bindNav();
+  bindPageActions();
+}
+
+/* ════════════════════════════════════════
+   AUTH PAGES
+════════════════════════════════════════ */
+function renderLogin(){
+  return `
+<div class="auth-wrap">
+  <div class="auth-hero">
+    <img src="hero-image.png" alt="Hecto Q&M">
+  </div>
+  <div class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <img src="logo-vertical.png" alt="Hecto Q&M" class="auth-logo-img">
+        <div class="tagline">신규입사자 온보딩 허브</div>
+      </div>
+      <h2 class="auth-h">로그인</h2>
+      <p class="auth-sub">회사 계정으로 로그인하세요</p>
+      <div id="login-msg"></div>
+      <div class="fgroup">
+        <label class="flabel">이메일</label>
+        <input class="finput" id="l-email" type="email" placeholder="이메일 주소 입력" autocomplete="email">
+      </div>
+      <div class="fgroup">
+        <label class="flabel">비밀번호</label>
+        <input class="finput" id="l-pw" type="password" placeholder="비밀번호 입력">
+      </div>
+      <button class="btn btn-primary btn-full" id="login-btn">로그인</button>
+      <div class="auth-footer">
+        아직 계정이 없으신가요? <a id="go-register">회원가입</a>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function renderRegister(){
+  return `
+<div class="auth-wrap">
+  <div class="auth-hero">
+    <img src="hero-image.png" alt="Hecto Q&M">
+  </div>
+  <div class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <img src="logo-vertical.png" alt="Hecto Q&M" class="auth-logo-img">
+        <div class="tagline">신규입사자 온보딩 허브</div>
+      </div>
+      <h2 class="auth-h">회원가입</h2>
+      <p class="auth-sub">입사 정보를 입력하여 계정을 생성하세요</p>
+      <div id="reg-msg"></div>
+      <div class="fgroup">
+        <label class="flabel">이름</label>
+        <input class="finput" id="r-name" type="text" placeholder="성명 입력">
+        <div class="err" id="err-name"></div>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">이메일</label>
+        <input class="finput" id="r-email" type="email" placeholder="회사 이메일 입력">
+        <div class="err" id="err-email"></div>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">비밀번호</label>
+        <input class="finput" id="r-pw" type="password" placeholder="8자 이상 입력">
+        <div class="err" id="err-pw"></div>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">고용형태</label>
+        <select class="fselect" id="r-type">
+          <option value="">선택하세요</option>
+          <option value="regular">정규직</option>
+          <option value="contract">계약직</option>
+        </select>
+        <div class="err" id="err-type"></div>
+      </div>
+      <button class="btn btn-primary btn-full" id="reg-btn">가입 신청</button>
+      <div class="auth-footer">
+        이미 계정이 있으신가요? <a id="go-login">로그인</a>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function renderPending(){
+  return `
+<div class="auth-wrap">
+  <div class="auth-hero">
+    <img src="hero-image.png" alt="Hecto Q&M">
+  </div>
+  <div class="auth-panel">
+    <div class="auth-card" style="text-align:center">
+      <div class="auth-logo">
+        <img src="logo-vertical.png" alt="Hecto Q&M" class="auth-logo-img">
+      </div>
+      <div style="font-size:52px;margin-bottom:16px">⏳</div>
+      <h2 class="auth-h" style="text-align:center">승인 대기 중</h2>
+      <p class="auth-sub" style="text-align:center;margin-bottom:20px">관리자 승인 후 서비스 이용이 가능합니다.<br>승인까지 영업일 기준 1일 이내 소요됩니다.</p>
+      <div class="msg msg-warn">인사팀 또는 담당자에게 승인을 요청하세요.</div>
+      <button class="btn btn-ghost btn-full" id="logout-pending">로그아웃</button>
+    </div>
+  </div>
+</div>`;
+}
+
+function bindAuth(){
+  document.getElementById('go-register')?.addEventListener('click', ()=>nav('register'));
+  document.getElementById('go-login')?.addEventListener('click', ()=>nav('login'));
+  document.getElementById('logout-pending')?.addEventListener('click', logout);
+
+  document.getElementById('login-btn')?.addEventListener('click', ()=>{
+    const email = document.getElementById('l-email').value.trim();
+    const pw    = document.getElementById('l-pw').value;
+    const users = DB.getUsers();
+    const user  = users.find(u=>u.email===email && u.password===pw);
+    if(!user){ showMsg('login-msg','error','이메일 또는 비밀번호가 올바르지 않습니다.'); return; }
+    if(user.status==='rejected'){ showMsg('login-msg','error','계정이 거절되었습니다. 인사팀에 문의하세요.'); return; }
+    DB.setCurrent(user);
+    render();
+  });
+  document.getElementById('l-pw')?.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-btn').click(); });
+
+  document.getElementById('reg-btn')?.addEventListener('click', ()=>{
+    const name  = document.getElementById('r-name').value.trim();
+    const email = document.getElementById('r-email').value.trim();
+    const pw    = document.getElementById('r-pw').value;
+    const type  = document.getElementById('r-type').value;
+    let ok = true;
+    clearErrs();
+    if(!name){ setErr('err-name','이름을 입력하세요'); ok=false; }
+    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setErr('err-email','올바른 이메일을 입력하세요'); ok=false; }
+    if(!pw||pw.length<8){ setErr('err-pw','비밀번호는 8자 이상이어야 합니다'); ok=false; }
+    if(!type){ setErr('err-type','고용형태를 선택하세요'); ok=false; }
+    if(!ok) return;
+    const users = DB.getUsers();
+    if(users.find(u=>u.email===email)){ setErr('err-email','이미 사용 중인 이메일입니다'); return; }
+    const newUser = {
+      id: Date.now(), name, email, password: pw,
+      role: 'user', employeeType: type,
+      status: 'pending', createdAt: new Date().toISOString()
+    };
+    users.push(newUser);
+    DB.saveUsers(users);
+    DB.setCurrent(newUser);
+    sendRegistrationEmail(newUser); // 관리자에게 알림 이메일 발송
+    render();
+  });
+}
+
+/* ════════════════════════════════════════
+   LAYOUT (sidebar + main)
+════════════════════════════════════════ */
+function renderLayout(user, content){
+  const isAdmin      = user.role==='admin';
+  const pendingCount = DB.getPendingCount();
+  let navHtml = '';
+
+  if(isAdmin){
+    navHtml = `
+      <div class="nav-sec">관리</div>
+      <div class="nav-item ${state.page==='admin-users'?'active':''}" data-nav="admin-users">
+        <span class="ni">👥</span>회원 승인 관리
+        ${pendingCount>0?`<span class="nav-badge">${pendingCount}</span>`:''}
+      </div>
+      <div class="nav-item ${state.page==='admin-all'?'active':''}" data-nav="admin-all">
+        <span class="ni">📋</span>전체 회원 목록
+      </div>`;
+  } else {
+    const t = user.employeeType;
+    navHtml = `
+      <div class="nav-sec">메인</div>
+      <div class="nav-item ${state.page==='dashboard'?'active':''}" data-nav="dashboard">
+        <span class="ni">🏠</span>대시보드
+      </div>
+      <div class="nav-sec">복리후생</div>
+      <div class="nav-item ${state.page==='benefits'?'active':''}" data-nav="benefits">
+        <span class="ni">🎁</span>복지제도 안내
+      </div>
+      ${t==='regular'?`
+      <div class="nav-item ${state.page==='points'?'active':''}" data-nav="points">
+        <span class="ni">💰</span>현금성 포인트
+      </div>
+      <div class="nav-item ${state.page==='loan'?'active':''}" data-nav="loan">
+        <span class="ni">🏦</span>사내 대출제도
+      </div>
+      <div class="nav-item ${state.page==='longservice'?'active':''}" data-nav="longservice">
+        <span class="ni">🏆</span>장기 근속 포상
+      </div>`:''}
+      <div class="nav-sec">사내 시스템</div>
+      <div class="nav-item ${state.page==='workthru'?'active':''}" data-nav="workthru">
+        <span class="ni">💻</span>워크쓰루 안내
+      </div>
+      <div class="nav-item ${state.page==='eapproval'?'active':''}" data-nav="eapproval">
+        <span class="ni">✍️</span>전자결재 작성
+      </div>
+      <div class="nav-item ${state.page==='leave'?'active':''}" data-nav="leave">
+        <span class="ni">📅</span>연차 신청
+      </div>
+      <div class="nav-item ${state.page==='welfare'?'active':''}" data-nav="welfare">
+        <span class="ni">💊</span>복지물품 신청
+      </div>
+      <div class="nav-item ${state.page==='certificate'?'active':''}" data-nav="certificate">
+        <span class="ni">📄</span>증명서 신청
+      </div>`;
+  }
+
+  const typeLabel = user.role==='admin' ? '관리자' : (user.employeeType==='regular'?'정규직':'계약직');
+
+  return `
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo-wrap">
+        <img src="logo-wide.png" alt="Hecto Q&M">
+      </div>
+      <div class="sb-tagline">온보딩 허브</div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-user-name">${user.name}</div>
+      <div class="sb-user-type">${typeLabel}</div>
+    </div>
+    <nav class="sb-nav">${navHtml}</nav>
+    <div class="sb-foot">
+      <button class="logout-btn" id="logout-btn">
+        <span>🚪</span> 로그아웃
+      </button>
+    </div>
+  </aside>
+  <main class="main">${content}</main>
+</div>`;
+}
+
+function bindNav(){
+  document.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click', ()=>nav(el.dataset.nav));
+  });
+  document.getElementById('logout-btn')?.addEventListener('click', logout);
+}
+
+function logout(){
+  DB.clearCurrent();
+  nav('login');
+}
+
+/* ════════════════════════════════════════
+   ADMIN PAGES
+════════════════════════════════════════ */
+function renderAdminPage(){
+  const users   = DB.getUsers().filter(u=>u.role!=='admin');
+  const pending  = users.filter(u=>u.status==='pending');
+  const approved = users.filter(u=>u.status==='approved');
+
+  if(state.page==='admin-all') return renderAdminAll(users);
+
+  return `
+<div class="page-head">
+  <div class="page-title">회원 승인 관리</div>
+  <div class="page-sub">신규 가입 요청을 검토하고 승인하세요</div>
+</div>
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-label">승인 대기</div><div class="stat-val orange">${pending.length}</div></div>
+  <div class="stat-card"><div class="stat-label">승인 완료</div><div class="stat-val green">${approved.length}</div></div>
+  <div class="stat-card"><div class="stat-label">전체 회원</div><div class="stat-val blue">${users.length}</div></div>
+</div>
+${pending.length===0
+  ? '<div class="content-block" style="text-align:center;padding:48px;color:var(--gray)"><div style="font-size:40px;margin-bottom:12px">✅</div><div>대기 중인 가입 요청이 없습니다</div></div>'
+  : `<div class="content-block">
+  <div class="sec-title">⏳ 승인 대기 목록</div>
+  <div class="t-wrap">
+  <table class="utbl">
+    <thead><tr><th>이름</th><th>이메일</th><th>고용형태</th><th>신청일</th><th>처리</th></tr></thead>
+    <tbody>
+      ${pending.map(u=>`
+      <tr>
+        <td><strong>${u.name}</strong></td>
+        <td>${u.email}</td>
+        <td><span class="tbadge ${u.employeeType==='regular'?'t-regular':'t-contract'}">${u.employeeType==='regular'?'정규직':'계약직'}</span></td>
+        <td>${formatDate(u.createdAt)}</td>
+        <td>
+          <div class="btn-gap">
+            <button class="btn btn-sm btn-success" data-action="approve" data-id="${u.id}">승인</button>
+            <button class="btn btn-sm btn-danger" data-action="reject" data-id="${u.id}">거절</button>
+          </div>
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table>
+  </div>
+</div>`}`;
+}
+
+function renderAdminAll(users){
+  return `
+<div class="page-head">
+  <div class="page-title">전체 회원 목록</div>
+  <div class="page-sub">등록된 모든 회원 정보</div>
+</div>
+<div class="content-block">
+  <div class="t-wrap">
+  <table class="utbl">
+    <thead><tr><th>이름</th><th>이메일</th><th>고용형태</th><th>상태</th><th>가입일</th></tr></thead>
+    <tbody>
+      ${users.length===0
+        ?'<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--gray)">등록된 회원이 없습니다</td></tr>'
+        :users.map(u=>`
+        <tr>
+          <td><strong>${u.name}</strong></td>
+          <td>${u.email}</td>
+          <td><span class="tbadge ${u.employeeType==='regular'?'t-regular':'t-contract'}">${u.employeeType==='regular'?'정규직':'계약직'}</span></td>
+          <td><span class="sbadge s-${u.status}">${{pending:'대기',approved:'승인',rejected:'거절'}[u.status]}</span></td>
+          <td>${formatDate(u.createdAt)}</td>
+        </tr>`).join('')}
+    </tbody>
+  </table>
+  </div>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   USER PAGES DISPATCHER
+════════════════════════════════════════ */
+function renderUserPage(user){
+  const p = state.page;
+  if(p==='benefits')                                return renderBenefits(user);
+  if(p==='points'      && user.employeeType==='regular') return renderPoints();
+  if(p==='loan'        && user.employeeType==='regular') return renderLoan();
+  if(p==='longservice' && user.employeeType==='regular') return renderLongService();
+  if(p==='workthru')   return renderWorkthru();
+  if(p==='eapproval')  return renderEApproval();
+  if(p==='leave')      return renderLeave();
+  if(p==='welfare')    return renderWelfare();
+  if(p==='certificate') return renderCertificate();
+  return renderDashboard(user);
+}
+
+/* ════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════ */
+function renderDashboard(user){
+  const isRegular = user.employeeType==='regular';
+  const commonCards = `
+    <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div></div>
+    <div class="card" data-nav="workthru"><div class="card-icon">💻</div><div class="card-title">워크쓰루 안내</div><div class="card-desc">그룹웨어 접속 및 기본 사용 방법</div></div>
+    <div class="card" data-nav="eapproval"><div class="card-icon">✍️</div><div class="card-title">전자결재 작성</div><div class="card-desc">품의서 작성 및 결재 요청 방법</div></div>
+    <div class="card" data-nav="leave"><div class="card-icon">📅</div><div class="card-title">연차 신청</div><div class="card-desc">연차·반차·반반차 신청 방법 안내</div></div>
+    <div class="card" data-nav="welfare"><div class="card-icon">💊</div><div class="card-title">복지물품 신청</div><div class="card-desc">유산균(드시모네/오투부스터) 신청 방법</div></div>
+    <div class="card" data-nav="certificate"><div class="card-icon">📄</div><div class="card-title">증명서 신청</div><div class="card-desc">재직증명서 등 각종 증명서 발급 방법</div></div>`;
+  const regularCards = isRegular ? `
+    <div class="card" data-nav="points"><div class="card-icon">💰</div><div class="card-title">현금성 포인트</div><div class="card-desc">복지포인트, 뚜벅포인트, 웰니스포인트 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="loan"><div class="card-icon">🏦</div><div class="card-title">사내 대출제도</div><div class="card-desc">주택구입·전월세 무이자 대출 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="longservice"><div class="card-icon">🏆</div><div class="card-title">장기 근속 포상</div><div class="card-desc">5년·10년·20년 근속 포상 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>` : '';
+  return `
+<div class="welcome-banner">
+  <div class="wb-title">환영합니다, ${user.name}님! 👋</div>
+  <div class="wb-sub">헥토큐앤엠 온보딩 허브에 오신 것을 환영합니다.</div>
+  <div class="wb-badge">${isRegular?'정규직':'계약직'} 입사자 가이드</div>
+  <div class="wb-slogan"><img src="slogan.png" alt="Perfecting Forward"></div>
+</div>
+<div class="page-head">
+  <div class="page-title">빠른 메뉴</div>
+  <div class="page-sub">아래 항목을 클릭하여 원하는 정보를 확인하세요</div>
+</div>
+<div class="cards">${commonCards}${regularCards}</div>`;
+}
+
+/* ════════════════════════════════════════
+   BENEFITS PAGE
+════════════════════════════════════════ */
+function renderBenefits(user){
+  const isRegular = user.employeeType==='regular';
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">복지제도 안내</span></div>
+  <div class="page-title">복리후생 안내</div>
+  <div class="page-sub">헥토큐앤엠의 복지제도 및 혜택을 안내해 드립니다</div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🏥 기본 복지제도</div>
+  <ul class="blist">
+    <li><strong>4대 보험</strong> — 국민연금, 건강보험, 고용보험, 산재보험 가입</li>
+    <li><strong>웰컴키트 제공</strong> — 입사 시 웰컴키트 지급</li>
+    <li><strong>연차 유급휴가</strong><div class="sub">그룹웨어(워크쓰루) 전자결재를 통해 휴가신청서 작성</div></li>
+    <li><strong>퇴직연금(DC형)</strong><div class="sub">퇴직연금 운용사 : 우리은행</div></li>
+    <li><strong>조식·중식·석식 제공</strong><div class="sub">Hecto 앱 '채움'에서 이용시간 및 메뉴 확인 가능</div></li>
+    ${isRegular?`<li><strong>사내 카페 (틔움포인트)</strong><div class="sub">월 22,000 포인트 제공 (매월 1일 자동 충전) · 복지포인트 2만원 차감<br>Hecto 앱 '틔움'에서 메뉴 및 잔여 포인트 확인 가능<br>판매 수익금은 기부되어 나눔 실천</div></li>`
+    :`<li><strong>무제한 간식 제공</strong><div class="sub">사내 구비된 음료·스낵 자유롭게 이용 가능</div></li>`}
+    <li><strong>사내 도서관</strong><div class="sub">신간·추천·베스트셀러 도서 보유 · 태광타워 11층 위치<br>Hecto 앱 '배움'에서 대여 가능 (1인 1권 / 기본 2주 / 연장 가능)</div></li>
+    <li><strong>무제한 간식 제공</strong><div class="sub">사내 구비된 음료·스낵 자유롭게 이용 가능</div></li>
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">💐 경조사 지원</div>
+  <ul class="blist">
+    <li><strong>소통비</strong> — 소속부서 팀워크 강화를 위해 지급 (1일 재직 기준 인당 50,000원)</li>
+    <li><strong>경조금·경조휴가·경조물품 지원</strong>
+      <div class="sub">
+        휴가: 발생일 포함, 역일 기준 계산 / 분할 사용 불가 (결혼 경조휴가 예외: 예식일로부터 1년 내 사용 가능)<br>
+        신청기한: 경조 발생일 기준 익월 말일까지 (미신청 시 지급 안 됨)<br>
+        상조서비스: 프리드라이프 / 약 300만원 상당 (현금 지원 없음)
+      </div>
+    </li>
+    <li><strong>생일 상품권 10만원 지급</strong></li>
+    <li><strong>명절선물</strong><div class="sub">임직원 전용 복지몰에서 신청 · 설날·추석 / 부모님 10만원 + 개인 10만원</div></li>
+    ${isRegular?`<li><strong>사우회 운영</strong><div class="sub">임직원 경조사 지원</div></li>`:''}
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🚗 기타 혜택</div>
+  <ul class="blist">
+    <li><strong>교통비 지원</strong> — 오후 10시 이후 야근 교통비 제공</li>
+    <li><strong>주차비</strong> — 팀장 자가 주차비 지원</li>
+    <li><strong>건강보조식품</strong> — 오투부스터·드시모네 4500 정액 2만원 구입 (차액 회사 지원, 월 1개)</li>
+    <li><strong>제휴 할인</strong><div class="sub">CGV 임직원 제휴할인 · 쏘카 카쉐어링 제휴할인 · 드시모네몰 직원가 (정가 50%)</div></li>
+    <li><strong>건강검진 반차 제공</strong></li>
+    <li><strong>직원 추천 제도</strong> — 직원 추천 시 포상금 지급</li>
+    ${isRegular?`<li><strong>멘토링 제도</strong><div class="sub">신규 입사자의 빠른 적응을 위해 멘토링 제도 운영</div></li>`:''}
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">📋 경조사 상세 기준표</div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th>구분</th><th>세부대상</th><th>휴가</th><th>경조금</th><th>선물</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="3"><strong>결혼</strong></td><td>본인</td><td>7일</td><td>50만원</td><td>화환</td></tr>
+      <tr><td>자녀</td><td>1일</td><td>30만원</td><td>화환</td></tr>
+      <tr><td>(배우자) 형제자매</td><td>-</td><td>10만원</td><td>-</td></tr>
+      <tr><td><strong>칠순·팔순</strong></td><td>(배우자) 부모</td><td>-</td><td>20만원</td><td>꽃바구니</td></tr>
+      <tr><td><strong>임신</strong></td><td>본인·배우자</td><td>-</td><td>-</td><td>드시모네 4500 (자기부담금 면제)</td></tr>
+      <tr><td rowspan="2"><strong>출산</strong></td><td>본인</td><td>90일 (다태아 120일)</td><td>20만원</td><td>과일바구니 + 유산균(6개월)</td></tr>
+      <tr><td>배우자</td><td>10일</td><td>20만원</td><td>과일바구니 + 유산균(6개월)</td></tr>
+      <tr><td><strong>사망(본인)</strong></td><td>본인</td><td>-</td><td>500만원</td><td>조화/상조용품</td></tr>
+      <tr><td><strong>사망(배우자·자녀)</strong></td><td>배우자/자녀</td><td>5일</td><td>100만원</td><td>조화/상조용품</td></tr>
+      <tr><td><strong>사망(부모)</strong></td><td>(배우자) 부모</td><td>5일</td><td>50만원</td><td>조화/상조용품</td></tr>
+      <tr><td><strong>사망(조부모·형제자매)</strong></td><td>(배우자) 조부모/형제자매</td><td>3일</td><td>20만원</td><td>조화/상조용품</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   POINTS PAGE (정규직 전용)
+════════════════════════════════════════ */
+function renderPoints(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">현금성 포인트</span></div>
+  <div class="page-title">현금성 포인트 안내</div>
+  <div class="page-sub">정규직 임직원을 위한 포인트 혜택입니다</div>
+</div>
+<div class="exc-badge">✨ 정규직 전용 혜택</div>
+
+<div class="two-col">
+  <div class="point-card">
+    <div class="pc-label">복지포인트 (기본 선택)</div>
+    <div class="pc-val">최대 180만 P</div>
+    <div class="pc-desc">사용 증빙에 따라 분할 정산 · 급여 지급 시 지급</div>
+  </div>
+  <div class="point-card">
+    <div class="pc-label">뚜벅포인트 (걸음 수 기반)</div>
+    <div class="pc-val">최대 240만 P</div>
+    <div class="pc-desc">월별 최대 20만 P · Hecto 앱 걸음 수 기반 정산</div>
+  </div>
+</div>
+
+<div class="content-block" style="margin-top:18px">
+  <div class="sec-title">💡 포인트 종류 및 상세 안내</div>
+  <div class="highlight">
+    <p>복지포인트(최대 180만P)와 뚜벅포인트(최대 240만P) 중 <strong>연 1회 선택</strong> 가능<br>변경 희망 시 다음 분기부터 적용됩니다.</p>
+  </div>
+  <ul class="blist">
+    <li><div><strong>복지포인트</strong> (최대 연 180만 P)<div class="sub">사용 증빙에 따라 최대 180만 포인트 지급 / 분할정산</div></div></li>
+    <li><div><strong>뚜벅포인트</strong> (최대 연 240만 P)<div class="sub">걸음 수에 따라 월 최대 20만 P · 1~12월 월별 지급<br>Hecto 앱 'Home'에서 일일 걸음 수 자동 집계 (정확한 집계를 위해 매월 1일 앱에서 동기화 필수)</div></div></li>
+    <li><div><strong>뚜벅투게더</strong> (최대 연 40만 P)<div class="sub">복지포인트 신청자도 참여 가능<br>1회당 5인 이상 그룹사 임직원이 사진에 포함되어야 함<br>분기 5회 이상: 10만P / 분기 3~4회: 5만P / 분기 2회 이하: 지급 없음</div></div></li>
+    <li><div><strong>웰니스 포인트</strong> (연간 60만 P)<div class="sub">중도입사자는 일할 계산 적용 · 자동 충전<br>제휴병원 '청담이든의원'에서 사용 가능</div></div></li>
+    <li><div><strong>근속 포인트</strong> (최대 50만 P)<div class="sub">입사일 기준 1년당 5만P 증가 (최대 50만P / 10년)<br>1년이 지난 해의 다음 해 1월 1일부터 지급 · 증빙 없이 매월 분할 지급</div></div></li>
+    <li><div><strong>평가 포인트</strong> (S등급: 100만 P)<div class="sub">전년도 개인평가 S등급 시 지급 · 증빙 없이 매월 분할 지급</div></div></li>
+    <li><div><strong>틔움포인트</strong> (월 22,000 P)<div class="sub">사내 카페 이용 포인트 · 매월 1일 자동 충전 · 복지포인트에서 2만원 차감</div></div></li>
+  </ul>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   LOAN PAGE (정규직 전용)
+════════════════════════════════════════ */
+function renderLoan(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">사내 대출제도</span></div>
+  <div class="page-title">사내 대출제도</div>
+  <div class="page-sub">임직원 주거 지원을 위한 무이자 대출 제도</div>
+</div>
+<div class="exc-badge">✨ 정규직 전용 혜택</div>
+
+<div class="content-block">
+  <div class="sec-title">🏠 대출 개요</div>
+  <div class="highlight">
+    <p><strong>대상:</strong> 1년 이상 근속자<br>임직원 주택 매입 및 보증금 등 <strong>무이자 대출</strong> 제도</p>
+  </div>
+  <ul class="blist">
+    <li><strong>주택 매입</strong> — 한도 5,000만원</li>
+    <li><strong>전·월세 보증금</strong> — 한도 3,000만원</li>
+    <li><strong>긴급 자금</strong> — 한도 1,000만원</li>
+  </ul>
+  <div class="highlight" style="margin-top:16px">
+    <p><strong>상환 조건:</strong> 최대 60개월 분할 상환 / 무이자 / 퇴사 시 일시 상환</p>
+  </div>
+  <p class="note">대출 신청 방법 및 상세 조건은 인사팀에 문의하세요.</p>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   LONG SERVICE PAGE (정규직 전용)
+════════════════════════════════════════ */
+function renderLongService(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">장기 근속 포상</span></div>
+  <div class="page-title">장기 근속 포상</div>
+  <div class="page-sub">헥토큐앤엠과 함께 성장하는 임직원을 위한 특별 혜택</div>
+</div>
+<div class="exc-badge exc-badge-gold">🏆 정규직 전용 혜택</div>
+
+<div class="content-block">
+  <div class="sec-title">🎖️ 근속 포상 기준</div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th>근속 연수</th><th>현금 포상</th><th>특별 휴가</th><th>해외여행</th></tr></thead>
+    <tbody>
+      <tr><td><strong>5년 근속</strong></td><td style="color:var(--primary);font-weight:700">500만원 (세전)</td><td>-</td><td>-</td></tr>
+      <tr><td><strong>10년 근속</strong></td><td style="color:var(--primary);font-weight:700">1,000만원 (세전)</td><td>14일 연속 휴가</td><td>최대 1,000만원 지원</td></tr>
+      <tr><td><strong>20년 근속</strong></td><td style="color:var(--primary);font-weight:700">3,000만원 (세전)</td><td>14일 연속 휴가</td><td>최대 1,000만원 지원</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div style="margin-top:16px">
+    <p class="note">근속기간에 <strong>계약직 근무기간은 미포함</strong>됩니다.</p>
+    <p class="note">휴가 1회 분할 사용 가능 (1년 이내)</p>
+  </div>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   WORKTHRU PAGE
+════════════════════════════════════════ */
+function renderWorkthru(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">워크쓰루 안내</span></div>
+  <div class="page-title">워크쓰루(WorkThru) 안내</div>
+  <div class="page-sub">헥토큐앤엠 차세대 통합 업무 포털 사용 가이드</div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">💡 워크쓰루란?</div>
+  <div class="highlight">
+    <p>기존의 분산된 업무 시스템을 하나로 통합한 <strong>차세대 업무 포털</strong>입니다.<br>
+    인사정보시스템(WHR), 경비정산시스템, 네이버웍스(메일·메신저)까지 완벽하게 연동되어,<br>
+    한 곳에서 결재·인사정보·경비정산·협업을 모두 처리할 수 있습니다.</p>
+  </div>
+  <ul class="blist">
+    <li><strong>전자결재</strong> — 품의서 작성, 개인경비 청구, 휴가 신청 등</li>
+    <li><strong>인사정보시스템</strong> — 증명서 발급, 연차 조회, 급여명세서, 복지물품 신청</li>
+    <li><strong>네이버웍스 연결</strong> — 메일·메신저 바로 접속</li>
+    <li><strong>뚜박틔움 포인트</strong> — 개인 걸음수·포인트 안내 (Hecto 앱 연동)</li>
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🔐 워크쓰루 접속 방법</div>
+  <div class="step-list">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div><div class="step-title">사이트 접속</div><div class="step-desc">웹 브라우저에서 <strong>gw.hecto.co.kr</strong> 접속</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div><div class="step-title">로그인</div><div class="step-desc">사용자 <strong>메일주소</strong>로 로그인 / 초기 비밀번호: <strong>생년월일 6자리</strong></div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div><div class="step-title">비밀번호 변경</div><div class="step-desc">초기 접속 시 <strong>반드시 PC에서</strong> 접속하여 비밀번호 변경<br><span style="color:var(--gray);font-size:12px">워크쓰루를 통해 WHRM, 네이버웍스를 이용하므로 최초 접속 시 비밀번호 변경 필수</span></div></div>
+    </div>
+  </div>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   E-APPROVAL PAGE
+════════════════════════════════════════ */
+function renderEApproval(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">전자결재 작성</span></div>
+  <div class="page-title">전자결재 작성 가이드</div>
+  <div class="page-sub">워크쓰루에서 품의서를 작성하고 결재 요청하는 방법</div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">✍️ 품의서 작성 순서</div>
+  <div class="step-list">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div><div class="step-title">기안문 작성 메뉴 진입</div><div class="step-desc">워크쓰루 좌측 메뉴에서 <strong>전자결재</strong> 클릭 → <strong>기안문 작성</strong> 클릭</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div><div class="step-title">양식 선택</div><div class="step-desc">필요 카테고리 선택 또는 제목 검색 후 원하는 양식 클릭<br><span style="color:var(--gray);font-size:12px">카테고리: 공통 / 인사 / 총무 / 재무 / 정보보안 / 물류</span></div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div><div class="step-title">품의서 작성</div><div class="step-desc">문서 제목·내용·참조자 등 기재사항 확인 후 작성</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div><div class="step-title">결재선 설정</div><div class="step-desc">좌측 조직도에서 결재자(팀장) 선택 → Add 버튼 클릭 → 결재 순서 확인 → 적용</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div><div class="step-title">결재 요청 (상신)</div><div class="step-desc">결재선 최종 확인 후 <strong>결재요청</strong> 버튼 클릭</div></div>
+    </div>
+  </div>
+  <p class="note">참조자에 <strong>부서를 추가</strong>할 경우 결재 완료 시 알림이 가지 않습니다. 개인을 추가해야 메일 알림이 발송됩니다.</p>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   LEAVE PAGE
+════════════════════════════════════════ */
+function renderLeave(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">연차 신청</span></div>
+  <div class="page-title">연차 신청 가이드</div>
+  <div class="page-sub">워크쓰루에서 연차 및 각종 휴가를 신청하는 방법</div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">📅 연차 신청 순서</div>
+  <div class="step-list">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div><div class="step-title">기안문 작성 메뉴 진입</div><div class="step-desc">워크쓰루 좌측 메뉴 <strong>전자결재</strong> → <strong>기안문 작성</strong></div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div><div class="step-title">양식 선택</div><div class="step-desc"><strong>인사</strong> 카테고리 → <strong>휴가&amp;경조금 신청서</strong> 클릭</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">휴가 상세 설정</div>
+        <div class="step-desc">
+          휴가구분 선택: <strong>연차 / 경조휴가 / 공가 / 기타휴가 / 포상휴가</strong><br>
+          휴가코드 선택: <strong>연차 / 반차 / 반반차</strong><br>
+          휴가일 선택
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div><div class="step-title">결재선 설정</div><div class="step-desc">조직도에서 결재자(팀장) 선택 → Add → 적용</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div><div class="step-title">결재 요청</div><div class="step-desc">결재선 확인 후 <strong>결재요청</strong> 클릭</div></div>
+    </div>
+  </div>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   WELFARE PAGE
+════════════════════════════════════════ */
+function renderWelfare(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">복지물품 신청</span></div>
+  <div class="page-title">복지물품 신청 가이드</div>
+  <div class="page-sub">유산균(드시모네/오투부스터) 복지물품 신청 방법</div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">💊 복지물품 안내</div>
+  <ul class="blist">
+    <li><strong>건강보조식품</strong> — 오투부스터, 드시모네 4500<br><div class="sub">정액 2만원 구입 가능 (구매 차액은 회사 지원) · 1인 월 1개만 구매 가능</div></li>
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">📋 복지물품 신청 순서</div>
+  <div class="step-list">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div><div class="step-title">인사정보시스템 접속</div><div class="step-desc">워크쓰루 좌측 메뉴 <strong>인사정보시스템</strong> 클릭 → WHRM 비밀번호 입력 (주민등록번호 뒤 7자리)</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div><div class="step-title">복지물품 신청 메뉴</div><div class="step-desc">좌측 <strong>셀프서비스</strong> → <strong>복리후생</strong> → <strong>복지물품 신청</strong></div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div><div class="step-title">상품 선택</div><div class="step-desc"><strong>입력</strong> 버튼 클릭 → 복지물품 종류 선택 (<strong>드시모네</strong> 또는 <strong>오투부스터</strong>)</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div><div class="step-title">신청 완료</div><div class="step-desc"><strong>신청</strong> 버튼 클릭 → 저장 확인 → 신청 상태 확인</div></div>
+    </div>
+  </div>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   CERTIFICATE PAGE
+════════════════════════════════════════ */
+function renderCertificate(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">증명서 신청</span></div>
+  <div class="page-title">증명서 신청 가이드</div>
+  <div class="page-sub">재직증명서 등 각종 증명서 발급 방법</div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">📄 재직증명서 신청 순서</div>
+  <div class="step-list">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div><div class="step-title">인사정보시스템 접속</div><div class="step-desc">워크쓰루 좌측 메뉴 <strong>인사정보시스템</strong> 클릭 → WHRM 비밀번호 입력 (주민등록번호 뒤 7자리)</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div><div class="step-title">증명서 신청 메뉴</div><div class="step-desc">좌측 <strong>셀프서비스</strong> → <strong>증명서관리</strong> → <strong>증명서신청발급</strong></div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div><div class="step-title">증명서 종류 선택</div><div class="step-desc">화면 우측 <strong>입력</strong> 버튼 클릭 → 증명서 종류 선택 (<strong>재직증명서</strong>)<br>주민등록번호 포함 여부 선택</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div><div class="step-title">출력</div><div class="step-desc">신청 완료 후 신청건 <strong>더블클릭</strong> → <strong>출력</strong> 버튼 클릭</div></div>
+    </div>
+  </div>
+  <p class="note">증명서는 신청 즉시 발급 가능합니다. 주민등록번호 포함 여부를 반드시 확인하세요.</p>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   BIND PAGE ACTIONS
+════════════════════════════════════════ */
+function bindPageActions(){
+  document.querySelectorAll('.card[data-nav]').forEach(el=>{
+    el.addEventListener('click', ()=>nav(el.dataset.nav));
+  });
+  document.querySelectorAll('[data-action]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id     = parseInt(btn.dataset.id);
+      const action = btn.dataset.action;
+      if(action==='approve'){
+        DB.updateUser(id, {status:'approved'});
+        const approvedUser = DB.getUsers().find(u=>u.id===id);
+        if(approvedUser) sendApprovalEmail(approvedUser);
+      }
+      if(action==='reject') DB.updateUser(id, {status:'rejected'});
+      render();
+    });
+  });
+}
+
+/* ════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════ */
+function showMsg(id, type, text){
+  const el = document.getElementById(id);
+  if(el) el.innerHTML = `<div class="msg msg-${type}">${text}</div>`;
+}
+function setErr(id, text){ const el=document.getElementById(id); if(el) el.textContent=text; }
+function clearErrs(){ document.querySelectorAll('.err').forEach(e=>e.textContent=''); }
+function formatDate(iso){
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+DB.init();
+
+const cur = DB.getCurrent();
+if(cur){
+  const fresh = DB.getUsers().find(u=>u.id===cur.id);
+  if(fresh) DB.setCurrent(fresh);
+}
+
+const initUser = DB.getCurrent();
+if(!initUser)                          state.page = 'login';
+else if(initUser.role==='admin')       state.page = 'admin-users';
+else                                   state.page = 'dashboard';
+
+render();
+</script>
+</body>
+</html>
