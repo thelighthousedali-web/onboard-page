@@ -108,8 +108,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Ne
 .sec-title{font-size:17px;font-weight:700;color:var(--primary);margin-bottom:15px;padding-bottom:11px;border-bottom:2px solid var(--primary-light);display:flex;align-items:center;gap:8px}
 .blist{list-style:none;display:flex;flex-direction:column;gap:9px}
 .blist li{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;background:var(--light);border-radius:8px;font-size:13.5px;line-height:1.6}
-.blist li::before{content:'✓';color:var(--primary);font-weight:700;flex-shrink:0;margin-top:1px}
-.blist .sub{margin-top:5px;padding-left:14px;color:var(--gray);font-size:12.5px;line-height:1.7}
+.blist li::before{content:'✓';color:var(--primary);font-weight:700;flex-shrink:0;margin-top:2px}
+.blist li>div{flex:1;min-width:0}
+.blist li strong{display:block;font-weight:700;color:#222;font-size:13.5px}
+.blist .sub{display:block;margin-top:4px;color:var(--gray);font-size:12px;line-height:1.65}
 .highlight{border-left:4px solid var(--primary);background:var(--primary-light);padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0}
 .highlight p{font-size:13.5px;line-height:1.65}
 .highlight strong{color:var(--primary)}
@@ -851,45 +853,44 @@ function renderBenefits(user){
 <div class="content-block">
   <div class="sec-title">🏥 기본 복지제도</div>
   <ul class="blist">
-    <li><strong>4대 보험</strong> — 국민연금, 건강보험, 고용보험, 산재보험 가입</li>
-    <li><strong>웰컴키트 제공</strong> — 입사 시 웰컴키트 지급</li>
-    <li><strong>연차 유급휴가</strong><div class="sub">그룹웨어(워크쓰루) 전자결재를 통해 휴가신청서 작성</div></li>
-    <li><strong>퇴직연금(DC형)</strong><div class="sub">퇴직연금 운용사 : 우리은행</div></li>
-    <li><strong>조식·중식·석식 제공</strong><div class="sub">Hecto 앱 '채움'에서 이용시간 및 메뉴 확인 가능</div></li>
-    ${isRegular?`<li><strong>사내 카페 (틔움포인트)</strong><div class="sub">월 22,000 포인트 제공 (매월 1일 자동 충전) · 복지포인트 2만원 차감<br>Hecto 앱 '틔움'에서 메뉴 및 잔여 포인트 확인 가능<br>판매 수익금은 기부되어 나눔 실천</div></li>`
-    :`<li><strong>무제한 간식 제공</strong><div class="sub">사내 구비된 음료·스낵 자유롭게 이용 가능</div></li>`}
-    <li><strong>사내 도서관</strong><div class="sub">신간·추천·베스트셀러 도서 보유 · 태광타워 11층 위치<br>Hecto 앱 '배움'에서 대여 가능 (1인 1권 / 기본 2주 / 연장 가능)</div></li>
-    <li><strong>무제한 간식 제공</strong><div class="sub">사내 구비된 음료·스낵 자유롭게 이용 가능</div></li>
+    <li><div><strong>4대 보험</strong><div class="sub">국민연금, 건강보험, 고용보험, 산재보험 가입</div></div></li>
+    <li><div><strong>웰컴키트 제공</strong><div class="sub">입사 시 웰컴키트 지급</div></div></li>
+    <li><div><strong>연차 유급휴가</strong><div class="sub">그룹웨어(워크쓰루) 전자결재를 통해 휴가신청서 작성</div></div></li>
+    <li><div><strong>퇴직연금(DC형)</strong><div class="sub">퇴직연금 운용사 : 우리은행</div></div></li>
+    <li><div><strong>조식·중식·석식 제공</strong><div class="sub">Hecto 앱 '채움'에서 이용시간 및 메뉴 확인 가능</div></div></li>
+    ${isRegular?`<li><div><strong>사내 카페 (틔움포인트)</strong><div class="sub">월 22,000 포인트 제공 (매월 1일 자동 충전) · 복지포인트 2만원 차감<br>Hecto 앱 '틔움'에서 메뉴 및 잔여 포인트 확인 가능<br>판매 수익금은 기부되어 나눔 실천</div></div></li>`
+    :`<li><div><strong>무제한 간식 제공</strong><div class="sub">사내 구비된 음료·스낵 자유롭게 이용 가능</div></div></li>`}
+    <li><div><strong>사내 도서관</strong><div class="sub">신간·추천·베스트셀러 도서 보유 · 태광타워 11층 위치<br>Hecto 앱 '배움'에서 대여 가능 (1인 1권 / 기본 2주 / 연장 가능)</div></div></li>
   </ul>
 </div>
 
 <div class="content-block">
   <div class="sec-title">💐 경조사 지원</div>
   <ul class="blist">
-    <li><strong>소통비</strong> — 소속부서 팀워크 강화를 위해 지급 (1일 재직 기준 인당 50,000원)</li>
-    <li><strong>경조금·경조휴가·경조물품 지원</strong>
+    <li><div><strong>소통비</strong><div class="sub">소속부서 팀워크 강화를 위해 지급 (1일 재직 기준 인당 50,000원)</div></div></li>
+    <li><div><strong>경조금·경조휴가·경조물품 지원</strong>
       <div class="sub">
         휴가: 발생일 포함, 역일 기준 계산 / 분할 사용 불가 (결혼 경조휴가 예외: 예식일로부터 1년 내 사용 가능)<br>
         신청기한: 경조 발생일 기준 익월 말일까지 (미신청 시 지급 안 됨)<br>
         상조서비스: 프리드라이프 / 약 300만원 상당 (현금 지원 없음)
       </div>
-    </li>
-    <li><strong>생일 상품권 10만원 지급</strong></li>
-    <li><strong>명절선물</strong><div class="sub">임직원 전용 복지몰에서 신청 · 설날·추석 / 부모님 10만원 + 개인 10만원</div></li>
-    ${isRegular?`<li><strong>사우회 운영</strong><div class="sub">임직원 경조사 지원</div></li>`:''}
+    </div></li>
+    <li><div><strong>생일 상품권 지급</strong><div class="sub">매년 생일 기준 10만원 상품권 지급</div></div></li>
+    <li><div><strong>명절선물</strong><div class="sub">임직원 전용 복지몰에서 신청 · 설날·추석 / 부모님 10만원 + 개인 10만원</div></div></li>
+    ${isRegular?`<li><div><strong>사우회 운영</strong><div class="sub">임직원 경조사 지원</div></div></li>`:''}
   </ul>
 </div>
 
 <div class="content-block">
   <div class="sec-title">🚗 기타 혜택</div>
   <ul class="blist">
-    <li><strong>교통비 지원</strong> — 오후 10시 이후 야근 교통비 제공</li>
-    <li><strong>주차비</strong> — 팀장 자가 주차비 지원</li>
-    <li><strong>건강보조식품</strong> — 오투부스터·드시모네 4500 정액 2만원 구입 (차액 회사 지원, 월 1개)</li>
-    <li><strong>제휴 할인</strong><div class="sub">CGV 임직원 제휴할인 · 쏘카 카쉐어링 제휴할인 · 드시모네몰 직원가 (정가 50%)</div></li>
-    <li><strong>건강검진 반차 제공</strong></li>
-    <li><strong>직원 추천 제도</strong> — 직원 추천 시 포상금 지급</li>
-    ${isRegular?`<li><strong>멘토링 제도</strong><div class="sub">신규 입사자의 빠른 적응을 위해 멘토링 제도 운영</div></li>`:''}
+    <li><div><strong>교통비 지원</strong><div class="sub">오후 10시 이후 야근 교통비 제공</div></div></li>
+    <li><div><strong>주차비</strong><div class="sub">팀장 자가 주차비 지원</div></div></li>
+    <li><div><strong>건강보조식품</strong><div class="sub">오투부스터·드시모네 4500 정액 2만원 구입 (차액 회사 지원, 월 1개)</div></div></li>
+    <li><div><strong>제휴 할인</strong><div class="sub">CGV 임직원 제휴할인 · 쏘카 카쉐어링 제휴할인 · 드시모네몰 직원가 (정가 50%)</div></div></li>
+    <li><div><strong>건강검진 반차 제공</strong><div class="sub">건강검진 당일 반차 제공</div></div></li>
+    <li><div><strong>직원 추천 제도</strong><div class="sub">직원 추천 시 포상금 지급</div></div></li>
+    ${isRegular?`<li><div><strong>멘토링 제도</strong><div class="sub">신규 입사자의 빠른 적응을 위해 멘토링 제도 운영</div></div></li>`:''}
   </ul>
 </div>
 
