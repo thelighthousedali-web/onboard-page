@@ -268,9 +268,12 @@ const DB = {
   getPendingCount(){ return _users.filter(u=>u.status==='pending').length },
 
   async loadUsers(){
-    const {data, error} = await supa.from('onboarding_users').select('*');
-    if(error){ console.error('[Supabase] load error:', error); return; }
-    _users = data.map(rowToUser);
+    try {
+      const {data, error} = await supa.from('onboarding_users').select('*');
+      if(error){ console.error('[Supabase] load error:', error); return false; }
+      _users = data.map(rowToUser);
+      return true;
+    } catch(e){ console.error('[Supabase] fetch exception:', e); return false; }
   },
 
   async addUser(u){
@@ -1221,7 +1224,19 @@ function formatDate(iso){
   const oldCur = DB.getCurrent();
   if(oldCur && oldCur.email === 'admin@hecto.com') DB.clearCurrent();
 
-  await DB.loadUsers();
+  const loadOk = await DB.loadUsers();
+  if(!loadOk){
+    document.getElementById('app').innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F3F4F6">
+        <div style="text-align:center;max-width:400px;padding:32px">
+          <div style="font-size:40px;margin-bottom:16px">⚠️</div>
+          <div style="font-weight:700;font-size:18px;margin-bottom:8px">데이터베이스 연결 실패</div>
+          <div style="color:#6B7280;font-size:13px;margin-bottom:16px">Supabase에 연결할 수 없습니다.<br>브라우저 개발자 도구(F12) → Console 탭에서 오류를 확인하세요.</div>
+          <button onclick="location.reload()" style="padding:10px 24px;background:#FF5500;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">다시 시도</button>
+        </div>
+      </div>`;
+    return;
+  }
 
   // 세션 갱신 (최신 DB 상태 반영)
   const cur = DB.getCurrent();
