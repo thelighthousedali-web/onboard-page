@@ -281,6 +281,12 @@ function render(){
     return;
   }
 
+  if(user.mustChangePw){
+    app.innerHTML = renderChangePassword();
+    bindChangePw();
+    return;
+  }
+
   if(user.role==='admin'){
     app.innerHTML = renderLayout(user, renderAdminPage());
   } else {
@@ -392,6 +398,57 @@ function renderPending(){
     </div>
   </div>
 </div>`;
+}
+
+function renderChangePassword(){
+  return `
+<div class="auth-wrap">
+  <div class="auth-hero">
+    <img src="hero-image.png" alt="Hecto Q&M">
+  </div>
+  <div class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <img src="logo-vertical.png" alt="Hecto Q&M" class="auth-logo-img">
+        <div class="tagline">신규입사자 온보딩 허브</div>
+      </div>
+      <h2 class="auth-h">새 비밀번호 설정</h2>
+      <p class="auth-sub">보안을 위해 임시 비밀번호를 새 비밀번호로 변경해 주세요.</p>
+      <div class="msg msg-warn" style="margin-bottom:18px">관리자가 비밀번호를 초기화했습니다. 새 비밀번호를 설정해야 로그인할 수 있습니다.</div>
+      <div id="cpw-msg"></div>
+      <div class="fgroup">
+        <label class="flabel">새 비밀번호</label>
+        <input class="finput" id="cpw-new" type="password" placeholder="8자 이상 입력">
+        <div class="err" id="err-cpw-new"></div>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">새 비밀번호 확인</label>
+        <input class="finput" id="cpw-confirm" type="password" placeholder="비밀번호 재입력">
+        <div class="err" id="err-cpw-confirm"></div>
+      </div>
+      <button class="btn btn-primary btn-full" id="cpw-btn">변경 후 로그인</button>
+      <div class="auth-footer">
+        <a id="cpw-logout">로그아웃</a>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function bindChangePw(){
+  document.getElementById('cpw-logout')?.addEventListener('click', logout);
+  document.getElementById('cpw-btn')?.addEventListener('click', ()=>{
+    const newPw     = document.getElementById('cpw-new').value;
+    const confirmPw = document.getElementById('cpw-confirm').value;
+    let ok = true;
+    document.querySelectorAll('.err').forEach(e=>e.textContent='');
+    if(!newPw || newPw.length < 8){ document.getElementById('err-cpw-new').textContent='8자 이상 입력하세요'; ok=false; }
+    if(newPw !== confirmPw){ document.getElementById('err-cpw-confirm').textContent='비밀번호가 일치하지 않습니다'; ok=false; }
+    if(!ok) return;
+    const user = DB.getCurrent();
+    DB.updateUser(user.id, {password: newPw, mustChangePw: false});
+    render();
+  });
 }
 
 function bindAuth(){
@@ -1068,8 +1125,8 @@ function bindPageActions(){
       if(action==='reject') DB.updateUser(id, {status:'rejected'});
       if(action==='reset-pw'){
         const tempPw = 'Hecto' + Math.floor(1000 + Math.random()*9000) + '!';
-        DB.updateUser(id, {password: tempPw});
-        alert(`🔑 ${name}님의 임시 비밀번호\n\n${tempPw}\n\n이 비밀번호를 사용자에게 직접 전달해 주세요.`);
+        DB.updateUser(id, {password: tempPw, mustChangePw: true});
+        alert(`🔑 ${name}님의 임시 비밀번호\n\n${tempPw}\n\n이 비밀번호를 사용자에게 직접 전달해 주세요.\n사용자는 로그인 후 새 비밀번호를 설정해야 합니다.`);
         return;
       }
       if(action==='delete-user'){
