@@ -1178,9 +1178,9 @@ function bindPageActions(){
       }
       if(action==='reject') await DB.updateUser(id, {status:'rejected'});
       if(action==='reset-pw'){
-        const tempPw = 'Hecto' + Math.floor(1000 + Math.random()*9000) + '!';
+        const tempPw = 'hecto12!@';
         await DB.updateUser(id, {password: tempPw, mustChangePw: true});
-        alert(`🔑 ${name}님의 임시 비밀번호\n\n${tempPw}\n\n이 비밀번호를 사용자에게 직접 전달해 주세요.\n사용자는 로그인 후 새 비밀번호를 설정해야 합니다.`);
+        alert(`🔑 ${name}님의 비밀번호가 초기화되었습니다.\n\n초기 비밀번호: ${tempPw}\n\n사용자는 로그인 후 새 비밀번호를 설정해야 합니다.`);
         render();
         return;
       }
