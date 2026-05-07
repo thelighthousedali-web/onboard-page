@@ -157,6 +157,8 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .t-contract{background:#F3E8FF;color:#6B21A8}
 .btn-gap{display:flex;gap:6px}
 .divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+.guide-img{width:100%;border:1px solid var(--border);border-radius:10px;margin-top:14px;box-shadow:0 3px 12px rgba(0,0,0,.08);display:block}
+.img-wrap{margin-top:4px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 @media(max-width:768px){.two-col{grid-template-columns:1fr}.main{margin-left:0;padding:20px}.sidebar{transform:translateX(-100%)}}
 </style>
@@ -989,11 +991,15 @@ function renderWorkthru(){
     </div>
     <div class="step">
       <div class="step-num">2</div>
-      <div><div class="step-title">로그인</div><div class="step-desc">사용자 <strong>메일주소</strong>로 로그인 / 초기 비밀번호: <strong>생년월일 6자리</strong></div></div>
+      <div><div class="step-title">로그인</div><div class="step-desc">사용자 <strong>메일주소</strong>로 로그인 / 초기 비밀번호: <strong>생년월일 6자리</strong></div>
+        <div class="img-wrap"><img src="workthru-login.png" alt="워크쓰루 로그인 화면" class="guide-img"></div>
+      </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
-      <div><div class="step-title">비밀번호 변경</div><div class="step-desc">초기 접속 시 <strong>반드시 PC에서</strong> 접속하여 비밀번호 변경<br><span style="color:var(--gray);font-size:12px">워크쓰루를 통해 WHRM, 네이버웍스를 이용하므로 최초 접속 시 비밀번호 변경 필수</span></div></div>
+      <div><div class="step-title">비밀번호 변경</div><div class="step-desc">초기 접속 시 <strong>반드시 PC에서</strong> 접속하여 비밀번호 변경<br><span style="color:var(--gray);font-size:12px">워크쓰루를 통해 WHRM, 네이버웍스를 이용하므로 최초 접속 시 비밀번호 변경 필수</span></div>
+        <div class="img-wrap"><img src="workthru-main.png" alt="워크쓰루 메인 화면" class="guide-img"></div>
+      </div>
     </div>
   </div>
 </div>`;
@@ -1015,15 +1021,21 @@ function renderEApproval(){
   <div class="step-list">
     <div class="step">
       <div class="step-num">1</div>
-      <div><div class="step-title">기안문 작성 메뉴 진입</div><div class="step-desc">워크쓰루 좌측 메뉴에서 <strong>전자결재</strong> 클릭 → <strong>기안문 작성</strong> 클릭</div></div>
+      <div><div class="step-title">기안문 작성 메뉴 진입</div><div class="step-desc">워크쓰루 좌측 메뉴에서 <strong>전자결재</strong> 클릭 → <strong>기안문 작성</strong> 클릭</div>
+        <div class="img-wrap"><img src="eapproval-step1.png" alt="기안문 작성 메뉴" class="guide-img"></div>
+      </div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
-      <div><div class="step-title">양식 선택</div><div class="step-desc">필요 카테고리 선택 또는 제목 검색 후 원하는 양식 클릭<br><span style="color:var(--gray);font-size:12px">카테고리: 공통 / 인사 / 총무 / 재무 / 정보보안 / 물류</span></div></div>
+      <div><div class="step-title">양식 선택</div><div class="step-desc">필요 카테고리 선택 또는 제목 검색 후 원하는 양식 클릭<br><span style="color:var(--gray);font-size:12px">카테고리: 공통 / 인사 / 총무 / 재무 / 정보보안 / 물류</span></div>
+        <div class="img-wrap"><img src="eapproval-step2.png" alt="양식 선택 화면" class="guide-img"></div>
+      </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
-      <div><div class="step-title">품의서 작성</div><div class="step-desc">문서 제목·내용·참조자 등 기재사항 확인 후 작성</div></div>
+      <div><div class="step-title">품의서 작성</div><div class="step-desc">문서 제목·내용·참조자 등 기재사항 확인 후 작성</div>
+        <div class="img-wrap"><img src="eapproval-step3.png" alt="품의서 작성 화면" class="guide-img"></div>
+      </div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
@@ -1058,7 +1070,9 @@ function renderLeave(){
     </div>
     <div class="step">
       <div class="step-num">2</div>
-      <div><div class="step-title">양식 선택</div><div class="step-desc"><strong>인사</strong> 카테고리 → <strong>휴가&amp;경조금 신청서</strong> 클릭</div></div>
+      <div><div class="step-title">양식 선택</div><div class="step-desc"><strong>인사</strong> 카테고리 → <strong>휴가&amp;경조금 신청서</strong> 클릭</div>
+        <div class="img-wrap"><img src="leave-step1.png" alt="연차 양식 선택 화면" class="guide-img"></div>
+      </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
@@ -1069,6 +1083,7 @@ function renderLeave(){
           휴가코드 선택: <strong>연차 / 반차 / 반반차</strong><br>
           휴가일 선택
         </div>
+        <div class="img-wrap"><img src="leave-step3.png" alt="휴가 상세 설정 화면" class="guide-img"></div>
       </div>
     </div>
     <div class="step">
@@ -1106,7 +1121,9 @@ function renderWelfare(){
   <div class="step-list">
     <div class="step">
       <div class="step-num">1</div>
-      <div><div class="step-title">인사정보시스템 접속</div><div class="step-desc">워크쓰루 좌측 메뉴 <strong>인사정보시스템</strong> 클릭 → WHRM 비밀번호 입력 (주민등록번호 뒤 7자리)</div></div>
+      <div><div class="step-title">인사정보시스템 접속</div><div class="step-desc">워크쓰루 좌측 메뉴 <strong>인사정보시스템</strong> 클릭 → WHRM 비밀번호 입력 (주민등록번호 뒤 7자리)</div>
+        <div class="img-wrap"><img src="welfare-step1.png" alt="인사정보시스템 접속 화면" class="guide-img"></div>
+      </div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
@@ -1114,7 +1131,9 @@ function renderWelfare(){
     </div>
     <div class="step">
       <div class="step-num">3</div>
-      <div><div class="step-title">상품 선택</div><div class="step-desc"><strong>입력</strong> 버튼 클릭 → 복지물품 종류 선택 (<strong>드시모네</strong> 또는 <strong>오투부스터</strong>)</div></div>
+      <div><div class="step-title">상품 선택</div><div class="step-desc"><strong>입력</strong> 버튼 클릭 → 복지물품 종류 선택 (<strong>드시모네</strong> 또는 <strong>오투부스터</strong>)</div>
+        <div class="img-wrap"><img src="welfare-step3.png" alt="복지물품 신청 화면" class="guide-img"></div>
+      </div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
@@ -1144,11 +1163,15 @@ function renderCertificate(){
     </div>
     <div class="step">
       <div class="step-num">2</div>
-      <div><div class="step-title">증명서 신청 메뉴</div><div class="step-desc">좌측 <strong>셀프서비스</strong> → <strong>증명서관리</strong> → <strong>증명서신청발급</strong></div></div>
+      <div><div class="step-title">증명서 신청 메뉴</div><div class="step-desc">좌측 <strong>셀프서비스</strong> → <strong>증명서관리</strong> → <strong>증명서신청발급</strong></div>
+        <div class="img-wrap"><img src="certificate-step2.png" alt="증명서 신청 메뉴 화면" class="guide-img"></div>
+      </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
-      <div><div class="step-title">증명서 종류 선택</div><div class="step-desc">화면 우측 <strong>입력</strong> 버튼 클릭 → 증명서 종류 선택 (<strong>재직증명서</strong>)<br>주민등록번호 포함 여부 선택</div></div>
+      <div><div class="step-title">증명서 종류 선택</div><div class="step-desc">화면 우측 <strong>입력</strong> 버튼 클릭 → 증명서 종류 선택 (<strong>재직증명서</strong>)<br>주민등록번호 포함 여부 선택</div>
+        <div class="img-wrap"><img src="certificate-step3.png" alt="재직증명서 신청 화면" class="guide-img"></div>
+      </div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
