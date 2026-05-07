@@ -576,6 +576,10 @@ function renderLayout(user, content){
       <div class="nav-item ${state.page==='dashboard'?'active':''}" data-nav="dashboard">
         <span class="ni">🏠</span>대시보드
       </div>
+      <div class="nav-sec">회사 소개</div>
+      <div class="nav-item ${state.page==='company'?'active':''}" data-nav="company">
+        <span class="ni">🏢</span>헥토큐앤엠 소개
+      </div>
       <div class="nav-sec">복리후생</div>
       <div class="nav-item ${state.page==='benefits'?'active':''}" data-nav="benefits">
         <span class="ni">🎁</span>복지제도 안내
@@ -731,6 +735,7 @@ function renderAdminAll(users){
 ════════════════════════════════════════ */
 function renderUserPage(user){
   const p = state.page;
+  if(p==='company')     return renderCompany();
   if(p==='benefits')                                return renderBenefits(user);
   if(p==='points'      && user.employeeType==='regular') return renderPoints();
   if(p==='loan'        && user.employeeType==='regular') return renderLoan();
@@ -749,6 +754,7 @@ function renderUserPage(user){
 function renderDashboard(user){
   const isRegular = user.employeeType==='regular';
   const commonCards = `
+    <div class="card" data-nav="company"><div class="card-icon">🏢</div><div class="card-title">헥토큐앤엠 소개</div><div class="card-desc">회사 개요, 핵심 가치, 서비스, 주요 고객사</div></div>
     <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div></div>
     <div class="card" data-nav="workthru"><div class="card-icon">💻</div><div class="card-title">워크쓰루 안내</div><div class="card-desc">그룹웨어 접속 및 기본 사용 방법</div></div>
     <div class="card" data-nav="eapproval"><div class="card-icon">✍️</div><div class="card-title">전자결재 작성</div><div class="card-desc">품의서 작성 및 결재 요청 방법</div></div>
@@ -771,6 +777,62 @@ function renderDashboard(user){
   <div class="page-sub">아래 항목을 클릭하여 원하는 정보를 확인하세요</div>
 </div>
 <div class="cards">${commonCards}${regularCards}</div>`;
+}
+
+/* ════════════════════════════════════════
+   COMPANY PAGE
+════════════════════════════════════════ */
+function renderCompany(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">헥토큐앤엠 소개</span></div>
+  <div class="page-title">헥토큐앤엠 소개</div>
+  <div class="page-sub">우리 회사를 소개합니다</div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🏢 회사 개요</div>
+  <div class="highlight">
+    <p>2018년 설립된 <strong>소프트웨어 테스트 전문기업</strong>으로, QA·모니터링·동향 등을 통해 지속적으로 품질 향상을 추구합니다.<br>
+    프로젝트 초기부터 전문 QA 컨설팅 및 체계화로 고객의 최적화된 서비스 고도화를 위해 함께합니다.</p>
+  </div>
+  <div class="img-wrap"><img src="company-overview.png" alt="회사 개요" class="guide-img"></div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">📅 연혁</div>
+  <div class="img-wrap"><img src="company-history.png" alt="회사 연혁" class="guide-img"></div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">💡 핵심 가치 (Core Value)</div>
+  <ul class="blist">
+    <li><strong>맞춤형 품질보증</strong> — 고객 요구사항에 최적화된 테스트 전략 제공</li>
+    <li><strong>24시간 365일 모니터링</strong> — 실시간 이슈 감지 및 즉각 대응</li>
+    <li><strong>테스트 자동화</strong> — 효율적인 반복 테스트로 품질과 속도를 동시에</li>
+  </ul>
+  <div class="img-wrap"><img src="company-value.png" alt="핵심 가치" class="guide-img"></div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🛠️ QA 서비스</div>
+  <div class="img-wrap"><img src="company-service.png" alt="QA 서비스" class="guide-img"></div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🏆 핵심 경쟁력</div>
+  <ul class="blist">
+    <li><strong>AAA급 게임 QA 경험 실무진</strong><div class="sub">리니지2레볼루션, B&S레볼루션, 검은사막 등 QA 경험자 보유 · QA 자격증 보유 비율 85%</div></li>
+    <li><strong>성과 중심의 체계적인 업무 관리</strong><div class="sub">성과지표 수립 및 관리 도구 활용을 통한 시스템화</div></li>
+    <li><strong>요구사항에 최적화된 테스트 환경 구축</strong><div class="sub">테스트 디바이스, 아이트래커, 자동화 디바이스팜 등 전문장비 보유</div></li>
+  </ul>
+  <div class="img-wrap"><img src="company-strength.png" alt="핵심 경쟁력" class="guide-img"></div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🤝 주요 고객사 &amp; 프로젝트</div>
+  <div class="img-wrap"><img src="company-clients.png" alt="주요 고객사 및 프로젝트" class="guide-img"></div>
+</div>`;
 }
 
 /* ════════════════════════════════════════
