@@ -21,10 +21,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Ne
 .auth-hero::before{content:'';position:absolute;width:420px;height:420px;background:rgba(255,255,255,.08);border-radius:50%;top:-80px;right:-100px;pointer-events:none}
 .auth-hero::after{content:'';position:absolute;width:280px;height:280px;background:rgba(255,255,255,.06);border-radius:50%;bottom:-60px;left:-80px;pointer-events:none}
 .auth-hero-logo{height:48px;width:auto;filter:brightness(0) invert(1);opacity:.92;position:relative;z-index:1;margin-bottom:8px}
-.auth-hero-emoji{font-size:64px;line-height:1;margin-bottom:4px;position:relative;z-index:1;animation:wave 2s ease-in-out infinite}
-@keyframes wave{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(10deg)}}
+.auth-hero-emoji{font-size:64px;line-height:1;margin-bottom:8px;position:relative;z-index:1;animation:party 1.6s ease-in-out infinite}
+@keyframes party{0%,100%{transform:scale(1) rotate(-5deg)}25%{transform:scale(1.15) rotate(5deg)}50%{transform:scale(1.1) rotate(-3deg)}75%{transform:scale(1.15) rotate(4deg)}}
 .auth-hero-title{font-size:38px;font-weight:900;color:#fff;line-height:1.15;position:relative;z-index:1;letter-spacing:-1px}
-.auth-hero-title em{display:block;font-style:normal;font-size:22px;font-weight:600;opacity:.9;margin-top:6px;letter-spacing:0}
+.auth-hero-slogan-img{height:36px;width:auto;filter:brightness(0) invert(1);opacity:.9;margin-top:10px;position:relative;z-index:1}
 .auth-hero-desc{font-size:14px;color:rgba(255,255,255,.82);line-height:1.7;margin-top:20px;position:relative;z-index:1;max-width:320px}
 .auth-hero-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:28px;position:relative;z-index:1}
 .auth-hero-tag{background:rgba(255,255,255,.2);color:#fff;font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.3)}
@@ -400,8 +400,9 @@ function renderLogin(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
-    <div class="auth-hero-emoji">👋</div>
-    <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!<em>Perfecting Forward</em></div>
+    <div class="auth-hero-emoji">🥳</div>
+    <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!</div>
+    <img src="slogan.png" alt="Perfecting Forward" class="auth-hero-slogan-img">
     <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다. 온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
     <div class="auth-hero-tags">
       <span class="auth-hero-tag">🏢 회사 소개</span>
@@ -440,8 +441,9 @@ function renderRegister(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
-    <div class="auth-hero-emoji">👋</div>
-    <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!<em>Perfecting Forward</em></div>
+    <div class="auth-hero-emoji">🥳</div>
+    <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!</div>
+    <img src="slogan.png" alt="Perfecting Forward" class="auth-hero-slogan-img">
     <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다. 온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
     <div class="auth-hero-tags">
       <span class="auth-hero-tag">🏢 회사 소개</span>
@@ -496,8 +498,9 @@ function renderPending(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
-    <div class="auth-hero-emoji">👋</div>
-    <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!<em>Perfecting Forward</em></div>
+    <div class="auth-hero-emoji">🥳</div>
+    <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!</div>
+    <img src="slogan.png" alt="Perfecting Forward" class="auth-hero-slogan-img">
     <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다. 온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
     <div class="auth-hero-tags">
       <span class="auth-hero-tag">🏢 회사 소개</span>
@@ -525,8 +528,9 @@ function renderChangePassword(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
-    <div class="auth-hero-emoji">👋</div>
-    <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!<em>Perfecting Forward</em></div>
+    <div class="auth-hero-emoji">🥳</div>
+    <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!</div>
+    <img src="slogan.png" alt="Perfecting Forward" class="auth-hero-slogan-img">
     <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다. 온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
     <div class="auth-hero-tags">
       <span class="auth-hero-tag">🏢 회사 소개</span>
