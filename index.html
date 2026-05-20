@@ -8,7 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,select{-webkit-user-select:text;user-select:text}
 :root{
   --primary:#FF5500;--primary-dark:#D94700;--primary-light:#FFF0EB;
   --dark:#1A1A2E;--gray:#6B7280;--light:#F3F4F6;--white:#fff;
@@ -2016,6 +2017,79 @@ function formatDate(iso){
   else                                   state.page = 'dashboard';
 
   render();
+})();
+
+/* ════════════════════════════════════════
+   SECURITY: 우클릭 금지 / 복사 차단 / 캡처 경고
+════════════════════════════════════════ */
+(function initSecurity(){
+  // ── 보안 팝업 ──
+  const overlay = document.createElement('div');
+  overlay.id = 'sec-popup';
+  overlay.style.cssText = `
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+    z-index:99999;align-items:center;justify-content:center;
+  `;
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:32px 28px;max-width:320px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+      <div style="font-size:44px;margin-bottom:12px">🔒</div>
+      <div id="sec-popup-title" style="font-size:17px;font-weight:700;margin-bottom:8px;color:#1A1A2E"></div>
+      <div id="sec-popup-msg" style="font-size:13px;color:#6B7280;line-height:1.65;margin-bottom:22px"></div>
+      <button onclick="document.getElementById('sec-popup').style.display='none'"
+        style="padding:10px 32px;background:#FF5500;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer">확인</button>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  function showSecPopup(title, msg){
+    document.getElementById('sec-popup-title').textContent = title;
+    document.getElementById('sec-popup-msg').textContent  = msg;
+    overlay.style.display = 'flex';
+  }
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.style.display='none'; });
+
+  // ── 우클릭 금지 ──
+  document.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    showSecPopup('우클릭 금지', '이 페이지의 콘텐츠는 사내 임직원 전용입니다.\n무단 복제 및 배포를 금지합니다.');
+  });
+
+  // ── 드래그 선택 금지 ──
+  document.addEventListener('selectstart', e => {
+    if(!['INPUT','TEXTAREA'].includes(e.target.tagName)) e.preventDefault();
+  });
+
+  // ── 키보드 단축키 차단 (저장·인쇄·소스보기·개발자도구) ──
+  document.addEventListener('keydown', e => {
+    const c = e.key.toLowerCase();
+    if(e.ctrlKey || e.metaKey){
+      if(['s','p','u'].includes(c)){
+        e.preventDefault();
+        showSecPopup('저장 · 인쇄 금지', '이 페이지는 저장 및 인쇄가 허용되지 않습니다.');
+      }
+      if(e.shiftKey && ['i','j','c'].includes(c)){
+        e.preventDefault();
+        showSecPopup('개발자 도구 사용 불가', '이 페이지에서는 개발자 도구 사용이 제한됩니다.');
+      }
+    }
+    if(e.key==='F12'){
+      e.preventDefault();
+      showSecPopup('개발자 도구 사용 불가', '이 페이지에서는 개발자 도구 사용이 제한됩니다.');
+    }
+    // 화면 캡처 단축키 (Windows: PrintScreen)
+    if(e.key==='PrintScreen'){
+      e.preventDefault();
+      showSecPopup('캡처 금지', '이 페이지의 무단 캡처 및 배포를 금지합니다.');
+    }
+  });
+
+  // ── 모바일: 화면 전환(캡처 시도) 감지 경고 ──
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden){
+      document.getElementById('app').style.filter = 'blur(20px)';
+    } else {
+      setTimeout(() => { document.getElementById('app').style.filter = ''; }, 300);
+    }
+  });
 })();
 </script>
 </body>
