@@ -20,6 +20,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Ne
 .auth-hero{flex:1;overflow:hidden;position:relative;background:linear-gradient(135deg,#FF5F1F 0%,#FF8C42 60%,#FFB347 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 48px;text-align:center}
 .auth-hero::before{content:'';position:absolute;width:420px;height:420px;background:rgba(255,255,255,.08);border-radius:50%;top:-80px;right:-100px;pointer-events:none}
 .auth-hero::after{content:'';position:absolute;width:280px;height:280px;background:rgba(255,255,255,.06);border-radius:50%;bottom:-60px;left:-80px;pointer-events:none}
+.auth-hero-bg-slogan{position:absolute;bottom:28px;right:24px;height:38px;width:auto;filter:brightness(0) invert(1);opacity:.2;pointer-events:none;z-index:0}
 .auth-hero-logo{height:48px;width:auto;filter:brightness(0) invert(1);opacity:.92;position:relative;z-index:1;margin-bottom:8px}
 .auth-hero-emoji{font-size:64px;line-height:1;margin-bottom:8px;position:relative;z-index:1;animation:party 1.6s ease-in-out infinite}
 @keyframes party{0%,100%{transform:scale(1) rotate(-5deg)}25%{transform:scale(1.15) rotate(5deg)}50%{transform:scale(1.1) rotate(-3deg)}75%{transform:scale(1.15) rotate(4deg)}}
@@ -400,10 +401,10 @@ function renderLogin(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
+    <img src="slogan.png" alt="" class="auth-hero-bg-slogan">
     <div class="auth-hero-emoji">🥳</div>
     <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!</div>
-    <img src="slogan.png" alt="Perfecting Forward" class="auth-hero-slogan-img">
-    <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다. 온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
+    <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다.<br>온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
     <div class="auth-hero-tags">
       <span class="auth-hero-tag">🏢 회사 소개</span>
       <span class="auth-hero-tag">🎁 복리후생</span>
@@ -441,10 +442,10 @@ function renderRegister(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
+    <img src="slogan.png" alt="" class="auth-hero-bg-slogan">
     <div class="auth-hero-emoji">🥳</div>
     <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!</div>
-    <img src="slogan.png" alt="Perfecting Forward" class="auth-hero-slogan-img">
-    <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다. 온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
+    <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다.<br>온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
     <div class="auth-hero-tags">
       <span class="auth-hero-tag">🏢 회사 소개</span>
       <span class="auth-hero-tag">🎁 복리후생</span>
@@ -498,10 +499,10 @@ function renderPending(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
+    <img src="slogan.png" alt="" class="auth-hero-bg-slogan">
     <div class="auth-hero-emoji">🥳</div>
     <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!</div>
-    <img src="slogan.png" alt="Perfecting Forward" class="auth-hero-slogan-img">
-    <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다. 온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
+    <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다.<br>온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
     <div class="auth-hero-tags">
       <span class="auth-hero-tag">🏢 회사 소개</span>
       <span class="auth-hero-tag">🎁 복리후생</span>
@@ -528,10 +529,10 @@ function renderChangePassword(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
+    <img src="slogan.png" alt="" class="auth-hero-bg-slogan">
     <div class="auth-hero-emoji">🥳</div>
     <div class="auth-hero-title">헥토큐앤엠에<br>오신 걸 환영해요!</div>
-    <img src="slogan.png" alt="Perfecting Forward" class="auth-hero-slogan-img">
-    <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다. 온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
+    <div class="auth-hero-desc">함께해주셔서 정말 반갑습니다.<br>온보딩 허브에서 입사에 필요한 모든 정보를 확인하세요.</div>
     <div class="auth-hero-tags">
       <span class="auth-hero-tag">🏢 회사 소개</span>
       <span class="auth-hero-tag">🎁 복리후생</span>
