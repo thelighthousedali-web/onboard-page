@@ -173,7 +173,30 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .guide-img{width:100%;max-width:760px;border:1px solid var(--border);border-radius:10px;margin-top:14px;box-shadow:0 3px 12px rgba(0,0,0,.08);display:block}
 .img-wrap{margin-top:4px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-@media(max-width:768px){.two-col{grid-template-columns:1fr}.main{margin-left:0;padding:20px}.sidebar{transform:translateX(-100%)}}
+/* ── MOBILE HEADER ── */
+.mob-header{display:none;position:fixed;top:0;left:0;right:0;height:52px;background:var(--dark);z-index:200;align-items:center;padding:0 16px;gap:12px}
+.mob-hamburger{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px 6px;line-height:1;flex-shrink:0}
+.mob-logo{height:26px;filter:brightness(0) invert(1);opacity:.9}
+.mob-title{font-size:14px;font-weight:600;color:rgba(255,255,255,.8);flex:1}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+.sidebar{transition:transform .25s ease}
+@media(max-width:768px){
+  .mob-header{display:flex}
+  .sidebar{transform:translateX(-100%)}
+  body.mob-open .sidebar{transform:translateX(0)}
+  body.mob-open .sidebar-overlay{display:block}
+  .main{margin-left:0;padding:68px 16px 24px}
+  .two-col{grid-template-columns:1fr}
+  .hg-vision{grid-template-columns:1fr}
+  .hg-overview{grid-template-columns:repeat(2,1fr)}
+  .stats-row{grid-template-columns:1fr}
+  .content-block{padding:18px 16px}
+  .page-title{font-size:20px}
+  .wb-slogan{display:none}
+  .welcome-banner{padding:20px 18px}
+  .cards{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .t-wrap{font-size:12px}
+}
 /* ── HECTO GROUP PAGE ── */
 .hg-vision{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
 .hg-vision-card{background:linear-gradient(135deg,var(--primary-light),#fff);border:1px solid var(--primary-light);border-radius:12px;padding:20px 22px}
@@ -732,6 +755,12 @@ function renderLayout(user, content){
   const typeLabel = user.role==='admin' ? '관리자' : (user.employeeType==='regular'?'정규직':'계약직');
 
   return `
+<div class="mob-header">
+  <button class="mob-hamburger" id="mob-menu-btn">☰</button>
+  <img class="mob-logo" src="logo-wide.png" alt="Hecto Q&M">
+  <span class="mob-title">온보딩 허브</span>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="layout">
   <aside class="sidebar">
     <div class="sb-head">
@@ -757,9 +786,18 @@ function renderLayout(user, content){
 
 function bindNav(){
   document.querySelectorAll('[data-nav]').forEach(el=>{
-    el.addEventListener('click', ()=>nav(el.dataset.nav));
+    el.addEventListener('click', ()=>{
+      document.body.classList.remove('mob-open');
+      nav(el.dataset.nav);
+    });
   });
   document.getElementById('logout-btn')?.addEventListener('click', logout);
+  document.getElementById('mob-menu-btn')?.addEventListener('click', ()=>{
+    document.body.classList.toggle('mob-open');
+  });
+  document.getElementById('sidebar-overlay')?.addEventListener('click', ()=>{
+    document.body.classList.remove('mob-open');
+  });
 }
 
 function logout(){
