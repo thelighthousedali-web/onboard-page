@@ -686,19 +686,6 @@ function renderLayout(user, content){
       </div>
       <div class="nav-item ${state.page==='longservice'?'active':''}" data-nav="longservice">
         <span class="ni">🏆</span>장기 근속 포상
-      </div>
-      <div class="nav-sec">규정</div>
-      <div class="nav-item ${state.page==='vacation-rules'?'active':''}" data-nav="vacation-rules">
-        <span class="ni">🌴</span>휴가 사용
-      </div>
-      <div class="nav-item ${state.page==='meal-parking'?'active':''}" data-nav="meal-parking">
-        <span class="ni">🍱</span>식대 &amp; 주차비
-      </div>
-      <div class="nav-item ${state.page==='expense-rules'?'active':''}" data-nav="expense-rules">
-        <span class="ni">💳</span>협업비 &amp; 직무비
-      </div>
-      <div class="nav-item ${state.page==='biztrip'?'active':''}" data-nav="biztrip">
-        <span class="ni">✈️</span>출장
       </div>`:''}
       <div class="nav-sec">사내 시스템</div>
       <div class="nav-item ${state.page==='workthru'?'active':''}" data-nav="workthru">
@@ -715,7 +702,22 @@ function renderLayout(user, content){
       </div>
       <div class="nav-item ${state.page==='certificate'?'active':''}" data-nav="certificate">
         <span class="ni">📄</span>증명서 신청
-      </div>`;
+      </div>
+      ${t==='regular'?`
+      <div class="nav-sec">규정</div>
+      <div class="nav-item ${state.page==='vacation-rules'?'active':''}" data-nav="vacation-rules">
+        <span class="ni">🌴</span>휴가 사용
+      </div>
+      <div class="nav-item ${state.page==='meal-parking'?'active':''}" data-nav="meal-parking">
+        <span class="ni">🍱</span>식대 &amp; 주차비
+      </div>
+      <div class="nav-item ${state.page==='expense-rules'?'active':''}" data-nav="expense-rules">
+        <span class="ni">💳</span>협업비 &amp; 직무비
+      </div>
+      <div class="nav-item ${state.page==='biztrip'?'active':''}" data-nav="biztrip">
+        <span class="ni">✈️</span>출장
+      </div>`:''}
+      `;
   }
 
   const typeLabel = user.role==='admin' ? '관리자' : (user.employeeType==='regular'?'정규직':'계약직');
