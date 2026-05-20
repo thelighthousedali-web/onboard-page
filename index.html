@@ -163,6 +163,36 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .img-wrap{margin-top:4px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 @media(max-width:768px){.two-col{grid-template-columns:1fr}.main{margin-left:0;padding:20px}.sidebar{transform:translateX(-100%)}}
+/* ── HECTO GROUP PAGE ── */
+.hg-vision{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+.hg-vision-card{background:linear-gradient(135deg,var(--primary-light),#fff);border:1px solid var(--primary-light);border-radius:12px;padding:20px 22px}
+.hg-vision-label{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.hg-vision-text{font-size:14px;line-height:1.7;color:#333}
+.hg-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.hg-stat{background:var(--light);border-radius:10px;padding:16px;text-align:center}
+.hg-stat-val{font-size:22px;font-weight:800;color:var(--primary)}
+.hg-stat-label{font-size:12px;color:var(--gray);margin-top:4px}
+.hg-biz-areas{display:flex;flex-wrap:wrap;gap:8px}
+.hg-tag{background:#fff;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12.5px;color:#444}
+.hg-affiliates{display:flex;flex-direction:column;gap:14px}
+.hg-card{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.hg-card-highlight{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-light)}
+.hg-card-header{background:var(--light);padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.hg-card-highlight .hg-card-header{background:linear-gradient(135deg,var(--primary-light),#fff)}
+.hg-card-name{font-size:15px;font-weight:700;color:#222}
+.hg-card-slogan{font-size:12px;color:var(--gray);font-style:italic}
+.hg-card-body{padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+.hg-card-desc{font-size:13px;color:#555;margin-bottom:4px}
+.hg-card-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#444;line-height:1.6}
+.hg-badge{flex-shrink:0;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:2px}
+.hg-badge-blue{background:#e8f0fe;color:#1a56db}
+.hg-badge-green{background:#e3f9e5;color:#1a7f37}
+.hg-badge-orange{background:#fff3e0;color:#e65100}
+.hg-badge-teal{background:#e0f7fa;color:#00695c}
+.hg-badge-purple{background:#f3e8fd;color:#7c3aed}
+.hg-badge-pink{background:#fce4ec;color:#c2185b}
+.hg-badge-red{background:#ffe8e8;color:#c62828}
+.hg-us-badge{background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -583,6 +613,9 @@ function renderLayout(user, content){
       <div class="nav-item ${state.page==='company'?'active':''}" data-nav="company">
         <span class="ni">🏢</span>헥토큐앤엠 소개
       </div>
+      <div class="nav-item ${state.page==='hectogroup'?'active':''}" data-nav="hectogroup">
+        <span class="ni">🌐</span>헥토 그룹 소개
+      </div>
       <div class="nav-sec">복리후생</div>
       <div class="nav-item ${state.page==='benefits'?'active':''}" data-nav="benefits">
         <span class="ni">🎁</span>복지제도 안내
@@ -739,6 +772,7 @@ function renderAdminAll(users){
 function renderUserPage(user){
   const p = state.page;
   if(p==='company')     return renderCompany();
+  if(p==='hectogroup')  return renderHectoGroup();
   if(p==='benefits')                                return renderBenefits(user);
   if(p==='points'      && user.employeeType==='regular') return renderPoints();
   if(p==='loan'        && user.employeeType==='regular') return renderLoan();
@@ -758,6 +792,7 @@ function renderDashboard(user){
   const isRegular = user.employeeType==='regular';
   const commonCards = `
     <div class="card" data-nav="company"><div class="card-icon">🏢</div><div class="card-title">헥토큐앤엠 소개</div><div class="card-desc">회사 개요, 핵심 가치, 서비스, 주요 고객사</div></div>
+    <div class="card" data-nav="hectogroup"><div class="card-icon">🌐</div><div class="card-title">헥토 그룹 소개</div><div class="card-desc">헥토 그룹 비전·미션, 주요 계열사 사업 소개</div></div>
     <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div></div>
     <div class="card" data-nav="workthru"><div class="card-icon">💻</div><div class="card-title">워크쓰루 안내</div><div class="card-desc">그룹웨어 접속 및 기본 사용 방법</div></div>
     <div class="card" data-nav="eapproval"><div class="card-icon">✍️</div><div class="card-title">전자결재 작성</div><div class="card-desc">품의서 작성 및 결재 요청 방법</div></div>
@@ -780,6 +815,145 @@ function renderDashboard(user){
   <div class="page-sub">아래 항목을 클릭하여 원하는 정보를 확인하세요</div>
 </div>
 <div class="cards">${commonCards}${regularCards}</div>`;
+}
+
+/* ════════════════════════════════════════
+   HECTO GROUP PAGE
+════════════════════════════════════════ */
+function renderHectoGroup(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">헥토 그룹 소개</span></div>
+  <div class="page-title">헥토 그룹 소개</div>
+  <div class="page-sub">삶의 무한한 가능성을 실현하는 글로벌 라이프테크 컴퍼니</div>
+</div>
+
+<!-- 비전 & 미션 -->
+<div class="content-block">
+  <div class="sec-title">🎯 비전 &amp; 미션</div>
+  <div class="hg-vision">
+    <div class="hg-vision-card">
+      <div class="hg-vision-label">비전</div>
+      <div class="hg-vision-text">삶의 무한한 가능성을 실현하는<br><strong>글로벌 라이프테크 컴퍼니</strong></div>
+    </div>
+    <div class="hg-vision-card">
+      <div class="hg-vision-label">미션</div>
+      <div class="hg-vision-text">우리의 솔루션과 서비스를 통해<br><strong>모든 사람들이 일상 속 긍정적 변화를 만들어갈 수 있다</strong>고 믿습니다.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 그룹 개요 -->
+<div class="content-block">
+  <div class="sec-title">🏛️ 그룹 개요</div>
+  <div class="hg-overview">
+    <div class="hg-stat"><div class="hg-stat-val">3,194억</div><div class="hg-stat-label">2024년 매출</div></div>
+    <div class="hg-stat"><div class="hg-stat-val">1,705%</div><div class="hg-stat-label">최근 10년 성장률</div></div>
+    <div class="hg-stat"><div class="hg-stat-val">7개</div><div class="hg-stat-label">주요 계열사</div></div>
+    <div class="hg-stat"><div class="hg-stat-val">이경민</div><div class="hg-stat-label">그룹 의장</div></div>
+  </div>
+  <div class="hg-biz-areas">
+    <span class="hg-tag">💻 IT정보서비스</span>
+    <span class="hg-tag">💳 핀테크서비스</span>
+    <span class="hg-tag">🏥 헬스케어서비스</span>
+    <span class="hg-tag">📊 데이터서비스</span>
+    <span class="hg-tag">📺 미디어서비스</span>
+    <span class="hg-tag">✅ QA서비스</span>
+  </div>
+  <img src="hg-growth.png" alt="헥토 그룹 성장" class="guide-img" style="margin-top:16px">
+</div>
+
+<!-- 주요 계열사 -->
+<div class="content-block">
+  <div class="sec-title">🏢 주요 계열사</div>
+  <div class="hg-affiliates">
+
+    <div class="hg-card">
+      <div class="hg-card-header">
+        <div class="hg-card-name">㈜헥토</div>
+        <div class="hg-card-slogan">"Group Holding"</div>
+      </div>
+      <div class="hg-card-body">
+        <div class="hg-card-row"><span class="hg-badge hg-badge-blue">홀딩스</span>그룹 지주회사 — 의장 전략 방향성을 전체 그룹사에 전파</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-blue">이슈해결</span>헥토이노베이션, 헥토파이낸셜, 헥토헬스케어, 헥토데이터 등 그룹사 이슈 처리</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-blue">전사지원</span>조직문화, 공간관리, 법무, IR, AI개발(HAI본부), 경영진단 등 그룹사 통합 지원</div>
+      </div>
+    </div>
+
+    <div class="hg-card">
+      <div class="hg-card-header">
+        <div class="hg-card-name">㈜헥토이노베이션</div>
+        <div class="hg-card-slogan">"Smart Life Forward"</div>
+      </div>
+      <div class="hg-card-body">
+        <div class="hg-card-desc">매일 더 스마트한 일상을 만들어 갑니다.</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-green">IT보안</span>국내 최초 휴대폰 본인확인 보호서비스 출시 — 국내 1위 IT보안 정보서비스 기업</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-green">B2C</span>약 1,000만 서비스 이용자 데이터 보유 — 매년 두 자리 수 성장</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-green">AI</span>HAI(Hecto AI) 본부 신설 — 글로벌 AI서비스 시장 도전 중</div>
+      </div>
+    </div>
+
+    <div class="hg-card">
+      <div class="hg-card-header">
+        <div class="hg-card-name">㈜헥토파이낸셜</div>
+        <div class="hg-card-slogan">"Fintech Life Forward"</div>
+      </div>
+      <div class="hg-card-body">
+        <div class="hg-card-desc">매일 더 새로운 금융을 만들어 갑니다.</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-orange">핀테크</span>간편현금결제, 신용카드, 휴대폰결제 등 모든 결제수단 직접 보유</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-orange">1위</span>국내 1위 계좌기반 결제 서비스 기업 — 글로벌 핀테크 기업으로 성장 중</div>
+      </div>
+    </div>
+
+    <div class="hg-card">
+      <div class="hg-card-header">
+        <div class="hg-card-name">㈜헥토헬스케어</div>
+        <div class="hg-card-slogan">"Healthy Life Forward"</div>
+      </div>
+      <div class="hg-card-body">
+        <div class="hg-card-desc">매일 더 건강한 삶의 균형을 만들어 갑니다.</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-teal">헬스케어</span>건강기능식품 · 디지털헬스케어 · 마이크로바이옴 연구</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-teal">글로벌</span>국내를 넘어 글로벌 헬스케어 플랫폼으로 확장 중</div>
+      </div>
+    </div>
+
+    <div class="hg-card">
+      <div class="hg-card-header">
+        <div class="hg-card-name">㈜헥토데이터</div>
+        <div class="hg-card-slogan">"Accelerate Forward"</div>
+      </div>
+      <div class="hg-card-body">
+        <div class="hg-card-desc">가치있는 데이터로 무한한 가능성을 만들어 갑니다.</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-purple">데이터</span>2009년 설립 — 강남구 테헤란로 소재</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-purple">서비스</span>데이터 기반 서비스 및 솔루션 제공</div>
+      </div>
+    </div>
+
+    <div class="hg-card">
+      <div class="hg-card-header">
+        <div class="hg-card-name">㈜헥토미디어</div>
+        <div class="hg-card-slogan">"Positive Impact Forward"</div>
+      </div>
+      <div class="hg-card-body">
+        <div class="hg-card-desc">매일 더 선한 영향력을 만들어 갑니다.</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-pink">미디어</span>미디어 서비스를 통한 사회적 가치 창출</div>
+      </div>
+    </div>
+
+    <div class="hg-card hg-card-highlight">
+      <div class="hg-card-header">
+        <div class="hg-card-name">㈜헥토큐앤엠 <span class="hg-us-badge">우리 회사</span></div>
+        <div class="hg-card-slogan">"Perfecting Forward"</div>
+      </div>
+      <div class="hg-card-body">
+        <div class="hg-card-desc">매일 더 완벽한 품질 관리를 향해 나아갑니다.</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-red">QA</span>2018년 12월 설립 — 강남구 언주로 85길 24, PNM 타워 4층</div>
+        <div class="hg-card-row"><span class="hg-badge hg-badge-red">서비스</span>그룹 전반의 품질 관리(QA) 전문 서비스 제공</div>
+      </div>
+    </div>
+
+  </div>
+</div>`;
 }
 
 /* ════════════════════════════════════════
