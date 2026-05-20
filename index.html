@@ -686,6 +686,19 @@ function renderLayout(user, content){
       </div>
       <div class="nav-item ${state.page==='longservice'?'active':''}" data-nav="longservice">
         <span class="ni">🏆</span>장기 근속 포상
+      </div>
+      <div class="nav-sec">규정</div>
+      <div class="nav-item ${state.page==='vacation-rules'?'active':''}" data-nav="vacation-rules">
+        <span class="ni">🌴</span>휴가 사용
+      </div>
+      <div class="nav-item ${state.page==='meal-parking'?'active':''}" data-nav="meal-parking">
+        <span class="ni">🍱</span>식대 &amp; 주차비
+      </div>
+      <div class="nav-item ${state.page==='expense-rules'?'active':''}" data-nav="expense-rules">
+        <span class="ni">💳</span>협업비 &amp; 직무비
+      </div>
+      <div class="nav-item ${state.page==='biztrip'?'active':''}" data-nav="biztrip">
+        <span class="ni">✈️</span>출장
       </div>`:''}
       <div class="nav-sec">사내 시스템</div>
       <div class="nav-item ${state.page==='workthru'?'active':''}" data-nav="workthru">
@@ -833,7 +846,11 @@ function renderUserPage(user){
   if(p==='benefits')                                return renderBenefits(user);
   if(p==='points'      && user.employeeType==='regular') return renderPoints();
   if(p==='loan'        && user.employeeType==='regular') return renderLoan();
-  if(p==='longservice' && user.employeeType==='regular') return renderLongService();
+  if(p==='longservice'    && user.employeeType==='regular') return renderLongService();
+  if(p==='vacation-rules' && user.employeeType==='regular') return renderVacationRules();
+  if(p==='meal-parking'   && user.employeeType==='regular') return renderMealParking();
+  if(p==='expense-rules'  && user.employeeType==='regular') return renderExpenseRules();
+  if(p==='biztrip'        && user.employeeType==='regular') return renderBizTrip();
   if(p==='workthru')   return renderWorkthru();
   if(p==='eapproval')  return renderEApproval();
   if(p==='leave')      return renderLeave();
@@ -859,7 +876,11 @@ function renderDashboard(user){
     <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="points"><div class="card-icon">💰</div><div class="card-title">현금성 포인트</div><div class="card-desc">복지포인트, 뚜벅포인트, 웰니스포인트 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="loan"><div class="card-icon">🏦</div><div class="card-title">사내 대출제도</div><div class="card-desc">주택구입·전월세 무이자 대출 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
-    <div class="card" data-nav="longservice"><div class="card-icon">🏆</div><div class="card-title">장기 근속 포상</div><div class="card-desc">5년·10년·20년 근속 포상 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>` : '';
+    <div class="card" data-nav="longservice"><div class="card-icon">🏆</div><div class="card-title">장기 근속 포상</div><div class="card-desc">5년·10년·20년 근속 포상 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="vacation-rules"><div class="card-icon">🌴</div><div class="card-title">휴가 사용 규정</div><div class="card-desc">시간 단위 휴가(2·4·8시간) 신청 규정</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="meal-parking"><div class="card-icon">🍱</div><div class="card-title">식대 &amp; 주차비</div><div class="card-desc">외근·휴일 식대 기준 및 주차비 지원 조건</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="expense-rules"><div class="card-icon">💳</div><div class="card-title">협업비 &amp; 직무비</div><div class="card-desc">협업비·소통비 사용 목적 및 유의사항</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="biztrip"><div class="card-icon">✈️</div><div class="card-title">출장 경비 기준</div><div class="card-desc">숙박비·일비·식비·교통비 기준표</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>` : '';
   return `
 <div class="welcome-banner">
   <div class="wb-title">환영합니다, ${user.name}님! 👋</div>
@@ -1289,6 +1310,193 @@ function renderLongService(){
   <div style="margin-top:16px">
     <p class="note">근속기간에 <strong>계약직 근무기간은 미포함</strong>됩니다.</p>
     <p class="note">휴가 1회 분할 사용 가능 (1년 이내)</p>
+  </div>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   VACATION RULES PAGE (정규직 전용)
+════════════════════════════════════════ */
+function renderVacationRules(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span>규정</span><span>›</span><span class="cur">휴가 사용</span></div>
+  <div class="page-title">휴가 사용 규정</div>
+  <div class="page-sub">2025년 5월부터 시행 (2025년 12월까지 시범 운영)</div>
+</div>
+<div class="exc-badge">✨ 정규직 전용</div>
+
+<div class="content-block">
+  <div class="sec-title">🌴 주요 변경사항</div>
+  <div class="highlight">
+    <p>기존 반반차·반차·연차 명칭이 <strong>시간 단위</strong>로 변경됩니다.</p>
+  </div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th>변경 전</th><th>변경 후</th></tr></thead>
+    <tbody>
+      <tr><td>반반차</td><td><strong>2시간 휴가</strong></td></tr>
+      <tr><td>반차</td><td><strong>4시간 휴가</strong></td></tr>
+      <tr><td>연차</td><td><strong>8시간 휴가</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">📋 시간 단위 휴가 규정</div>
+  <ul class="blist">
+    <li><div><strong>자유로운 시간 선택 가능</strong><div class="sub">정규 근무시간 내 자유롭게 사용 가능 (예: 09~11시, 10~12시)</div></div></li>
+    <li><div><strong>1일 1회 사용 원칙</strong><div class="sub">4시간 + 2시간 휴가 조합 사용 불가 (하루에 1번만 사용)</div></div></li>
+    <li><div><strong>법정 연차에만 적용</strong><div class="sub">경조, 포상, 대체 휴가 등에는 시간 단위 휴가 적용 안 됨</div></div></li>
+    <li><div><strong>승인은 사용 3일 전까지</strong><div class="sub">원칙적으로 사용 3일 전까지 승인을 받아야 함</div></div></li>
+    <li><div><strong>미승인 시 지각 처리</strong><div class="sub">휴가 시작 시각 전까지 승인권자의 승인 없이 자리 비울 경우 지각 처리</div></div></li>
+    <li><div><strong>개인 용무 시 시간 단위 휴가 사용</strong><div class="sub">제휴병원, 은행 등 기존에 휴가 신청 없이 방문하던 개인 용무 → 반드시 시간 단위 휴가 신청</div></div></li>
+  </ul>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   MEAL & PARKING PAGE (정규직 전용)
+════════════════════════════════════════ */
+function renderMealParking(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span>규정</span><span>›</span><span class="cur">식대 &amp; 주차비</span></div>
+  <div class="page-title">식대 &amp; 주차비</div>
+  <div class="page-sub">2025년 5월부터 시행</div>
+</div>
+<div class="exc-badge">✨ 정규직 전용</div>
+
+<div class="content-block">
+  <div class="sec-title">🍱 식대</div>
+  <div class="highlight">
+    <p>1식 기준 <strong>13,000원</strong> (변경 전 10,000원)</p>
+  </div>
+  <ul class="blist">
+    <li><div><strong>외근 시 지급 기준</strong><div class="sub">점심: 11시~13시 시간 포함하여 외근 시 지급<br>저녁: 17시~19시 시간 포함하여 외근 시 지급</div></div></li>
+    <li><div><strong>휴일 근무 시 지급</strong><div class="sub">점심(11~13시) / 저녁(17~19시) 시간을 포함하여 근무 시 지급</div></div></li>
+    <li><div><strong>영수증 1장만 처리 가능</strong><div class="sub">한 식당에서 사용한 영수증만 처리 가능 (두 개 식당 이용 후 2개 영수증 청구 불가)</div></div></li>
+    <li><div><strong>저녁 19시까지 근무 시 청구 가능</strong><div class="sub">저녁의 경우 19시까지 근무할 경우 식대 경비 청구 가능</div></div></li>
+    <li><div><strong>구내식당 이용 불가 시</strong><div class="sub">특정 사유로 구내식당을 이용 못할 경우, 팀장/실장/경영지원팀에 사유 소명 후 경비 청구 가능</div></div></li>
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🚗 주차비</div>
+  <div class="highlight">
+    <p>주차 지원을 받지 못하는 직원 대상 · <strong>휴일 근무</strong> 시에만 지원</p>
+  </div>
+  <ul class="blist">
+    <li><div><strong>지원 조건</strong><div class="sub">주 5일 정규 근무 외 추가 근무(휴일 근무)에 한해 지원</div></div></li>
+    <li><div><strong>이용 방법</strong><div class="sub">주차여름(모든 주차장)에서 주차권 구매 후 사용 → 비용은 월말 경비 청구</div></div></li>
+    <li><div><strong>사전 별도 승인 필요</strong><div class="sub">사전에 별도 사면 승인 시에만 지원</div></div></li>
+  </ul>
+  <p class="note">유류비, 교통비는 지급하지 않습니다.</p>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   EXPENSE RULES PAGE (정규직 전용)
+════════════════════════════════════════ */
+function renderExpenseRules(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span>규정</span><span>›</span><span class="cur">협업비 &amp; 직무비</span></div>
+  <div class="page-title">협업비 &amp; 직무비 사용</div>
+  <div class="page-sub">2025년 5월 7일 업데이트</div>
+</div>
+<div class="exc-badge">✨ 정규직 전용</div>
+
+<div class="content-block">
+  <div class="sec-title">📌 명칭 및 사용 목적</div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th>명칭</th><th>사용 목적</th></tr></thead>
+    <tbody>
+      <tr><td><strong>협업비</strong></td><td>외부 가이드 및 헥토 그룹사 등 다양한 부서 간 협업 목적 사용</td></tr>
+      <tr><td><strong>소통비</strong></td><td>조직장의 소속 부서 조직 관리 및 팀빌딩 관련 목적 사용</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">💡 예산 범주</div>
+  <ul class="blist">
+    <li><div><strong>팀장의 경우</strong><div class="sub">팀원 유지·조직 관리가 핵심 업무 — 협업비(팀), 직무 예산, 소통비를 대상별·목적별로 구분하여 사용</div></div></li>
+    <li><div><strong>임원 이상의 경우</strong><div class="sub">협업비(팀), 직무 예산, 소통비를 탑다운(상하)으로 사용 가능</div></div></li>
+    <li><div><strong>소통비 배정 방식</strong><div class="sub">조직장에게 소통비 예산이 배정되며, 상위 조직장은 소통비를 조직원 인당 배당 가능</div></div></li>
+  </ul>
+  <p class="note">협업비와 소통비는 동일 예산에서 중복 사용 불가합니다.</p>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">⚠️ 사용 시 유의사항</div>
+  <div class="sec-sub">협업비</div>
+  <ul class="blist">
+    <li><div><strong>업무 연관성 있는 용도에만 사용</strong><div class="sub">개인적인 친목 모임이나 업무 연관성이 불분명한 사항은 사용 금지</div></div></li>
+    <li><div><strong>반복 사용 제한</strong><div class="sub">동일 인원 또는 동일 부서 간 지속적·반복적 사용은 제한</div></div></li>
+    <li><div><strong>예산 소진용 사용 금지</strong><div class="sub">예산 소진 목적의 회식, 선물세트, 상품권 구입 금지</div></div></li>
+  </ul>
+  <div class="sec-sub" style="margin-top:16px">소통비</div>
+  <ul class="blist">
+    <li><div><strong>팀워크 강화·소통 목적으로만 사용</strong><div class="sub">소속 부서 직원들의 팀워크 강화, 사기 진작, 소통 강화 목적에 한함</div></div></li>
+    <li><div><strong>조직장 책임 하에 자율 사용</strong><div class="sub">예산 운영 주체는 조직장이며, 부서원 개인별 예산이 할당된 것이 아님 — 자율적·책임감 있게 사용</div></div></li>
+    <li><div><strong>예산 소진용 사용 금지</strong><div class="sub">예산 소진 목적의 회식, 선물세트, 상품권 구입 금지</div></div></li>
+  </ul>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   BIZTRIP PAGE (정규직 전용)
+════════════════════════════════════════ */
+function renderBizTrip(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span>규정</span><span>›</span><span class="cur">출장</span></div>
+  <div class="page-title">출장 경비 기준</div>
+  <div class="page-sub">국내 출장 기준 · 2024년 11월 업데이트</div>
+</div>
+<div class="exc-badge">✨ 정규직 전용</div>
+
+<div class="content-block">
+  <div class="sec-title">✈️ 경비 기준표</div>
+  <div class="highlight">
+    <p>아래는 <strong>국내 출장</strong> 기준으로 작성됨<br>
+    제주를 제외한 지역 항공편 이용 금지 (제주 노선은 Economy Class 이용)<br>
+    일비는 <strong>1박 이상인 경우에만 지급</strong>, 당일 출장은 지급하지 않음</p>
+  </div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead>
+      <tr>
+        <th rowspan="2">구분</th>
+        <th rowspan="2">숙박비<br><span style="font-weight:400;font-size:11px">(1박 기준/실비)</span></th>
+        <th rowspan="2">일비<br><span style="font-weight:400;font-size:11px">(1일 기준)</span></th>
+        <th rowspan="2">식비<br><span style="font-weight:400;font-size:11px">(1식 기준/실비)</span></th>
+        <th colspan="2">교통비</th>
+      </tr>
+      <tr><th>철도</th><th>버스</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>임원</strong></td>
+        <td>15만원 한도<br><span style="font-size:11px;color:var(--gray)">(휴일 20만원)</span></td>
+        <td>5만원</td>
+        <td>15,000원 한도</td>
+        <td>KTX 특실</td>
+        <td rowspan="2">우등</td>
+      </tr>
+      <tr>
+        <td><strong>수석(팀장) 이하</strong></td>
+        <td>7만원 한도<br><span style="font-size:11px;color:var(--gray)">(휴일 9만원)</span></td>
+        <td>3만원</td>
+        <td>13,000원 한도</td>
+        <td>KTX 일반실</td>
+      </tr>
+    </tbody>
+  </table>
   </div>
 </div>`;
 }
