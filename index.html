@@ -876,19 +876,21 @@ function renderDashboard(user){
   const isRegular = user.employeeType==='regular';
   const commonCards = `
     <div class="card" data-nav="company"><div class="card-icon">🏢</div><div class="card-title">헥토큐앤엠 소개</div><div class="card-desc">회사 개요, 핵심 가치, 서비스, 주요 고객사</div></div>
-    <div class="card" data-nav="hectogroup"><div class="card-icon">🌐</div><div class="card-title">헥토 그룹 소개</div><div class="card-desc">헥토 그룹 비전·미션, 주요 계열사 사업 소개</div></div>
+    <div class="card" data-nav="hectogroup"><div class="card-icon">🌐</div><div class="card-title">헥토 그룹 소개</div><div class="card-desc">헥토 그룹 비전·미션, 주요 계열사 사업 소개</div></div>`;
+  const regularCards = isRegular ? `
+    <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="points"><div class="card-icon">💰</div><div class="card-title">현금성 포인트</div><div class="card-desc">뚜벅포인트, 웰니스포인트 등 연간 혜택 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="loan"><div class="card-icon">🏦</div><div class="card-title">사내 대출제도</div><div class="card-desc">주택구입·전월세 무이자 대출 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="longservice"><div class="card-icon">🏆</div><div class="card-title">장기 근속 포상</div><div class="card-desc">5년·10년·20년 근속 포상 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="maternity"><div class="card-icon">🤰</div><div class="card-title">모성보호 제도</div><div class="card-desc">출산휴가·육아휴직·임신기 근로시간 단축 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>` : '';
+  const sysCards = `
+    <div class="card" data-nav="wifi"><div class="card-icon">📶</div><div class="card-title">Wi-Fi</div><div class="card-desc">오피스별 Wi-Fi SSID 및 비밀번호 안내</div></div>
     <div class="card" data-nav="workthru"><div class="card-icon">💻</div><div class="card-title">워크쓰루 안내</div><div class="card-desc">그룹웨어 접속 및 기본 사용 방법</div></div>
     <div class="card" data-nav="eapproval"><div class="card-icon">✍️</div><div class="card-title">전자결재 작성</div><div class="card-desc">품의서 작성 및 결재 요청 방법</div></div>
     <div class="card" data-nav="leave"><div class="card-icon">📅</div><div class="card-title">연차 신청</div><div class="card-desc">연차·반차·반반차 신청 방법 안내</div></div>
     <div class="card" data-nav="welfare"><div class="card-icon">💊</div><div class="card-title">복지물품 신청</div><div class="card-desc">유산균(드시모네/오투부스터) 신청 방법</div></div>
-    <div class="card" data-nav="certificate"><div class="card-icon">📄</div><div class="card-title">증명서 신청</div><div class="card-desc">재직증명서 등 각종 증명서 발급 방법</div></div>
-    <div class="card" data-nav="wifi"><div class="card-icon">📶</div><div class="card-title">Wi-Fi</div><div class="card-desc">오피스별 Wi-Fi SSID 및 비밀번호 안내</div></div>`;
-  const regularCards = isRegular ? `
-    <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
-    <div class="card" data-nav="points"><div class="card-icon">💰</div><div class="card-title">현금성 포인트</div><div class="card-desc">복지포인트, 뚜벅포인트, 웰니스포인트 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
-    <div class="card" data-nav="loan"><div class="card-icon">🏦</div><div class="card-title">사내 대출제도</div><div class="card-desc">주택구입·전월세 무이자 대출 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
-    <div class="card" data-nav="longservice"><div class="card-icon">🏆</div><div class="card-title">장기 근속 포상</div><div class="card-desc">5년·10년·20년 근속 포상 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
-    <div class="card" data-nav="maternity"><div class="card-icon">🤰</div><div class="card-title">모성보호 제도</div><div class="card-desc">출산휴가·육아휴직·임신기 근로시간 단축 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="certificate"><div class="card-icon">📄</div><div class="card-title">증명서 신청</div><div class="card-desc">재직증명서 등 각종 증명서 발급 방법</div></div>`;
+  const ruleCards = isRegular ? `
     <div class="card" data-nav="vacation-rules"><div class="card-icon">🌴</div><div class="card-title">휴가 사용 규정</div><div class="card-desc">시간 단위 휴가(2·4·8시간) 신청 규정</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="meal-parking"><div class="card-icon">🍱</div><div class="card-title">식대 &amp; 주차비</div><div class="card-desc">외근·휴일 식대 기준 및 주차비 지원 조건</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="expense-rules"><div class="card-icon">💳</div><div class="card-title">협업비 &amp; 직무비</div><div class="card-desc">협업비·소통비 사용 목적 및 유의사항</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
@@ -904,7 +906,7 @@ function renderDashboard(user){
   <div class="page-title">빠른 메뉴</div>
   <div class="page-sub">아래 항목을 클릭하여 원하는 정보를 확인하세요</div>
 </div>
-<div class="cards">${commonCards}${regularCards}</div>`;
+<div class="cards">${commonCards}${regularCards}${sysCards}${ruleCards}</div>`;
 }
 
 /* ════════════════════════════════════════
