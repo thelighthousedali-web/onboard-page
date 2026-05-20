@@ -691,6 +691,9 @@ function renderLayout(user, content){
         <span class="ni">🤰</span>모성보호 제도
       </div>`:''}
       <div class="nav-sec">사내 시스템</div>
+      <div class="nav-item ${state.page==='wifi'?'active':''}" data-nav="wifi">
+        <span class="ni">📶</span>Wi-Fi
+      </div>
       <div class="nav-item ${state.page==='workthru'?'active':''}" data-nav="workthru">
         <span class="ni">💻</span>워크쓰루 안내
       </div>
@@ -705,9 +708,6 @@ function renderLayout(user, content){
       </div>
       <div class="nav-item ${state.page==='certificate'?'active':''}" data-nav="certificate">
         <span class="ni">📄</span>증명서 신청
-      </div>
-      <div class="nav-item ${state.page==='wifi'?'active':''}" data-nav="wifi">
-        <span class="ni">📶</span>Wi-Fi
       </div>
       ${t==='regular'?`
       <div class="nav-sec">규정</div>
