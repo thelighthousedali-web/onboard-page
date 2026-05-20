@@ -17,8 +17,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Ne
 
 /* ── AUTH ── */
 .auth-wrap{min-height:100vh;display:flex}
-.auth-hero{flex:1;overflow:hidden;position:relative}
-.auth-hero img{width:100%;height:100%;object-fit:cover;display:block}
+.auth-hero{flex:1;overflow:hidden;position:relative;background:linear-gradient(145deg,#E8420A 0%,#FF7A2F 50%,#FFB347 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;gap:32px}
+.auth-hero-logo{height:56px;width:auto;filter:brightness(0) invert(1);opacity:.95}
+.auth-hero-slogan{color:#fff;font-size:36px;font-weight:800;letter-spacing:-.5px;line-height:1.2;text-align:center}
+.auth-hero-slogan span{display:block;font-size:15px;font-weight:400;opacity:.85;margin-top:10px;letter-spacing:.02em}
+.auth-hero-dots{display:flex;gap:10px;margin-top:8px}
+.auth-hero-dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5)}
+.auth-hero-dots i:first-child{background:#fff}
+.auth-hero-cards{display:flex;flex-direction:column;gap:14px;width:100%;max-width:340px;margin-top:16px}
+.auth-hero-card{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border-radius:14px;padding:16px 20px;color:#fff;border:1px solid rgba(255,255,255,.25)}
+.auth-hero-card-title{font-size:13px;font-weight:700;margin-bottom:4px;opacity:.9}
+.auth-hero-card-desc{font-size:12px;opacity:.75;line-height:1.5}
 .auth-panel{width:500px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:48px 48px;background:#fff;overflow-y:auto}
 .auth-card{width:100%;max-width:400px}
 .auth-logo{text-align:center;margin-bottom:32px}
@@ -391,7 +400,14 @@ function renderLogin(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
-    <img src="hero-image.png" alt="Hecto Q&M">
+    <img src="logo-vertical.png" alt="Hecto Q&M" class="auth-hero-logo">
+    <div class="auth-hero-slogan">Perfecting Forward<span>매일 더 완벽한 품질을 향해 나아갑니다</span></div>
+    <div class="auth-hero-dots"><i></i><i></i><i></i></div>
+    <div class="auth-hero-cards">
+      <div class="auth-hero-card"><div class="auth-hero-card-title">🏢 회사 소개</div><div class="auth-hero-card-desc">헥토큐앤엠 소개 및 헥토 그룹 계열사 안내</div></div>
+      <div class="auth-hero-card"><div class="auth-hero-card-title">🎁 복리후생</div><div class="auth-hero-card-desc">복지제도, 경조사 지원, 포인트 혜택 안내</div></div>
+      <div class="auth-hero-card"><div class="auth-hero-card-title">💻 업무 시스템</div><div class="auth-hero-card-desc">워크쓰루, 전자결재, 연차 신청 가이드</div></div>
+    </div>
   </div>
   <div class="auth-panel">
     <div class="auth-card">
@@ -423,7 +439,14 @@ function renderRegister(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
-    <img src="hero-image.png" alt="Hecto Q&M">
+    <img src="logo-vertical.png" alt="Hecto Q&M" class="auth-hero-logo">
+    <div class="auth-hero-slogan">Perfecting Forward<span>매일 더 완벽한 품질을 향해 나아갑니다</span></div>
+    <div class="auth-hero-dots"><i></i><i></i><i></i></div>
+    <div class="auth-hero-cards">
+      <div class="auth-hero-card"><div class="auth-hero-card-title">🏢 회사 소개</div><div class="auth-hero-card-desc">헥토큐앤엠 소개 및 헥토 그룹 계열사 안내</div></div>
+      <div class="auth-hero-card"><div class="auth-hero-card-title">🎁 복리후생</div><div class="auth-hero-card-desc">복지제도, 경조사 지원, 포인트 혜택 안내</div></div>
+      <div class="auth-hero-card"><div class="auth-hero-card-title">💻 업무 시스템</div><div class="auth-hero-card-desc">워크쓰루, 전자결재, 연차 신청 가이드</div></div>
+    </div>
   </div>
   <div class="auth-panel">
     <div class="auth-card">
@@ -471,7 +494,14 @@ function renderPending(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
-    <img src="hero-image.png" alt="Hecto Q&M">
+    <img src="logo-vertical.png" alt="Hecto Q&M" class="auth-hero-logo">
+    <div class="auth-hero-slogan">Perfecting Forward<span>매일 더 완벽한 품질을 향해 나아갑니다</span></div>
+    <div class="auth-hero-dots"><i></i><i></i><i></i></div>
+    <div class="auth-hero-cards">
+      <div class="auth-hero-card"><div class="auth-hero-card-title">🏢 회사 소개</div><div class="auth-hero-card-desc">헥토큐앤엠 소개 및 헥토 그룹 계열사 안내</div></div>
+      <div class="auth-hero-card"><div class="auth-hero-card-title">🎁 복리후생</div><div class="auth-hero-card-desc">복지제도, 경조사 지원, 포인트 혜택 안내</div></div>
+      <div class="auth-hero-card"><div class="auth-hero-card-title">💻 업무 시스템</div><div class="auth-hero-card-desc">워크쓰루, 전자결재, 연차 신청 가이드</div></div>
+    </div>
   </div>
   <div class="auth-panel">
     <div class="auth-card" style="text-align:center">
@@ -492,7 +522,14 @@ function renderChangePassword(){
   return `
 <div class="auth-wrap">
   <div class="auth-hero">
-    <img src="hero-image.png" alt="Hecto Q&M">
+    <img src="logo-vertical.png" alt="Hecto Q&M" class="auth-hero-logo">
+    <div class="auth-hero-slogan">Perfecting Forward<span>매일 더 완벽한 품질을 향해 나아갑니다</span></div>
+    <div class="auth-hero-dots"><i></i><i></i><i></i></div>
+    <div class="auth-hero-cards">
+      <div class="auth-hero-card"><div class="auth-hero-card-title">🏢 회사 소개</div><div class="auth-hero-card-desc">헥토큐앤엠 소개 및 헥토 그룹 계열사 안내</div></div>
+      <div class="auth-hero-card"><div class="auth-hero-card-title">🎁 복리후생</div><div class="auth-hero-card-desc">복지제도, 경조사 지원, 포인트 혜택 안내</div></div>
+      <div class="auth-hero-card"><div class="auth-hero-card-title">💻 업무 시스템</div><div class="auth-hero-card-desc">워크쓰루, 전자결재, 연차 신청 가이드</div></div>
+    </div>
   </div>
   <div class="auth-panel">
     <div class="auth-card">
