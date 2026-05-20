@@ -673,11 +673,11 @@ function renderLayout(user, content){
       <div class="nav-item ${state.page==='hectogroup'?'active':''}" data-nav="hectogroup">
         <span class="ni">🌐</span>헥토 그룹 소개
       </div>
-      ${t==='regular'?`
       <div class="nav-sec">복리후생</div>
       <div class="nav-item ${state.page==='benefits'?'active':''}" data-nav="benefits">
         <span class="ni">🎁</span>복지제도 안내
       </div>
+      ${t==='regular'?`
       <div class="nav-item ${state.page==='points'?'active':''}" data-nav="points">
         <span class="ni">💰</span>현금성 포인트
       </div>
@@ -686,13 +686,13 @@ function renderLayout(user, content){
       </div>
       <div class="nav-item ${state.page==='longservice'?'active':''}" data-nav="longservice">
         <span class="ni">🏆</span>장기 근속 포상
-      </div>
+      </div>`:''}
       <div class="nav-item ${state.page==='maternity'?'active':''}" data-nav="maternity">
         <span class="ni">🤰</span>모성보호 제도
       </div>
       <div class="nav-item ${state.page==='funeral'?'active':''}" data-nav="funeral">
         <span class="ni">🕊️</span>상조서비스
-      </div>`:''}
+      </div>
       <div class="nav-sec">사내 시스템</div>
       <div class="nav-item ${state.page==='wifi'?'active':''}" data-nav="wifi">
         <span class="ni">📶</span>Wi-Fi
@@ -858,8 +858,8 @@ function renderUserPage(user){
   if(p==='points'      && user.employeeType==='regular') return renderPoints();
   if(p==='loan'        && user.employeeType==='regular') return renderLoan();
   if(p==='longservice'    && user.employeeType==='regular') return renderLongService();
-  if(p==='maternity'      && user.employeeType==='regular') return renderMaternity();
-  if(p==='funeral'        && user.employeeType==='regular') return renderFuneral();
+  if(p==='maternity')     return renderMaternity();
+  if(p==='funeral')       return renderFuneral();
   if(p==='vacation-rules' && user.employeeType==='regular') return renderVacationRules();
   if(p==='meal-parking'   && user.employeeType==='regular') return renderMealParking();
   if(p==='expense-rules'  && user.employeeType==='regular') return renderExpenseRules();
@@ -880,14 +880,15 @@ function renderDashboard(user){
   const isRegular = user.employeeType==='regular';
   const commonCards = `
     <div class="card" data-nav="company"><div class="card-icon">🏢</div><div class="card-title">헥토큐앤엠 소개</div><div class="card-desc">회사 개요, 핵심 가치, 서비스, 주요 고객사</div></div>
-    <div class="card" data-nav="hectogroup"><div class="card-icon">🌐</div><div class="card-title">헥토 그룹 소개</div><div class="card-desc">헥토 그룹 비전·미션, 주요 계열사 사업 소개</div></div>`;
+    <div class="card" data-nav="hectogroup"><div class="card-icon">🌐</div><div class="card-title">헥토 그룹 소개</div><div class="card-desc">헥토 그룹 비전·미션, 주요 계열사 사업 소개</div></div>
+    <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div></div>`;
   const regularCards = isRegular ? `
-    <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="points"><div class="card-icon">💰</div><div class="card-title">현금성 포인트</div><div class="card-desc">뚜벅포인트, 웰니스포인트 등 연간 혜택 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="loan"><div class="card-icon">🏦</div><div class="card-title">사내 대출제도</div><div class="card-desc">주택구입·전월세 무이자 대출 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
-    <div class="card" data-nav="longservice"><div class="card-icon">🏆</div><div class="card-title">장기 근속 포상</div><div class="card-desc">5년·10년·20년 근속 포상 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
-    <div class="card" data-nav="maternity"><div class="card-icon">🤰</div><div class="card-title">모성보호 제도</div><div class="card-desc">출산휴가·육아휴직·임신기 근로시간 단축 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
-    <div class="card" data-nav="funeral"><div class="card-icon">🕊️</div><div class="card-title">상조서비스</div><div class="card-desc">헥토그룹 장례서비스 (프리드라이프) 지원 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>` : '';
+    <div class="card" data-nav="longservice"><div class="card-icon">🏆</div><div class="card-title">장기 근속 포상</div><div class="card-desc">5년·10년·20년 근속 포상 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>` : '';
+  const welfareCards = `
+    <div class="card" data-nav="maternity"><div class="card-icon">🤰</div><div class="card-title">모성보호 제도</div><div class="card-desc">출산휴가·육아휴직·임신기 근로시간 단축 안내</div></div>
+    <div class="card" data-nav="funeral"><div class="card-icon">🕊️</div><div class="card-title">상조서비스</div><div class="card-desc">헥토그룹 장례서비스 (프리드라이프) 지원 안내</div></div>`;
   const sysCards = `
     <div class="card" data-nav="wifi"><div class="card-icon">📶</div><div class="card-title">Wi-Fi</div><div class="card-desc">오피스별 Wi-Fi SSID 및 비밀번호 안내</div></div>
     <div class="card" data-nav="workthru"><div class="card-icon">💻</div><div class="card-title">워크쓰루 안내</div><div class="card-desc">그룹웨어 접속 및 기본 사용 방법</div></div>
@@ -911,7 +912,7 @@ function renderDashboard(user){
   <div class="page-title">빠른 메뉴</div>
   <div class="page-sub">아래 항목을 클릭하여 원하는 정보를 확인하세요</div>
 </div>
-<div class="cards">${commonCards}${regularCards}${sysCards}${ruleCards}</div>`;
+<div class="cards">${commonCards}${regularCards}${welfareCards}${sysCards}${ruleCards}</div>`;
 }
 
 /* ════════════════════════════════════════
@@ -1176,7 +1177,7 @@ function renderBenefits(user){
     <li><div><strong>건강보조식품</strong><div class="sub">오투부스터·드시모네 4500 정액 2만원 구입 (차액 회사 지원, 월 1개)</div></div></li>
     <li><div><strong>제휴 할인</strong><div class="sub">쏘카 카쉐어링 제휴할인 · 드시모네몰 직원가 (정가 50%)</div></div></li>
     <li><div><strong>건강검진 반차 제공</strong><div class="sub">건강검진 당일 반차 제공</div></div></li>
-    <li><div><strong>직원 추천 제도</strong><div class="sub">직원 추천 채용 성공 시 포상금 50만원 지급</div></div></li>
+    ${isRegular?`<li><div><strong>직원 추천 제도</strong><div class="sub">직원 추천 채용 성공 시 포상금 50만원 지급</div></div></li>`:''}
     <li><div><strong>다양한 교육 지원</strong><div class="sub">직무 역량 강화 및 임직원이 원하는 활동에 대한 교육 지원</div></div></li>
     ${isRegular?`<li><div><strong>멘토링 제도</strong><div class="sub">신규 입사자의 빠른 적응을 위해 멘토링 제도 운영</div></div></li>`:''}
   </ul>
@@ -1329,7 +1330,6 @@ function renderMaternity(){
   <div class="page-title">모성보호 제도</div>
   <div class="page-sub">임신·출산·육아 근로자를 위한 법정 보호 제도 안내 (2026년 기준)</div>
 </div>
-<div class="exc-badge">✨ 정규직 전용</div>
 
 <div class="content-block">
   <div class="t-wrap">
@@ -1388,7 +1388,6 @@ function renderFuneral(){
   <div class="page-title">상조서비스</div>
   <div class="page-sub">헥토그룹 장례서비스 (프리드라이프) · 약 300만원 상당</div>
 </div>
-<div class="exc-badge">✨ 정규직 전용</div>
 
 <div class="highlight" style="margin-top:18px">
   <p>🕊️ <strong>헥토그룹 장례서비스 (프리드라이프)</strong> · 약 300만원 상당 · 현금 지원 없음</p>
