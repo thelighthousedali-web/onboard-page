@@ -686,6 +686,9 @@ function renderLayout(user, content){
       </div>
       <div class="nav-item ${state.page==='longservice'?'active':''}" data-nav="longservice">
         <span class="ni">🏆</span>장기 근속 포상
+      </div>
+      <div class="nav-item ${state.page==='maternity'?'active':''}" data-nav="maternity">
+        <span class="ni">🤰</span>모성보호 제도
       </div>`:''}
       <div class="nav-sec">사내 시스템</div>
       <div class="nav-item ${state.page==='workthru'?'active':''}" data-nav="workthru">
@@ -849,6 +852,7 @@ function renderUserPage(user){
   if(p==='points'      && user.employeeType==='regular') return renderPoints();
   if(p==='loan'        && user.employeeType==='regular') return renderLoan();
   if(p==='longservice'    && user.employeeType==='regular') return renderLongService();
+  if(p==='maternity'      && user.employeeType==='regular') return renderMaternity();
   if(p==='vacation-rules' && user.employeeType==='regular') return renderVacationRules();
   if(p==='meal-parking'   && user.employeeType==='regular') return renderMealParking();
   if(p==='expense-rules'  && user.employeeType==='regular') return renderExpenseRules();
@@ -879,6 +883,7 @@ function renderDashboard(user){
     <div class="card" data-nav="points"><div class="card-icon">💰</div><div class="card-title">현금성 포인트</div><div class="card-desc">복지포인트, 뚜벅포인트, 웰니스포인트 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="loan"><div class="card-icon">🏦</div><div class="card-title">사내 대출제도</div><div class="card-desc">주택구입·전월세 무이자 대출 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="longservice"><div class="card-icon">🏆</div><div class="card-title">장기 근속 포상</div><div class="card-desc">5년·10년·20년 근속 포상 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="maternity"><div class="card-icon">🤰</div><div class="card-title">모성보호 제도</div><div class="card-desc">출산휴가·육아휴직·임신기 근로시간 단축 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="vacation-rules"><div class="card-icon">🌴</div><div class="card-title">휴가 사용 규정</div><div class="card-desc">시간 단위 휴가(2·4·8시간) 신청 규정</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="meal-parking"><div class="card-icon">🍱</div><div class="card-title">식대 &amp; 주차비</div><div class="card-desc">외근·휴일 식대 기준 및 주차비 지원 조건</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="expense-rules"><div class="card-icon">💳</div><div class="card-title">협업비 &amp; 직무비</div><div class="card-desc">협업비·소통비 사용 목적 및 유의사항</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
@@ -1303,6 +1308,107 @@ function renderLongService(){
     <li><div><strong>8년 근속</strong><div class="sub">20만원 지급</div></div></li>
   </ul>
   <p class="note">서류 작성 후 강남규 팀장님께 제출 · 입직 초에 포상비 지급</p>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   MATERNITY PROTECTION PAGE (정규직 전용)
+════════════════════════════════════════ */
+function renderMaternity(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span>복리후생</span><span>›</span><span class="cur">모성보호 제도</span></div>
+  <div class="page-title">모성보호 제도</div>
+  <div class="page-sub">임신·출산·육아 근로자를 위한 법정 보호 제도 안내 (2025년 기준)</div>
+</div>
+<div class="exc-badge">✨ 정규직 전용</div>
+
+<div class="content-block">
+  <div class="sec-title">🤰 출산전후휴가</div>
+  <ul class="blist">
+    <li><div><strong>휴가 기간</strong><div class="sub">90일 (다태아 120일) · 출산 후 최소 45일 이상 확보 필수</div></div></li>
+    <li><div><strong>급여 지원</strong><div class="sub">통상임금 100% 지급 (상한액 월 220만원)<br>우선지원대상기업: 고용보험에서 90일 전액 지원<br>대규모 기업: 최초 60일 사업주 부담 → 이후 30일 고용보험 지원</div></div></li>
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">👨‍👩‍👧 배우자 출산휴가</div>
+  <ul class="blist">
+    <li><div><strong>휴가 기간</strong><div class="sub">20일 (유급) · 출산일로부터 90일 이내 사용</div></div></li>
+    <li><div><strong>분할 사용</strong><div class="sub">1회 분할 사용 가능</div></div></li>
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">👶 육아휴직</div>
+  <div class="highlight">
+    <p>만 8세 이하 또는 초등학교 2학년 이하 자녀 대상 · 부모 각각 최대 <strong>1년</strong> 사용 가능</p>
+  </div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th>기간</th><th>급여 (통상임금 기준)</th><th>월 상한액</th></tr></thead>
+    <tbody>
+      <tr><td>1~3개월</td><td>100%</td><td>250만원</td></tr>
+      <tr><td>4~6개월</td><td>100%</td><td>200만원</td></tr>
+      <tr><td>7~12개월</td><td>80%</td><td>160만원</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <ul class="blist" style="margin-top:12px">
+    <li><div><strong>사후지급금 폐지 (2025년~)</strong><div class="sub">이전에는 급여의 25%를 복직 후 6개월 근무 시 지급했으나, 2025년부터 전액 매월 지급</div></div></li>
+    <li><div><strong>분할 사용 가능</strong><div class="sub">최대 3회 분할 사용 가능</div></div></li>
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">⏱️ 육아기 근로시간 단축</div>
+  <ul class="blist">
+    <li><div><strong>대상</strong><div class="sub">만 8세 이하 또는 초등학교 2학년 이하 자녀 · 육아휴직 미사용 기간은 2배 가산 (최대 2년)</div></div></li>
+    <li><div><strong>근무시간</strong><div class="sub">주 15시간 이상 ~ 35시간 이하</div></div></li>
+    <li><div><strong>급여 지원</strong><div class="sub">최초 주 10시간 단축분: 통상임금 100% (상한 250만원)<br>나머지 단축분: 통상임금 80% (상한 160만원)</div></div></li>
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🏥 임신기 근로시간 단축</div>
+  <ul class="blist">
+    <li><div><strong>사용 가능 시기</strong><div class="sub">임신 12주 이내 또는 임신 32주 이후</div></div></li>
+    <li><div><strong>단축 시간</strong><div class="sub">1일 2시간 단축 (급여 삭감 없음)</div></div></li>
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">💊 난임치료휴가</div>
+  <ul class="blist">
+    <li><div><strong>휴가 일수</strong><div class="sub">연간 3일 · 최초 1일 유급, 나머지 2일 무급</div></div></li>
+    <li><div><strong>중소기업 급여 지원</strong><div class="sub">우선지원대상기업 근로자는 최초 2일 고용보험에서 급여 지원</div></div></li>
+    <li><div><strong>비밀 유지 의무</strong><div class="sub">사업주는 난임치료 사실에 대해 비밀을 유지해야 할 법적 의무 있음</div></div></li>
+  </ul>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">😢 유산·사산 휴가</div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th>임신 기간</th><th>휴가 일수</th></tr></thead>
+    <tbody>
+      <tr><td>11주 이내</td><td>5일</td></tr>
+      <tr><td>12~15주</td><td>10일</td></tr>
+      <tr><td>16~21주</td><td>30일</td></tr>
+      <tr><td>22~27주</td><td>60일</td></tr>
+      <tr><td>28주 이상</td><td>90일</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">📋 신청 방법</div>
+  <ul class="blist">
+    <li><div><strong>회사 신청</strong><div class="sub">그룹웨어(워크쓰루) 전자결재 → 인사팀 제출</div></div></li>
+    <li><div><strong>고용보험 급여 신청</strong><div class="sub">고용24 (www.work24.go.kr) 온라인 신청 또는 고용노동부 지청 방문</div></div></li>
+    <li><div><strong>문의</strong><div class="sub">고용노동부 고객상담센터 ☎ 1350 (유료)</div></div></li>
+  </ul>
 </div>`;
 }
 
