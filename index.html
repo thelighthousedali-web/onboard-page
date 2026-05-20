@@ -706,6 +706,9 @@ function renderLayout(user, content){
       <div class="nav-item ${state.page==='certificate'?'active':''}" data-nav="certificate">
         <span class="ni">📄</span>증명서 신청
       </div>
+      <div class="nav-item ${state.page==='wifi'?'active':''}" data-nav="wifi">
+        <span class="ni">📶</span>Wi-Fi
+      </div>
       ${t==='regular'?`
       <div class="nav-sec">규정</div>
       <div class="nav-item ${state.page==='vacation-rules'?'active':''}" data-nav="vacation-rules">
@@ -862,6 +865,7 @@ function renderUserPage(user){
   if(p==='leave')      return renderLeave();
   if(p==='welfare')    return renderWelfare();
   if(p==='certificate') return renderCertificate();
+  if(p==='wifi')        return renderWifi();
   return renderDashboard(user);
 }
 
@@ -877,7 +881,8 @@ function renderDashboard(user){
     <div class="card" data-nav="eapproval"><div class="card-icon">✍️</div><div class="card-title">전자결재 작성</div><div class="card-desc">품의서 작성 및 결재 요청 방법</div></div>
     <div class="card" data-nav="leave"><div class="card-icon">📅</div><div class="card-title">연차 신청</div><div class="card-desc">연차·반차·반반차 신청 방법 안내</div></div>
     <div class="card" data-nav="welfare"><div class="card-icon">💊</div><div class="card-title">복지물품 신청</div><div class="card-desc">유산균(드시모네/오투부스터) 신청 방법</div></div>
-    <div class="card" data-nav="certificate"><div class="card-icon">📄</div><div class="card-title">증명서 신청</div><div class="card-desc">재직증명서 등 각종 증명서 발급 방법</div></div>`;
+    <div class="card" data-nav="certificate"><div class="card-icon">📄</div><div class="card-title">증명서 신청</div><div class="card-desc">재직증명서 등 각종 증명서 발급 방법</div></div>
+    <div class="card" data-nav="wifi"><div class="card-icon">📶</div><div class="card-title">Wi-Fi</div><div class="card-desc">오피스별 Wi-Fi SSID 및 비밀번호 안내</div></div>`;
   const regularCards = isRegular ? `
     <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="points"><div class="card-icon">💰</div><div class="card-title">현금성 포인트</div><div class="card-desc">복지포인트, 뚜벅포인트, 웰니스포인트 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
@@ -1740,6 +1745,61 @@ function renderWelfare(){
       <div class="step-num">4</div>
       <div><div class="step-title">신청 완료</div><div class="step-desc"><strong>신청</strong> 버튼 클릭 → 저장 확인 → 신청 상태 확인</div></div>
     </div>
+  </div>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   WI-FI PAGE
+════════════════════════════════════════ */
+function renderWifi(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span>사내 시스템</span><span>›</span><span class="cur">Wi-Fi</span></div>
+  <div class="page-title">사내 Wi-Fi 안내</div>
+  <div class="page-sub">오피스별 Wi-Fi SSID 및 비밀번호 안내</div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🏢 Office 1 · PNM타워 4층</div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th>구분</th><th>SSID</th><th>비밀번호</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">일반</td><td>Q_Qffice 5G</td><td>qoffice1!</td></tr>
+      <tr><td>Q_Qffice 2.4G</td><td>qoffice1!</td></tr>
+      <tr><td rowspan="4">Automation</td><td>Automation_2.4G</td><td>automation1!</td></tr>
+      <tr><td>Automation_5G</td><td>automation1!</td></tr>
+      <tr><td>Automation_sub_2.4</td><td>automation1!</td></tr>
+      <tr><td>Automation_sub_5</td><td>automation1!</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🏢 Office 2 · 스타팅빌딩 3층</div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th>구분</th><th>SSID</th><th>비밀번호</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">일반</td><td>qoffice_stt</td><td>qoffice1!</td></tr>
+      <tr><td>qoffice_stt_5G</td><td>qoffice1!</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🏢 Office 3 · 헥성빌딩 4층</div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th>구분</th><th>SSID</th><th>비밀번호</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">일반</td><td>HectoQ&amp;M 2.4G</td><td>qoffice1!</td></tr>
+      <tr><td>HectoQ&amp;M 5G</td><td>qoffice1!</td></tr>
+    </tbody>
+  </table>
   </div>
 </div>`;
 }
