@@ -180,23 +180,6 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .mob-title{font-size:14px;font-weight:600;color:rgba(255,255,255,.8);flex:1}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
 .sidebar{transition:transform .25s ease}
-@media(max-width:768px){
-  .mob-header{display:flex}
-  .sidebar{transform:translateX(-100%)}
-  body.mob-open .sidebar{transform:translateX(0)}
-  body.mob-open .sidebar-overlay{display:block}
-  .main{margin-left:0;padding:68px 16px 24px}
-  .two-col{grid-template-columns:1fr}
-  .hg-vision{grid-template-columns:1fr}
-  .hg-overview{grid-template-columns:1fr}
-  .stats-row{grid-template-columns:1fr}
-  .content-block{padding:18px 16px}
-  .page-title{font-size:20px}
-  .wb-slogan{display:none}
-  .welcome-banner{padding:20px 18px}
-  .cards{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
-  .t-wrap{font-size:12px}
-}
 /* ── HECTO GROUP PAGE ── */
 .hg-vision{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
 .hg-vision-card{background:linear-gradient(135deg,var(--primary-light),#fff);border:1px solid var(--primary-light);border-radius:12px;padding:20px 22px}
@@ -229,6 +212,23 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .hg-us-badge{background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle}
 .hg-video-wrap{width:100%;max-width:560px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000}
 .hg-video-wrap iframe{width:100%;height:100%;border:none;display:block}
+@media(max-width:768px){
+  .mob-header{display:flex}
+  .sidebar{transform:translateX(-100%)}
+  body.mob-open .sidebar{transform:translateX(0)}
+  body.mob-open .sidebar-overlay{display:block}
+  .main{margin-left:0;padding:68px 16px 24px}
+  .two-col{grid-template-columns:1fr}
+  .hg-vision{grid-template-columns:1fr}
+  .hg-overview{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr}
+  .content-block{padding:18px 16px}
+  .page-title{font-size:20px}
+  .wb-slogan{display:none}
+  .welcome-banner{padding:20px 18px}
+  .cards{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .t-wrap{font-size:12px}
+}
 </style>
 </head>
 <body>
@@ -971,8 +971,6 @@ function renderHectoGroup(){
   <div class="hg-video-wrap">
     <iframe src="https://drive.google.com/file/d/1frx0UdqxIQSdF4Po85vg5nBxTjjIEVaP/preview" allowfullscreen allow="autoplay; encrypted-media" loading="lazy"></iframe>
   </div>
-  <p style="margin-top:10px;font-size:13px;color:var(--gray)">영상이 재생되지 않을 경우 아래 버튼을 눌러 직접 열어보세요.</p>
-  <a href="https://drive.google.com/file/d/1frx0UdqxIQSdF4Po85vg5nBxTjjIEVaP/view" target="_blank" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:9px 18px;background:var(--primary);color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">▶ 영상 새 탭에서 열기</a>
 </div>
 
 <!-- 비전 & 미션 -->
