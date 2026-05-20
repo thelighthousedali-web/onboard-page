@@ -1109,7 +1109,7 @@ function renderBenefits(user){
   </ul>
 </div>
 
-<div class="content-block">
+${isRegular?`<div class="content-block">
   <div class="sec-title">🏆 장기 근속 포상</div>
   <ul class="blist">
     <li><div><strong>그룹사 장기 근속 지원</strong>
@@ -1120,14 +1120,14 @@ function renderBenefits(user){
         ※ 근속기간에 계약직 근무기간은 미포함 · 휴가 1회 분할 가능(1년 이내)
       </div>
     </div></li>
-    ${isRegular?`<li><div><strong>헥토큐앤엠 사우회 포상</strong>
+    <li><div><strong>헥토큐앤엠 사우회 포상</strong>
       <div class="sub">
         3년 근속 : 10만원 / 8년 근속 : 20만원<br>
         서류 작성 후 강남규 팀장님께 제출 · 입직 초에 포상비 지급
       </div>
-    </div></li>`:''}
+    </div></li>
   </ul>
-</div>
+</div>`:''}
 
 <div class="content-block">
   <div class="sec-title">💐 경조사 지원</div>
