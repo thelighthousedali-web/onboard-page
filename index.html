@@ -673,11 +673,11 @@ function renderLayout(user, content){
       <div class="nav-item ${state.page==='hectogroup'?'active':''}" data-nav="hectogroup">
         <span class="ni">🌐</span>헥토 그룹 소개
       </div>
+      ${t==='regular'?`
       <div class="nav-sec">복리후생</div>
       <div class="nav-item ${state.page==='benefits'?'active':''}" data-nav="benefits">
         <span class="ni">🎁</span>복지제도 안내
       </div>
-      ${t==='regular'?`
       <div class="nav-item ${state.page==='points'?'active':''}" data-nav="points">
         <span class="ni">💰</span>현금성 포인트
       </div>
@@ -850,13 +850,13 @@ function renderDashboard(user){
   const commonCards = `
     <div class="card" data-nav="company"><div class="card-icon">🏢</div><div class="card-title">헥토큐앤엠 소개</div><div class="card-desc">회사 개요, 핵심 가치, 서비스, 주요 고객사</div></div>
     <div class="card" data-nav="hectogroup"><div class="card-icon">🌐</div><div class="card-title">헥토 그룹 소개</div><div class="card-desc">헥토 그룹 비전·미션, 주요 계열사 사업 소개</div></div>
-    <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div></div>
     <div class="card" data-nav="workthru"><div class="card-icon">💻</div><div class="card-title">워크쓰루 안내</div><div class="card-desc">그룹웨어 접속 및 기본 사용 방법</div></div>
     <div class="card" data-nav="eapproval"><div class="card-icon">✍️</div><div class="card-title">전자결재 작성</div><div class="card-desc">품의서 작성 및 결재 요청 방법</div></div>
     <div class="card" data-nav="leave"><div class="card-icon">📅</div><div class="card-title">연차 신청</div><div class="card-desc">연차·반차·반반차 신청 방법 안내</div></div>
     <div class="card" data-nav="welfare"><div class="card-icon">💊</div><div class="card-title">복지물품 신청</div><div class="card-desc">유산균(드시모네/오투부스터) 신청 방법</div></div>
     <div class="card" data-nav="certificate"><div class="card-icon">📄</div><div class="card-title">증명서 신청</div><div class="card-desc">재직증명서 등 각종 증명서 발급 방법</div></div>`;
   const regularCards = isRegular ? `
+    <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="points"><div class="card-icon">💰</div><div class="card-title">현금성 포인트</div><div class="card-desc">복지포인트, 뚜벅포인트, 웰니스포인트 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="loan"><div class="card-icon">🏦</div><div class="card-title">사내 대출제도</div><div class="card-desc">주택구입·전월세 무이자 대출 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="longservice"><div class="card-icon">🏆</div><div class="card-title">장기 근속 포상</div><div class="card-desc">5년·10년·20년 근속 포상 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>` : '';
