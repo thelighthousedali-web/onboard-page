@@ -231,6 +231,19 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
   .cards{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
   .t-wrap{font-size:12px}
 }
+/* ── CMS EDITOR ── */
+.cms-editor-wrap{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;height:calc(100vh - 260px);min-height:440px}
+.cms-pane{flex:1;display:flex;flex-direction:column;min-width:0}
+.cms-pane+.cms-pane{border-left:1px solid var(--border)}
+.cms-pane-head{padding:10px 16px;background:var(--light);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cms-textarea{flex:1;resize:none;border:none;outline:none;padding:16px;font-family:'Consolas','Monaco',monospace;font-size:12.5px;line-height:1.7;color:#1e293b;overflow:auto;background:#fff;-webkit-user-select:text;user-select:text}
+.cms-preview-area{flex:1;padding:24px;overflow:auto;background:#fff}
+.cms-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 0 0}
+.cms-bar-info{font-size:12px;color:var(--gray)}
+.cms-bar-btns{display:flex;gap:10px}
+.cms-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600}
+.cms-status.modified{background:#FEF3C7;color:#92400E}
+.cms-status.default{background:var(--light);color:var(--gray)}
 </style>
 </head>
 <body>
@@ -379,6 +392,28 @@ const DB = {
    STATE & ROUTER
 ════════════════════════════════════════ */
 let state = {page:'login', sub:null};
+let _pageContent = {};
+
+const PAGE_META = [
+  {key:'company',        label:'헥토큐앤엠 소개',  icon:'🏢'},
+  {key:'hectogroup',     label:'헥토 그룹 소개',  icon:'🌐'},
+  {key:'benefits',       label:'복지제도 안내',    icon:'🎁'},
+  {key:'points',         label:'현금성 포인트',    icon:'💰', regular:true},
+  {key:'loan',           label:'사내 대출제도',    icon:'🏦', regular:true},
+  {key:'longservice',    label:'장기 근속 포상',   icon:'🏆', regular:true},
+  {key:'maternity',      label:'모성보호 제도',    icon:'🤰'},
+  {key:'funeral',        label:'상조서비스',       icon:'🕊️'},
+  {key:'vacation-rules', label:'휴가 사용 규정',   icon:'🌴', regular:true},
+  {key:'meal-parking',   label:'식대 & 주차비',    icon:'🍱', regular:true},
+  {key:'expense-rules',  label:'협업비 & 직무비',  icon:'💳', regular:true},
+  {key:'biztrip',        label:'출장 경비 기준',   icon:'✈️', regular:true},
+  {key:'wifi',           label:'Wi-Fi',            icon:'📶'},
+  {key:'workthru',       label:'워크쓰루 안내',    icon:'💻'},
+  {key:'eapproval',      label:'전자결재 작성',    icon:'✍️'},
+  {key:'leave',          label:'연차 신청',        icon:'📅'},
+  {key:'welfare',        label:'복지물품 신청',    icon:'💊'},
+  {key:'certificate',    label:'증명서 신청',      icon:'📄'},
+];
 
 function nav(page, sub=null){
   state = {page, sub};
@@ -683,6 +718,10 @@ function renderLayout(user, content){
       </div>
       <div class="nav-item ${state.page==='admin-all'?'active':''}" data-nav="admin-all">
         <span class="ni">📋</span>전체 회원 목록
+      </div>
+      <div class="nav-sec">콘텐츠</div>
+      <div class="nav-item ${state.page==='admin-content'||state.page==='admin-content-edit'?'active':''}" data-nav="admin-content">
+        <span class="ni">📝</span>콘텐츠 편집
       </div>`;
   } else {
     const t = user.employeeType;
@@ -811,6 +850,9 @@ function logout(){
    ADMIN PAGES
 ════════════════════════════════════════ */
 function renderAdminPage(){
+  if(state.page==='admin-content')      return renderAdminContent();
+  if(state.page==='admin-content-edit') return renderAdminContentEdit();
+
   const users   = DB.getUsers().filter(u=>u.role!=='admin');
   const pending  = users.filter(u=>u.status==='pending');
   const approved = users.filter(u=>u.status==='approved');
@@ -892,6 +934,7 @@ function renderAdminAll(users){
 ════════════════════════════════════════ */
 function renderUserPage(user){
   const p = state.page;
+  if(_pageContent[p]) return _pageContent[p].content_html;
   if(p==='company')     return renderCompany();
   if(p==='hectogroup')  return renderHectoGroup();
   if(p==='benefits')                                return renderBenefits(user);
@@ -1933,6 +1976,51 @@ function bindPageActions(){
   document.querySelectorAll('.card[data-nav]').forEach(el=>{
     el.addEventListener('click', ()=>nav(el.dataset.nav));
   });
+
+  // ── CMS: 콘텐츠 목록 페이지 버튼 ──
+  document.querySelectorAll('[data-cms-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state={page:'admin-content-edit', sub:btn.dataset.cmsEdit}; render(); });
+  });
+  document.querySelectorAll('[data-cms-reset]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm(`⚠️ "${btn.dataset.cmsLabel}" 페이지를 기본값으로 초기화하시겠습니까?`)) return;
+      const ok = await resetPageContent(btn.dataset.cmsReset);
+      if(ok){ nav('admin-content'); } else { alert('초기화 중 오류가 발생했습니다.'); }
+    });
+  });
+
+  // ── CMS: 편집 페이지 버튼 ──
+  document.getElementById('cms-refresh')?.addEventListener('click', ()=>{
+    const ta = document.getElementById('cms-textarea');
+    if(ta) document.getElementById('cms-preview').innerHTML = ta.value;
+  });
+  document.getElementById('cms-textarea')?.addEventListener('input', ()=>{
+    const ta = document.getElementById('cms-textarea');
+    if(ta) document.getElementById('cms-preview').innerHTML = ta.value;
+  });
+  document.getElementById('cms-save')?.addEventListener('click', async ()=>{
+    const pageKey = document.getElementById('cms-save').dataset.key;
+    const html    = document.getElementById('cms-textarea').value;
+    const user    = DB.getCurrent();
+    const btn     = document.getElementById('cms-save');
+    btn.disabled  = true; btn.textContent = '저장 중...';
+    const ok = await savePageContent(pageKey, html, user?.name||'관리자');
+    if(ok){
+      btn.textContent = '✅ 저장됨!';
+      setTimeout(()=>nav('admin-content'), 800);
+    } else {
+      btn.disabled = false; btn.textContent = '💾 저장하기';
+      alert('저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
+    }
+  });
+  document.getElementById('cms-reset-edit')?.addEventListener('click', async ()=>{
+    const key   = document.getElementById('cms-reset-edit').dataset.key;
+    const label = document.getElementById('cms-reset-edit').dataset.label;
+    if(!confirm(`⚠️ "${label}" 페이지를 기본값으로 초기화하시겠습니까?`)) return;
+    const ok = await resetPageContent(key);
+    if(ok){ nav('admin-content'); } else { alert('초기화 중 오류가 발생했습니다.'); }
+  });
+
   document.querySelectorAll('[data-action]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       const id     = parseInt(btn.dataset.id);
@@ -1958,6 +2046,136 @@ function bindPageActions(){
       render();
     });
   });
+}
+
+/* ════════════════════════════════════════
+   CMS: PAGE CONTENT
+════════════════════════════════════════ */
+async function loadPageContent(){
+  try {
+    const {data} = await supa.from('page_content').select('*');
+    _pageContent = {};
+    (data||[]).forEach(r => { _pageContent[r.page_key] = r; });
+  } catch(e){ console.error('[CMS] load error:', e); }
+}
+
+async function savePageContent(pageKey, html, updatedBy){
+  const {error} = await supa.from('page_content').upsert(
+    {page_key: pageKey, content_html: html, updated_at: new Date().toISOString(), updated_by: updatedBy},
+    {onConflict: 'page_key'}
+  );
+  if(!error) _pageContent[pageKey] = {page_key: pageKey, content_html: html, updated_at: new Date().toISOString(), updated_by: updatedBy};
+  return !error;
+}
+
+async function resetPageContent(pageKey){
+  const {error} = await supa.from('page_content').delete().eq('page_key', pageKey);
+  if(!error) delete _pageContent[pageKey];
+  return !error;
+}
+
+function getDefaultHtml(pageKey){
+  const mock = {employeeType:'regular'};
+  const map = {
+    'company':        ()=>renderCompany(),
+    'hectogroup':     ()=>renderHectoGroup(),
+    'benefits':       ()=>renderBenefits(mock),
+    'points':         ()=>renderPoints(),
+    'loan':           ()=>renderLoan(),
+    'longservice':    ()=>renderLongService(),
+    'maternity':      ()=>renderMaternity(),
+    'funeral':        ()=>renderFuneral(),
+    'vacation-rules': ()=>renderVacationRules(),
+    'meal-parking':   ()=>renderMealParking(),
+    'expense-rules':  ()=>renderExpenseRules(),
+    'biztrip':        ()=>renderBizTrip(),
+    'wifi':           ()=>renderWifi(),
+    'workthru':       ()=>renderWorkthru(),
+    'eapproval':      ()=>renderEApproval(),
+    'leave':          ()=>renderLeave(),
+    'welfare':        ()=>renderWelfare(),
+    'certificate':    ()=>renderCertificate(),
+  };
+  return map[pageKey] ? map[pageKey]() : '';
+}
+
+function escHtml(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderAdminContent(){
+  return `
+<div class="page-head">
+  <div class="page-title">📝 콘텐츠 편집</div>
+  <div class="page-sub">각 페이지의 내용을 직접 수정하고 저장할 수 있습니다</div>
+</div>
+<div class="content-block" style="padding:0">
+  <div class="t-wrap">
+  <table class="utbl">
+    <thead><tr><th>페이지</th><th>구분</th><th>최근 수정</th><th>상태</th><th>관리</th></tr></thead>
+    <tbody>
+      ${PAGE_META.map(p=>{
+        const saved = _pageContent[p.key];
+        return `<tr>
+          <td><strong>${p.icon} ${p.label}</strong></td>
+          <td>${p.regular?'<span class="tbadge t-regular">정규직</span>':'<span class="tbadge t-contract">공통</span>'}</td>
+          <td style="color:var(--gray);font-size:12px">${saved ? formatDate(saved.updated_at) : '-'}</td>
+          <td>${saved
+            ? '<span class="cms-status modified">✏️ 수정됨</span>'
+            : '<span class="cms-status default">기본값</span>'}</td>
+          <td>
+            <div class="btn-gap">
+              <button class="btn btn-sm btn-primary" data-cms-edit="${p.key}">✏️ 편집</button>
+              ${saved?`<button class="btn btn-sm btn-ghost" data-cms-reset="${p.key}" data-cms-label="${p.label}">🔄 초기화</button>`:''}
+            </div>
+          </td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+  </div>
+</div>`;
+}
+
+function renderAdminContentEdit(){
+  const pageKey = state.sub;
+  const meta = PAGE_META.find(p=>p.key===pageKey);
+  if(!meta) return '<div class="content-block">페이지를 찾을 수 없습니다.</div>';
+  const saved = _pageContent[pageKey];
+  const currentHtml = saved ? saved.content_html : getDefaultHtml(pageKey);
+  return `
+<div class="page-head">
+  <div class="breadcrumb">
+    <span style="cursor:pointer;color:var(--primary)" data-nav="admin-content">콘텐츠 편집</span>
+    <span>›</span><span class="cur">${meta.label}</span>
+  </div>
+  <div class="page-title">${meta.icon} ${meta.label}</div>
+  <div class="page-sub">${saved ? `최근 수정: ${formatDate(saved.updated_at)} · ${saved.updated_by||''}` : '아직 수정된 내용이 없습니다 (기본값 표시 중)'}</div>
+</div>
+<div class="cms-editor-wrap">
+  <div class="cms-pane">
+    <div class="cms-pane-head">
+      <span>✏️ HTML 편집</span>
+      <span style="font-weight:400;text-transform:none;letter-spacing:0">텍스트를 직접 수정하세요</span>
+    </div>
+    <textarea class="cms-textarea" id="cms-textarea">${escHtml(currentHtml)}</textarea>
+  </div>
+  <div class="cms-pane">
+    <div class="cms-pane-head">
+      <span>👁️ 미리보기</span>
+      <button class="btn btn-sm btn-ghost" id="cms-refresh" style="font-size:11px;padding:3px 10px">🔄 새로고침</button>
+    </div>
+    <div class="cms-preview-area" id="cms-preview">${currentHtml}</div>
+  </div>
+</div>
+<div class="cms-bar">
+  <div class="cms-bar-info">💡 HTML 태그를 수정하거나 텍스트만 바꿀 수 있습니다</div>
+  <div class="cms-bar-btns">
+    <button class="btn btn-ghost" data-nav="admin-content">취소</button>
+    ${saved?`<button class="btn btn-ghost" id="cms-reset-edit" data-key="${pageKey}" data-label="${meta.label}">🔄 기본값으로</button>`:''}
+    <button class="btn btn-primary" id="cms-save" data-key="${pageKey}">💾 저장하기</button>
+  </div>
+</div>`;
 }
 
 /* ════════════════════════════════════════
@@ -1992,6 +2210,7 @@ function formatDate(iso){
   if(oldCur && oldCur.email === 'admin@hecto.com') DB.clearCurrent();
 
   const loadOk = await DB.loadUsers();
+  await loadPageContent();
   if(!loadOk){
     document.getElementById('app').innerHTML = `
       <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F3F4F6">
@@ -2065,6 +2284,7 @@ function formatDate(iso){
     const c = e.key.toLowerCase();
     if(e.ctrlKey || e.metaKey){
       if(['s','p','u'].includes(c)){
+        if(c==='s' && state.page==='admin-content-edit') return;
         e.preventDefault();
         showSecPopup('저장 · 인쇄 금지', '이 페이지는 저장 및 인쇄가 허용되지 않습니다.');
       }
