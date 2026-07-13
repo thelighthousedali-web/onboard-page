@@ -213,7 +213,7 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .hg-us-badge{background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle}
 .hg-video-wrap{width:100%;max-width:560px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000;position:relative}
 .hg-video-wrap iframe{width:100%;height:100%;border:none;display:block}
-.hg-video-wrap .vid-block{position:absolute;top:0;right:0;width:60px;height:40px;z-index:10;cursor:not-allowed}
+.hg-video-wrap .vid-block{position:absolute;top:0;right:0;width:140px;height:100px;z-index:999;cursor:not-allowed;transform:translateZ(0)}
 @media(max-width:768px){
   .mob-header{display:flex}
   .sidebar{transform:translateX(-100%)}
@@ -244,6 +244,17 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .cms-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600}
 .cms-status.modified{background:#FEF3C7;color:#92400E}
 .cms-status.default{background:var(--light);color:var(--gray)}
+/* ── SURVEY ── */
+.survey-q{margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.survey-q:last-of-type{border-bottom:none}
+.survey-q-text{font-weight:600;font-size:14px;color:#1a1a1a;margin-bottom:12px;line-height:1.5}
+.survey-scale{display:flex;gap:10px;max-width:420px}
+.survey-scale-opt{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;flex:1}
+.survey-scale-opt input{width:18px;height:18px;accent-color:var(--primary);cursor:pointer}
+.survey-scale-opt span{font-size:12px;color:var(--gray)}
+.survey-scale-labels{display:flex;justify-content:space-between;font-size:11px;color:#9CA3AF;margin-top:6px;max-width:420px}
+.survey-section-title{font-size:15px;font-weight:700;color:var(--primary);margin:26px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--primary-light)}
+.survey-section-title:first-child{margin-top:0}
 </style>
 </head>
 <body>
@@ -311,6 +322,96 @@ const SUPA_CFG = {
   key: 'sb_publishable_pEMmU4vVPtn7EteLHpOByw_nJZiCpQc',
 };
 const supa = supabase.createClient(SUPA_CFG.url, SUPA_CFG.key);
+
+/* ════════════════════════════════════════
+   서베이 정의 (온보딩 30/60/90) — 구글폼 원본 문항 그대로 내재화
+════════════════════════════════════════ */
+const ONBOARDING_SCALE_ITEMS = [
+  '나는 회사의 비전과 사업 구조를 이해하고 있다',
+  '나는 우리 조직(팀)의 역할과 목표를 이해하고 있다',
+  '나는 우리 회사의 비즈니스 모델을 이해하고 있다',
+  '나는 조직 내 구성원의 역할을 알고 있다',
+  '나는 나의 주요 업무와 기대 역할을 명확히 알고 있다',
+  '나는 내가 달성해야 할 성과 기준(KPI/목표)을 이해하고 있다',
+  '나는 업무 수행에 필요한 프로세스와 툴을 이해하고 있다',
+  '나는 현재 업무를 독립적으로 수행할 수 있다',
+  '나는 필요한 정보를 얻을 수 있는 채널을 알고 있다',
+  '회사는 나의 적응을 체계적으로 지원해주었다',
+  '온보딩 과정은 업무 이해에 실질적으로 도움이 되었다',
+  '나는 팀원들과 편하게 소통할 수 있다',
+  '나는 조직 내에서 도움을 요청하기 어렵지 않다',
+  '나는 조직에 잘 적응하고 있다고 느낀다',
+  '전반적으로 온보딩 경험에 만족한다',
+].map((text,i)=>({id:'q'+(i+1), text}));
+
+const ONBOARDING_90_ITEMS = [
+  '나는 회사의 비전과 사업 구조를 이해하고 있다',
+  '나는 우리 조직(팀)의 역할과 목표를 이해하고 있다',
+  '나는 우리 회사의 비즈니스 모델을 이해하고 있다',
+  '나는 조직 내 구성원의 역할을 알고 있다',
+  '나는 나의 주요 업무와 기대 역할을 명확히 알고 있다',
+  '나는 내가 달성해야 할 성과 기준(KPI/목표)을 이해하고 있다',
+  '나는 업무 수행에 필요한 프로세스와 툴을 이해하고 있다',
+  '나는 현재 업무를 독립적으로 수행할 수 있다',
+  '나는 회사의 인사제도(평가/보상)를 이해하고 있다',
+  '나는 회사의 업무 방식 및 규칙을 이해하고 있다',
+  '나는 필요한 정보를 얻을 수 있는 채널을 알고 있다',
+  '회사는 나의 적응을 체계적으로 지원해주었다',
+  '온보딩 과정은 업무 이해에 실질적으로 도움이 되었다',
+  '온보딩 프로그램의 구성과 일정은 적절했다',
+  {text:'멘토링은 회사 적응에 도움이 되었다', regularOnly:true},
+  {text:'멘토와의 상호작용은 충분했다', regularOnly:true},
+  '나는 팀원들과 편하게 소통할 수 있다',
+  '나는 조직 내에서 도움을 요청하기 어렵지 않다',
+  '나는 조직에 잘 적응하고 있다고 느낀다',
+  '전반적으로 온보딩 경험에 만족한다',
+  '나는 이 회사를 지인에게 추천할 의향이 있다',
+  '나는 이 회사에서 성장할 수 있다고 느낀다',
+].map((v,i)=> typeof v==='string' ? {id:'q'+(i+1), text:v} : {id:'q'+(i+1), text:v.text, regularOnly:v.regularOnly});
+
+const SURVEY_DEFS = {
+  onboarding_30: { title:'온보딩 경험 서베이 (30일)', scaleMax:5, questions: ONBOARDING_SCALE_ITEMS },
+  onboarding_60: { title:'온보딩 경험 서베이 (60일)', scaleMax:5, questions: ONBOARDING_SCALE_ITEMS },
+  onboarding_90: {
+    title:'온보딩 경험 서베이 (90일)', scaleMax:5, questions: ONBOARDING_90_ITEMS,
+    openQuestions: [
+      {id:'o1', text:'입사 후 적응에 가장 도움이 되었던 것은 무엇인가요?'},
+      {id:'o2', text:'온보딩 과정에서 가장 부족했던 점은 무엇인가요?'},
+      {id:'o3', text:'온보딩 개선을 위한 아이디어를 작성해주세요'},
+    ],
+  },
+};
+
+let pendingSurvey = null;
+(function parseSurveyParam(){
+  const params = new URLSearchParams(location.search);
+  const type = params.get('survey');
+  const emp  = params.get('emp');
+  if(type && emp && SURVEY_DEFS[type]) pendingSurvey = {type, emp};
+})();
+
+let _surveyCache = {};
+
+async function fetchEmployeeById(id){
+  const {data, error} = await supa.from('employees').select('id,name,dept,email,join_date,type,status').eq('id', id).maybeSingle();
+  if(error){ console.error('[Supabase] employee fetch error:', error); return null; }
+  return data;
+}
+
+async function getSurveyResponse(employeeId, surveyType){
+  const {data, error} = await supa.from('survey_responses').select('id,submitted_at').eq('employee_id', employeeId).eq('survey_type', surveyType).maybeSingle();
+  if(error){ console.error('[Supabase] survey fetch error:', error); return null; }
+  return data;
+}
+
+async function submitSurveyResponse(employeeId, surveyType, respondentEmail, respondentName, scores, comments){
+  const {error} = await supa.from('survey_responses').insert({
+    employee_id: employeeId, survey_type: surveyType,
+    respondent_email: respondentEmail, respondent_name: respondentName,
+    scores, comments,
+  });
+  if(error) throw error;
+}
 
 /* ════════════════════════════════════════
    DATA LAYER
@@ -666,7 +767,8 @@ function bindAuth(){
     if(!user){ showMsg('login-msg','error','이메일 또는 비밀번호가 올바르지 않습니다.'); return; }
     if(user.status==='rejected'){ showMsg('login-msg','error','계정이 거절되었습니다. 인사팀에 문의하세요.'); return; }
     DB.setCurrent(user);
-    render();
+    if(pendingSurvey) nav('survey', pendingSurvey);
+    else render();
   });
   document.getElementById('l-pw')?.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-btn').click(); });
 
@@ -934,6 +1036,7 @@ function renderAdminAll(users){
 ════════════════════════════════════════ */
 function renderUserPage(user){
   const p = state.page;
+  if(p==='survey') return renderSurveyPage(user, state.sub);
   if(_pageContent[p]) return _pageContent[p].content_html;
   if(p==='company')     return renderCompany();
   if(p==='hectogroup')  return renderHectoGroup();
@@ -1144,6 +1247,94 @@ function renderHectoGroup(){
     </div>
 
   </div>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   SURVEY (온보딩 30/60/90 서베이 응답)
+════════════════════════════════════════ */
+function renderSurveyPage(user, sub){
+  if(!sub || !sub.type || !sub.emp || !SURVEY_DEFS[sub.type]){
+    return `<div class="page-head"><h1>서베이</h1></div><div class="card" style="padding:24px">잘못된 서베이 링크입니다.</div>`;
+  }
+  const cacheKey = sub.emp + '|' + sub.type;
+  const cached = _surveyCache[cacheKey];
+
+  if(!cached){
+    loadSurveyData(sub, cacheKey);
+    return `
+<div style="display:flex;align-items:center;justify-content:center;min-height:60vh">
+  <div style="text-align:center;color:#6B7280">서베이 정보를 불러오는 중...</div>
+</div>`;
+  }
+
+  if(cached.error){
+    return `<div class="page-head"><h1>서베이</h1></div><div class="card" style="padding:24px">${cached.error}</div>`;
+  }
+
+  if(cached.alreadySubmitted){
+    return `
+<div class="page-head"><h1>${SURVEY_DEFS[sub.type].title}</h1></div>
+<div class="card" style="max-width:520px;text-align:center;padding:40px 24px">
+  <div style="font-size:40px;margin-bottom:12px">✅</div>
+  <div style="font-weight:700;font-size:16px;margin-bottom:6px">이미 응답을 제출하셨습니다</div>
+  <div style="color:#6B7280;font-size:13px">소중한 의견 감사합니다.</div>
+</div>`;
+  }
+
+  return renderSurveyForm(sub, cached.employee);
+}
+
+async function loadSurveyData(sub, cacheKey){
+  const emp = await fetchEmployeeById(sub.emp);
+  if(!emp){ _surveyCache[cacheKey] = {error:'대상 정보를 찾을 수 없습니다.'}; render(); return; }
+  const user = DB.getCurrent();
+  if(!user || user.email !== emp.email){
+    _surveyCache[cacheKey] = {error:'본인에게 배정된 서베이만 응답할 수 있습니다.'};
+    render(); return;
+  }
+  const existing = await getSurveyResponse(sub.emp, sub.type);
+  if(existing){ _surveyCache[cacheKey] = {alreadySubmitted:true, employee:emp}; render(); return; }
+  _surveyCache[cacheKey] = {employee:emp};
+  render();
+}
+
+function renderSurveyForm(sub, emp){
+  const def = SURVEY_DEFS[sub.type];
+  const isRegular = emp.type === '정규직';
+
+  const qHtml = def.questions.map((q,i)=>{
+    if(q.regularOnly && !isRegular) return '';
+    const opts = Array.from({length:def.scaleMax}, (_,k)=>k+1).map(v=>`
+      <label class="survey-scale-opt">
+        <input type="radio" name="${q.id}" value="${v}" required>
+        <span>${v}</span>
+      </label>`).join('');
+    return `
+<div class="survey-q">
+  <div class="survey-q-text">${i+1}. ${q.text}</div>
+  <div class="survey-scale">${opts}</div>
+  <div class="survey-scale-labels"><span>매우 그렇지 않다</span><span>매우 그렇다</span></div>
+</div>`;
+  }).join('');
+
+  const openHtml = (def.openQuestions||[]).map((o,i)=>`
+<div class="survey-q">
+  <div class="survey-q-text">${def.questions.length+i+1}. ${o.text}</div>
+  <textarea class="finput" name="${o.id}" rows="3" style="resize:vertical" placeholder="자유롭게 작성해주세요" required></textarea>
+</div>`).join('');
+
+  return `
+<div class="page-head"><h1>${def.title}</h1></div>
+<div class="card" style="max-width:640px;padding:28px">
+  <div style="margin-bottom:20px;font-size:13px;color:#6B7280;line-height:1.6">
+    안녕하세요, <b>${emp.name}</b>님. 편하게 느끼신 대로 응답해주시면 되며, 보내주신 의견은 더 나은 온보딩 환경을 만드는 데 소중하게 활용하겠습니다.
+  </div>
+  <form id="survey-form" data-emp="${sub.emp}" data-type="${sub.type}">
+    ${qHtml}
+    ${openHtml}
+    <button type="submit" class="btn btn-primary btn-full" id="survey-submit-btn">제출하기</button>
+  </form>
 </div>`;
 }
 
@@ -1977,6 +2168,32 @@ function bindPageActions(){
     el.addEventListener('click', ()=>nav(el.dataset.nav));
   });
 
+  // ── 서베이 제출 ──
+  document.getElementById('survey-form')?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const form = e.target;
+    const empId = form.dataset.emp, type = form.dataset.type;
+    const def   = SURVEY_DEFS[type];
+    const fd    = new FormData(form);
+    const scores = {};
+    def.questions.forEach(q=>{ const v = fd.get(q.id); scores[q.id] = v ? Number(v) : null; });
+    const comments = {};
+    (def.openQuestions||[]).forEach(o=>{ comments[o.id] = fd.get(o.id) || ''; });
+
+    const user = DB.getCurrent();
+    const btn  = document.getElementById('survey-submit-btn');
+    btn.disabled = true; btn.textContent = '제출 중...';
+    try{
+      await submitSurveyResponse(empId, type, user.email, user.name, scores, comments);
+      _surveyCache[empId+'|'+type] = {alreadySubmitted:true, employee:_surveyCache[empId+'|'+type]?.employee};
+      render();
+    }catch(err){
+      console.error('[Supabase] survey submit error:', err);
+      btn.disabled = false; btn.textContent = '제출하기';
+      alert('제출 중 오류가 발생했습니다. 다시 시도해 주세요.');
+    }
+  });
+
   // ── CMS: 콘텐츠 목록 페이지 버튼 ──
   document.querySelectorAll('[data-cms-edit]').forEach(btn=>{
     btn.addEventListener('click', ()=>{ state={page:'admin-content-edit', sub:btn.dataset.cmsEdit}; render(); });
@@ -2234,6 +2451,7 @@ function formatDate(iso){
 
   const initUser = DB.getCurrent();
   if(!initUser)                          state.page = 'login';
+  else if(pendingSurvey)                 { state.page = 'survey'; state.sub = pendingSurvey; }
   else if(initUser.role==='admin')       state.page = 'admin-users';
   else                                   state.page = 'dashboard';
 
