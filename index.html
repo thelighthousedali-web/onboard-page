@@ -245,6 +245,15 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .cms-status.modified{background:#FEF3C7;color:#92400E}
 .cms-status.default{background:var(--light);color:var(--gray)}
 /* ── SURVEY ── */
+.survey-page-wrap{display:flex;justify-content:center;padding:8px 0 32px}
+.survey-shell{max-width:640px;width:100%;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden}
+.survey-shell-header{background:linear-gradient(135deg,var(--primary) 0%,#FF8C42 100%);color:#fff;padding:28px 32px}
+.survey-shell-header .ss-title{font-size:20px;font-weight:800;margin-bottom:8px}
+.survey-shell-header .ss-desc{font-size:13px;line-height:1.7;opacity:.95}
+.survey-shell-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.survey-shell-badge{background:rgba(255,255,255,.22);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.survey-shell-body{padding:28px 32px}
+.survey-required{color:var(--error);margin-left:2px}
 .survey-q{margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid var(--border)}
 .survey-q:last-of-type{border-bottom:none}
 .survey-q-text{font-weight:600;font-size:14px;color:#1a1a1a;margin-bottom:12px;line-height:1.5}
@@ -255,6 +264,22 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .survey-scale-labels{display:flex;justify-content:space-between;font-size:11px;color:#9CA3AF;margin-top:6px;max-width:420px}
 .survey-section-title{font-size:15px;font-weight:700;color:var(--primary);margin:26px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--primary-light)}
 .survey-section-title:first-child{margin-top:0}
+.survey-done-wrap{display:flex;align-items:center;justify-content:center;min-height:60vh;padding:24px}
+.survey-done-card{max-width:420px;width:100%;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);padding:48px 32px;text-align:center}
+.survey-done-icon{width:64px;height:64px;border-radius:50%;background:#E6F7EC;color:#1E7F4F;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 20px}
+.survey-done-title{font-size:17px;font-weight:700;margin-bottom:8px;color:var(--dark)}
+.survey-done-desc{font-size:13px;color:var(--gray)}
+.survey-blocked-card{max-width:420px;width:100%;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);padding:48px 32px;text-align:center}
+.onb-survey-row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.onb-survey-card{border:1.5px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.onb-survey-card.clickable{cursor:pointer;transition:border-color .15s,transform .15s}
+.onb-survey-card.clickable:hover{border-color:var(--primary);transform:translateY(-2px)}
+.onb-survey-label{font-weight:700;font-size:13px;margin-bottom:10px}
+.onb-survey-status{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.onb-survey-status.onb-survey-done{background:#E6F7EC;color:#1E7F4F}
+.onb-survey-status.onb-survey-active{background:var(--primary-light);color:var(--primary)}
+.onb-survey-status.onb-survey-locked{background:var(--light);color:var(--gray)}
+@media(max-width:768px){.onb-survey-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -399,7 +424,7 @@ async function fetchEmployeeById(id){
 }
 
 async function getSurveyResponse(employeeId, surveyType){
-  const {data, error} = await supa.from('survey_responses').select('id,submitted_at').eq('employee_id', employeeId).eq('survey_type', surveyType).maybeSingle();
+  const {data, error} = await supa.from('survey_responses').select('*').eq('employee_id', employeeId).eq('survey_type', surveyType).maybeSingle();
   if(error){ console.error('[Supabase] survey fetch error:', error); return null; }
   return data;
 }
@@ -411,6 +436,24 @@ async function submitSurveyResponse(employeeId, surveyType, respondentEmail, res
     scores, comments,
   });
   if(error) throw error;
+}
+
+async function updateSurveyResponse(id, respondentEmail, respondentName, scores, comments){
+  const {error} = await supa.from('survey_responses').update({
+    respondent_email: respondentEmail, respondent_name: respondentName,
+    scores, comments, submitted_at: new Date().toISOString(),
+  }).eq('id', id);
+  if(error) throw error;
+}
+
+async function getSurveyWindow(employeeId, surveyType){
+  const {data, error} = await supa.from('survey_windows').select('start_date,end_date').eq('employee_id', employeeId).eq('survey_type', surveyType).maybeSingle();
+  if(error){ console.warn('[Supabase] survey_windows 조회 실패(마이그레이션 전이면 무시):', error.message); return null; }
+  return data;
+}
+
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 /* ════════════════════════════════════════
@@ -1094,11 +1137,59 @@ function renderDashboard(user){
   <div class="wb-badge">${isRegular?'정규직':'계약직'} 입사자 가이드</div>
   <div class="wb-slogan"><img src="slogan.png" alt="Perfecting Forward"></div>
 </div>
+${renderOnboardingSurveyBanner(user)}
 <div class="page-head">
   <div class="page-title">빠른 메뉴</div>
   <div class="page-sub">아래 항목을 클릭하여 원하는 정보를 확인하세요</div>
 </div>
 <div class="cards">${commonCards}${regularCards}${welfareCards}${sysCards}${ruleCards}</div>`;
+}
+
+/* ── 대시보드: 온보딩 서베이 진입 배너 ── */
+let _dashSurveyStatus = null;
+
+async function loadDashSurveyStatus(user){
+  const {data: emp} = await supa.from('employees').select('id').eq('email', user.email).maybeSingle();
+  if(!emp){ _dashSurveyStatus = {none:true}; render(); return; }
+  const {data: sched} = await supa.from('onboarding_schedule').select('day30_date,day30_sent_at,day60_date,day60_sent_at,day90_date,day90_sent_at').eq('employee_id', emp.id).maybeSingle();
+  const {data: resp} = await supa.from('survey_responses').select('survey_type').eq('employee_id', emp.id).in('survey_type', ['onboarding_30','onboarding_60','onboarding_90']);
+  const submitted = new Set((resp||[]).map(r=>r.survey_type));
+  _dashSurveyStatus = {employeeId: emp.id, schedule: sched, submitted};
+  render();
+}
+
+function renderOnboardingSurveyBanner(user){
+  if(_dashSurveyStatus === null){
+    loadDashSurveyStatus(user);
+    return `<div class="content-block" style="margin-bottom:20px"><div class="loading"><div class="spinner"></div></div></div>`;
+  }
+  if(_dashSurveyStatus.none || !_dashSurveyStatus.schedule) return '';
+
+  const {schedule, submitted} = _dashSurveyStatus;
+  const todayStr = new Date().toISOString().slice(0,10);
+  // 90일 서베이는 수습 최종 '합격'자에게만 해당 — 오해 방지를 위해 대시보드에는 노출하지 않고 메일 링크로만 진입
+  const items = [
+    {type:'onboarding_30', label:'입사 30일 서베이', date:schedule.day30_date},
+    {type:'onboarding_60', label:'입사 60일 서베이', date:schedule.day60_date},
+  ];
+  const cardsHtml = items.map(it=>{
+    const isSubmitted = submitted.has(it.type);
+    const isDue = it.date && it.date <= todayStr;
+    let statusCls, statusText, clickable;
+    if(isSubmitted){ statusCls='onb-survey-done'; statusText='✅ 제출완료'; clickable=true; }
+    else if(isDue){ statusCls='onb-survey-active'; statusText='✍️ 응답하기'; clickable=true; }
+    else { statusCls='onb-survey-locked'; statusText='🔒 대기중'; clickable=false; }
+    return `<div class="onb-survey-card ${clickable?'clickable':''}" ${clickable?`data-survey-type="${it.type}"`:''}>
+      <div class="onb-survey-label">${it.label}</div>
+      <div class="onb-survey-status ${statusCls}">${statusText}</div>
+    </div>`;
+  }).join('');
+
+  return `
+<div class="content-block" style="margin-bottom:20px">
+  <div class="sec-title">📝 온보딩 경험 서베이</div>
+  <div class="onb-survey-row">${cardsHtml}</div>
+</div>`;
 }
 
 /* ════════════════════════════════════════
@@ -1255,7 +1346,7 @@ function renderHectoGroup(){
 ════════════════════════════════════════ */
 function renderSurveyPage(user, sub){
   if(!sub || !sub.type || !sub.emp || !SURVEY_DEFS[sub.type]){
-    return `<div class="page-head"><h1>서베이</h1></div><div class="card" style="padding:24px">잘못된 서베이 링크입니다.</div>`;
+    return `<div class="survey-page-wrap"><div class="survey-blocked-card">잘못된 서베이 링크입니다.</div></div>`;
   }
   const cacheKey = sub.emp + '|' + sub.type;
   const cached = _surveyCache[cacheKey];
@@ -1269,20 +1360,47 @@ function renderSurveyPage(user, sub){
   }
 
   if(cached.error){
-    return `<div class="page-head"><h1>서베이</h1></div><div class="card" style="padding:24px">${cached.error}</div>`;
+    return `<div class="survey-page-wrap"><div class="survey-blocked-card">${cached.error}</div></div>`;
   }
 
-  if(cached.alreadySubmitted){
+  if(cached.justSubmitted){
+    delete _surveyCache[cacheKey]; // 다음 진입 시 최신 응답 다시 로드
+    _dashSurveyStatus = null;      // 대시보드 서베이 카드 상태도 갱신
     return `
-<div class="page-head"><h1>${SURVEY_DEFS[sub.type].title}</h1></div>
-<div class="card" style="max-width:520px;text-align:center;padding:40px 24px">
-  <div style="font-size:40px;margin-bottom:12px">✅</div>
-  <div style="font-weight:700;font-size:16px;margin-bottom:6px">이미 응답을 제출하셨습니다</div>
-  <div style="color:#6B7280;font-size:13px">소중한 의견 감사합니다.</div>
+<div class="survey-done-wrap">
+  <div class="survey-done-card">
+    <div class="survey-done-icon">✅</div>
+    <div class="survey-done-title">제출이 완료되었습니다</div>
+    <div class="survey-done-desc">소중한 의견 감사합니다.</div>
+  </div>
 </div>`;
   }
 
-  return renderSurveyForm(sub, cached.employee);
+  if(cached.window && !cached.window.missing){
+    const todayStr = new Date().toISOString().slice(0,10);
+    if(cached.window.start_date && todayStr < cached.window.start_date){
+      return `<div class="survey-page-wrap"><div class="survey-blocked-card">
+        <div style="font-size:40px;margin-bottom:12px">⏳</div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:6px">아직 응답 기간이 아닙니다</div>
+        <div style="color:var(--gray);font-size:13px">${fmtDateKo(cached.window.start_date)}부터 응답하실 수 있습니다.</div>
+      </div></div>`;
+    }
+    if(cached.window.end_date && todayStr > cached.window.end_date){
+      return `<div class="survey-page-wrap"><div class="survey-blocked-card">
+        <div style="font-size:40px;margin-bottom:12px">⌛</div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:6px">응답 기간이 종료되었습니다</div>
+        <div style="color:var(--gray);font-size:13px">마감일: ${fmtDateKo(cached.window.end_date)}<br>추가 응답이 필요하시면 경영지원팀에 문의해주세요.</div>
+      </div></div>`;
+    }
+  }
+
+  return renderSurveyForm(sub, cached.employee, cached.response, cached.window);
+}
+
+function fmtDateKo(d){
+  if(!d) return '-';
+  const [y,m,day] = String(d).split('-');
+  return `${y}.${Number(m)}.${Number(day)}`;
 }
 
 async function loadSurveyData(sub, cacheKey){
@@ -1293,26 +1411,30 @@ async function loadSurveyData(sub, cacheKey){
     _surveyCache[cacheKey] = {error:'본인에게 배정된 서베이만 응답할 수 있습니다.'};
     render(); return;
   }
-  const existing = await getSurveyResponse(sub.emp, sub.type);
-  if(existing){ _surveyCache[cacheKey] = {alreadySubmitted:true, employee:emp}; render(); return; }
-  _surveyCache[cacheKey] = {employee:emp};
+  const [existing, window_] = await Promise.all([
+    getSurveyResponse(sub.emp, sub.type),
+    getSurveyWindow(sub.emp, sub.type),
+  ]);
+  _surveyCache[cacheKey] = {employee:emp, response: existing || null, window: window_};
   render();
 }
 
-function renderSurveyForm(sub, emp){
+function renderSurveyForm(sub, emp, existing, window_){
   const def = SURVEY_DEFS[sub.type];
   const isRegular = emp.type === '정규직';
+  const prevScores = existing?.scores || {};
+  const prevComments = existing?.comments || {};
 
   const qHtml = def.questions.map((q,i)=>{
     if(q.regularOnly && !isRegular) return '';
     const opts = Array.from({length:def.scaleMax}, (_,k)=>k+1).map(v=>`
       <label class="survey-scale-opt">
-        <input type="radio" name="${q.id}" value="${v}" required>
+        <input type="radio" name="${q.id}" value="${v}" required ${Number(prevScores[q.id])===v?'checked':''}>
         <span>${v}</span>
       </label>`).join('');
     return `
 <div class="survey-q">
-  <div class="survey-q-text">${i+1}. ${q.text}</div>
+  <div class="survey-q-text">${i+1}. ${q.text}<span class="survey-required">*</span></div>
   <div class="survey-scale">${opts}</div>
   <div class="survey-scale-labels"><span>매우 그렇지 않다</span><span>매우 그렇다</span></div>
 </div>`;
@@ -1321,21 +1443,30 @@ function renderSurveyForm(sub, emp){
   const openHtml = (def.openQuestions||[]).map((o,i)=>`
 <div class="survey-q">
   <div class="survey-q-text">${def.questions.length+i+1}. ${o.text}</div>
-  <textarea class="finput" name="${o.id}" rows="3" style="resize:vertical" placeholder="자유롭게 작성해주세요" required></textarea>
+  <textarea class="finput" name="${o.id}" rows="3" style="resize:vertical" placeholder="자유롭게 작성해주세요">${escapeHtml(prevComments[o.id]||'')}</textarea>
 </div>`).join('');
 
+  const deadlineBadge = (window_ && !window_.missing && window_.end_date)
+    ? `<span class="survey-shell-badge">⏰ ${fmtDateKo(window_.end_date)}까지 응답</span>` : '';
+
   return `
-<div class="page-head"><h1>${def.title}</h1></div>
-<div class="card" style="max-width:640px;padding:28px">
-  <div style="margin-bottom:20px;font-size:13px;color:#6B7280;line-height:1.6">
-    안녕하세요, <b>${emp.name}</b>님. 편하게 느끼신 대로 응답해주시면 되며, 보내주신 의견은 더 나은 온보딩 환경을 만드는 데 소중하게 활용하겠습니다.
+<div class="survey-page-wrap"><div class="survey-shell">
+  <div class="survey-shell-header">
+    <div class="ss-title">${def.title}</div>
+    <div class="ss-desc">안녕하세요, <b>${emp.name}</b>님. 편하게 느끼신 대로 응답해주시면 되며, 보내주신 의견은 더 나은 온보딩 환경을 만드는 데 소중하게 활용하겠습니다.${existing ? '<br>이전에 제출하신 답변이 아래에 채워져 있습니다. 재제출 시 신규 제출한 내용으로 반영됩니다.' : ''}</div>
+    <div class="survey-shell-meta">
+      <span class="survey-shell-badge">👤 ${emp.name}</span>
+      ${deadlineBadge}
+    </div>
   </div>
-  <form id="survey-form" data-emp="${sub.emp}" data-type="${sub.type}">
-    ${qHtml}
-    ${openHtml}
-    <button type="submit" class="btn btn-primary btn-full" id="survey-submit-btn">제출하기</button>
-  </form>
-</div>`;
+  <div class="survey-shell-body">
+    <form id="survey-form" data-emp="${sub.emp}" data-type="${sub.type}" data-existing-id="${existing?.id||''}">
+      ${qHtml}
+      ${openHtml}
+      <button type="submit" class="btn btn-primary btn-full" id="survey-submit-btn">제출하기</button>
+    </form>
+  </div>
+</div></div>`;
 }
 
 /* ════════════════════════════════════════
@@ -2168,11 +2299,19 @@ function bindPageActions(){
     el.addEventListener('click', ()=>nav(el.dataset.nav));
   });
 
+  document.querySelectorAll('[data-survey-type]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const empId = _dashSurveyStatus?.employeeId;
+      if(!empId) return;
+      nav('survey', {type: el.dataset.surveyType, emp: empId});
+    });
+  });
+
   // ── 서베이 제출 ──
   document.getElementById('survey-form')?.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const form = e.target;
-    const empId = form.dataset.emp, type = form.dataset.type;
+    const empId = form.dataset.emp, type = form.dataset.type, existingId = form.dataset.existingId;
     const def   = SURVEY_DEFS[type];
     const fd    = new FormData(form);
     const scores = {};
@@ -2180,12 +2319,19 @@ function bindPageActions(){
     const comments = {};
     (def.openQuestions||[]).forEach(o=>{ comments[o.id] = fd.get(o.id) || ''; });
 
+    if(existingId){
+      const ok = confirm('이미 제출한 응답이 있습니다. 새로 입력한 내용으로 기존 응답을 덮어쓰시겠습니까?');
+      if(!ok) return;
+    }
+
     const user = DB.getCurrent();
     const btn  = document.getElementById('survey-submit-btn');
     btn.disabled = true; btn.textContent = '제출 중...';
     try{
-      await submitSurveyResponse(empId, type, user.email, user.name, scores, comments);
-      _surveyCache[empId+'|'+type] = {alreadySubmitted:true, employee:_surveyCache[empId+'|'+type]?.employee};
+      if(existingId) await updateSurveyResponse(existingId, user.email, user.name, scores, comments);
+      else await submitSurveyResponse(empId, type, user.email, user.name, scores, comments);
+      const cacheKey = empId+'|'+type;
+      _surveyCache[cacheKey] = {..._surveyCache[cacheKey], justSubmitted:true};
       render();
     }catch(err){
       console.error('[Supabase] survey submit error:', err);
