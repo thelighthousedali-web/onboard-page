@@ -564,10 +564,18 @@ const PAGE_META = [
   {key:'certificate',    label:'증명서 신청',      icon:'📄'},
 ];
 
-function nav(page, sub=null){
+function nav(page, sub=null, replace=false){
   state = {page, sub};
+  if (replace) history.replaceState(state, '', location.pathname);
+  else history.pushState(state, '', location.pathname);
   render();
 }
+
+window.addEventListener('popstate', (e) => {
+  if (!e.state) return;
+  state = e.state;
+  render();
+});
 
 /* ════════════════════════════════════════
    RENDER DISPATCHER
@@ -815,8 +823,8 @@ function bindAuth(){
     if(!user){ showMsg('login-msg','error','이메일 또는 비밀번호가 올바르지 않습니다.'); return; }
     if(user.status==='rejected'){ showMsg('login-msg','error','계정이 거절되었습니다. 인사팀에 문의하세요.'); return; }
     DB.setCurrent(user);
+    nav(user.role==='admin' ? 'admin-users' : 'dashboard', null, true);
     if(pendingSurvey) nav('survey', pendingSurvey);
-    else render();
   });
   document.getElementById('l-pw')?.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-btn').click(); });
 
@@ -1007,7 +1015,7 @@ function bindNav(){
 function logout(){
   DB.clearCurrent();
   sessionStorage.removeItem('hq_impersonating');
-  nav('login');
+  nav('login', null, true);
 }
 
 /* ════════════════════════════════════════
@@ -2632,12 +2640,14 @@ function formatDate(iso){
   }
 
   const initUser = DB.getCurrent();
-  if(!initUser)                          state.page = 'login';
-  else if(pendingSurvey)                 { state.page = 'survey'; state.sub = pendingSurvey; }
-  else if(initUser.role==='admin')       state.page = 'admin-users';
-  else                                   state.page = 'dashboard';
-
-  render();
+  if(!initUser){
+    state.page = 'login';
+    render();
+  } else {
+    // 뒤로가기 시 앱 밖으로 나가지 않도록 기본 홈 히스토리부터 확보
+    nav(initUser.role==='admin' ? 'admin-users' : 'dashboard', null, true);
+    if(pendingSurvey) nav('survey', pendingSurvey);
+  }
 })();
 
 /* ════════════════════════════════════════
