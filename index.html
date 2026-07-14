@@ -68,6 +68,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Ne
 /* ── LAYOUT ── */
 .layout{display:flex;min-height:100vh}
 
+/* ── 대행 로그인 배너 ── */
+#impersonate-banner{position:fixed;top:0;left:0;right:0;height:38px;z-index:300}
+body.impersonating .sidebar{top:38px;height:calc(100vh - 38px)}
+body.impersonating .layout{margin-top:38px}
+
 /* ── SIDEBAR ── */
 .sidebar{width:256px;background:var(--dark);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
 .sb-head{padding:16px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1)}
@@ -939,8 +944,15 @@ function renderLayout(user, content){
   }
 
   const typeLabel = user.role==='admin' ? '관리자' : (user.employeeType==='regular'?'정규직':'계약직');
+  const impersonating = !!sessionStorage.getItem('hq_impersonating');
+  document.body.classList.toggle('impersonating', impersonating);
 
   return `
+${impersonating ? `
+<div id="impersonate-banner" style="background:#111318;color:#fff;padding:8px 16px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;font-weight:600">
+  🎭 <b>${user.name}</b>님으로 대행 로그인 중 (실제 로그인 아님)
+  <button id="stop-impersonate-btn" class="btn btn-primary btn-xs" style="margin-left:8px">종료</button>
+</div>` : ''}
 <div class="mob-header">
   <button class="mob-hamburger" id="mob-menu-btn">☰</button>
   <img class="mob-logo" src="logo-wide.png" alt="Hecto Q&M">
@@ -978,6 +990,7 @@ function bindNav(){
     });
   });
   document.getElementById('logout-btn')?.addEventListener('click', logout);
+  document.getElementById('stop-impersonate-btn')?.addEventListener('click', logout);
   document.getElementById('mob-menu-btn')?.addEventListener('click', ()=>{
     document.body.classList.toggle('mob-open');
   });
@@ -988,6 +1001,7 @@ function bindNav(){
 
 function logout(){
   DB.clearCurrent();
+  sessionStorage.removeItem('hq_impersonating');
   nav('login');
 }
 
@@ -2585,6 +2599,23 @@ function formatDate(iso){
         </div>
       </div>`;
     return;
+  }
+
+  // 관리자 대행 로그인 토큰 처리 (HR 허브 → 온보딩 허브 크로스도메인 임퍼스네이션)
+  const impParams = new URLSearchParams(location.search);
+  const impToken = impParams.get('impersonate_token');
+  if(impToken){
+    const { data: tokRow } = await supa.from('impersonation_tokens').select('employee_id').eq('token', impToken).maybeSingle();
+    if(tokRow){
+      await supa.from('impersonation_tokens').delete().eq('token', impToken);
+      const { data: emp } = await supa.from('employees').select('email').eq('id', tokRow.employee_id).maybeSingle();
+      const target = emp?.email ? _users.find(u=>u.email===emp.email) : null;
+      if(target){
+        DB.setCurrent(target);
+        sessionStorage.setItem('hq_impersonating','1');
+      }
+    }
+    history.replaceState({}, '', location.pathname);
   }
 
   // 세션 갱신 (최신 DB 상태 반영)
