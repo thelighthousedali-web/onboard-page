@@ -990,7 +990,12 @@ function bindNav(){
     });
   });
   document.getElementById('logout-btn')?.addEventListener('click', logout);
-  document.getElementById('stop-impersonate-btn')?.addEventListener('click', logout);
+  document.getElementById('stop-impersonate-btn')?.addEventListener('click', () => {
+    logout();
+    // HR 허브에서 새 탭으로 연 대행 로그인이므로, 탭을 닫아 원래 HR 허브 화면으로 복귀
+    // (스크립트로 열지 않은 탭이면 window.close()가 조용히 무시되고 로그인 화면이 fallback으로 남음)
+    window.close();
+  });
   document.getElementById('mob-menu-btn')?.addEventListener('click', ()=>{
     document.body.classList.toggle('mob-open');
   });
