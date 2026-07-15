@@ -362,7 +362,7 @@ const ONBOARDING_SCALE_ITEMS = [
   '나는 우리 회사의 비즈니스 모델을 이해하고 있다',
   '나는 조직 내 구성원의 역할을 알고 있다',
   '나는 나의 주요 업무와 기대 역할을 명확히 알고 있다',
-  '나는 내가 달성해야 할 성과 기준(KPI/목표)을 이해하고 있다',
+  {text:'나는 내가 달성해야 할 성과 기준(KPI/목표)을 이해하고 있다', regularOnly:true},
   '나는 업무 수행에 필요한 프로세스와 툴을 이해하고 있다',
   '나는 현재 업무를 독립적으로 수행할 수 있다',
   '나는 필요한 정보를 얻을 수 있는 채널을 알고 있다',
@@ -372,7 +372,7 @@ const ONBOARDING_SCALE_ITEMS = [
   '나는 조직 내에서 도움을 요청하기 어렵지 않다',
   '나는 조직에 잘 적응하고 있다고 느낀다',
   '전반적으로 온보딩 경험에 만족한다',
-].map((text,i)=>({id:'q'+(i+1), text}));
+].map((v,i)=> typeof v==='string' ? {id:'q'+(i+1), text:v} : {id:'q'+(i+1), text:v.text, regularOnly:v.regularOnly});
 
 const ONBOARDING_90_ITEMS = [
   '나는 회사의 비전과 사업 구조를 이해하고 있다',
@@ -380,10 +380,10 @@ const ONBOARDING_90_ITEMS = [
   '나는 우리 회사의 비즈니스 모델을 이해하고 있다',
   '나는 조직 내 구성원의 역할을 알고 있다',
   '나는 나의 주요 업무와 기대 역할을 명확히 알고 있다',
-  '나는 내가 달성해야 할 성과 기준(KPI/목표)을 이해하고 있다',
+  {text:'나는 내가 달성해야 할 성과 기준(KPI/목표)을 이해하고 있다', regularOnly:true},
   '나는 업무 수행에 필요한 프로세스와 툴을 이해하고 있다',
   '나는 현재 업무를 독립적으로 수행할 수 있다',
-  '나는 회사의 인사제도(평가/보상)를 이해하고 있다',
+  {text:'나는 회사의 인사제도(평가/보상)를 이해하고 있다', regularOnly:true},
   '나는 회사의 업무 방식 및 규칙을 이해하고 있다',
   '나는 필요한 정보를 얻을 수 있는 채널을 알고 있다',
   '회사는 나의 적응을 체계적으로 지원해주었다',
@@ -395,9 +395,9 @@ const ONBOARDING_90_ITEMS = [
   '나는 조직 내에서 도움을 요청하기 어렵지 않다',
   '나는 조직에 잘 적응하고 있다고 느낀다',
   '전반적으로 온보딩 경험에 만족한다',
-  '나는 이 회사를 지인에게 추천할 의향이 있다',
+  {text:'나는 이 회사를 지인에게 추천할 의향이 있다', scaleMax:10, scaleLabels:['전혀 추천할 의향이 없다','적극 추천할 의향이 있다']}, // NPS(직원순추천지수) 10점 척도
   '나는 이 회사에서 성장할 수 있다고 느낀다',
-].map((v,i)=> typeof v==='string' ? {id:'q'+(i+1), text:v} : {id:'q'+(i+1), text:v.text, regularOnly:v.regularOnly});
+].map((v,i)=> typeof v==='string' ? {id:'q'+(i+1), text:v} : {id:'q'+(i+1), text:v.text, regularOnly:v.regularOnly, scaleMax:v.scaleMax, scaleLabels:v.scaleLabels});
 
 const SURVEY_DEFS = {
   onboarding_30: { title:'온보딩 경험 서베이 (30일)', scaleMax:5, questions: ONBOARDING_SCALE_ITEMS },
@@ -405,6 +405,7 @@ const SURVEY_DEFS = {
   onboarding_90: {
     title:'온보딩 경험 서베이 (90일)', scaleMax:5, questions: ONBOARDING_90_ITEMS,
     openQuestions: [
+      {id:'o0', text:'멘토링 제도 개선을 위한 아이디어를 작성해주세요', regularOnly:true},
       {id:'o1', text:'입사 후 적응에 가장 도움이 되었던 것은 무엇인가요?'},
       {id:'o2', text:'온보딩 과정에서 가장 부족했던 점은 무엇인가요?'},
       {id:'o3', text:'온보딩 개선을 위한 아이디어를 작성해주세요'},
@@ -1454,7 +1455,9 @@ function renderSurveyForm(sub, emp, existing, window_){
 
   const qHtml = def.questions.map((q,i)=>{
     if(q.regularOnly && !isRegular) return '';
-    const opts = Array.from({length:def.scaleMax}, (_,k)=>k+1).map(v=>`
+    const max = q.scaleMax || def.scaleMax;
+    const [lowLabel, highLabel] = q.scaleLabels || ['매우 그렇지 않다','매우 그렇다'];
+    const opts = Array.from({length:max}, (_,k)=>k+1).map(v=>`
       <label class="survey-scale-opt">
         <input type="radio" name="${q.id}" value="${v}" required ${Number(prevScores[q.id])===v?'checked':''}>
         <span>${v}</span>
@@ -1463,15 +1466,18 @@ function renderSurveyForm(sub, emp, existing, window_){
 <div class="survey-q">
   <div class="survey-q-text">${i+1}. ${q.text}<span class="survey-required">*</span></div>
   <div class="survey-scale">${opts}</div>
-  <div class="survey-scale-labels"><span>매우 그렇지 않다</span><span>매우 그렇다</span></div>
+  <div class="survey-scale-labels"><span>${lowLabel}</span><span>${highLabel}</span></div>
 </div>`;
   }).join('');
 
-  const openHtml = (def.openQuestions||[]).map((o,i)=>`
+  const openHtml = (def.openQuestions||[]).map((o,i)=>{
+    if(o.regularOnly && !isRegular) return '';
+    return `
 <div class="survey-q">
   <div class="survey-q-text">${def.questions.length+i+1}. ${o.text}</div>
   <textarea class="finput" name="${o.id}" rows="3" style="resize:vertical" placeholder="자유롭게 작성해주세요">${escapeHtml(prevComments[o.id]||'')}</textarea>
-</div>`).join('');
+</div>`;
+  }).join('');
 
   const deadlineBadge = (window_ && !window_.missing && window_.end_date)
     ? `<span class="survey-shell-badge">⏰ ${fmtDateKo(window_.end_date)}까지 응답</span>` : '';
