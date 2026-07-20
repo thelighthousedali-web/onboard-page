@@ -889,6 +889,9 @@ function renderLayout(user, content){
       <div class="nav-item ${state.page==='dashboard'?'active':''}" data-nav="dashboard">
         <span class="ni">🏠</span>대시보드
       </div>
+      <div class="nav-item ${state.page==='firstday'?'active':''}" data-nav="firstday">
+        <span class="ni">🎉</span>입사 첫날 안내
+      </div>
       <div class="nav-sec">회사 소개</div>
       <div class="nav-item ${state.page==='company'?'active':''}" data-nav="company">
         <span class="ni">🏢</span>헥토큐앤엠 소개
@@ -1109,6 +1112,7 @@ function renderUserPage(user){
   const p = state.page;
   if(p==='survey') return renderSurveyPage(user, state.sub);
   if(_pageContent[p]) return _pageContent[p].content_html;
+  if(p==='firstday')    return renderFirstDay();
   if(p==='company')     return renderCompany();
   if(p==='hectogroup')  return renderHectoGroup();
   if(p==='benefits')                                return renderBenefits(user);
@@ -1135,6 +1139,8 @@ function renderUserPage(user){
 ════════════════════════════════════════ */
 function renderDashboard(user){
   const isRegular = user.employeeType==='regular';
+  const firstDayCard = `
+    <div class="card" data-nav="firstday"><div class="card-icon">🎉</div><div class="card-title">입사 첫날 안내</div><div class="card-desc">필수 앱 설치·로그인 방법, 첫날 진행되는 행정 절차 안내</div></div>`;
   const commonCards = `
     <div class="card" data-nav="company"><div class="card-icon">🏢</div><div class="card-title">헥토큐앤엠 소개</div><div class="card-desc">회사 개요, 핵심 가치, 서비스, 주요 고객사</div></div>
     <div class="card" data-nav="hectogroup"><div class="card-icon">🌐</div><div class="card-title">헥토 그룹 소개</div><div class="card-desc">헥토 그룹 비전·미션, 주요 계열사 사업 소개</div></div>
@@ -1170,7 +1176,7 @@ ${renderOnboardingSurveyBanner(user)}
   <div class="page-title">빠른 메뉴</div>
   <div class="page-sub">아래 항목을 클릭하여 원하는 정보를 확인하세요</div>
 </div>
-<div class="cards">${commonCards}${regularCards}${welfareCards}${sysCards}${ruleCards}</div>`;
+<div class="cards">${firstDayCard}${commonCards}${regularCards}${welfareCards}${sysCards}${ruleCards}</div>`;
 }
 
 /* ── 대시보드: 온보딩 서베이 진입 배너 ── */
@@ -1500,6 +1506,58 @@ function renderSurveyForm(sub, emp, existing, window_){
     </form>
   </div>
 </div></div>`;
+}
+
+/* ════════════════════════════════════════
+   FIRST DAY PAGE
+════════════════════════════════════════ */
+function renderFirstDay(){
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">입사 첫날 안내</span></div>
+  <div class="page-title">입사 첫날 안내</div>
+  <div class="page-sub">첫 출근일 꼭 필요한 앱 설치 방법과 진행되는 행정 절차를 안내해 드립니다</div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">📱 필수 앱 설치 및 로그인</div>
+  <div class="step-list">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div><div class="step-title">The Hecto App</div>
+        <div class="step-desc">안드로이드(구글 플레이스토어) 또는 iOS(앱스토어)에서 <strong>"The Hecto App"</strong> 검색 후 설치<br>설치 후 <strong>전화번호로 개인 인증</strong> 진행<br>인증이 되지 않을 경우 헥토 <strong>장성욱 책임</strong>에게 문의해주세요.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div><div class="step-title">네이버웍스(Naver Works) App</div>
+        <div class="step-desc">안드로이드·iOS 마켓에서 <strong>"네이버웍스"</strong> 검색 후 설치<br>
+        <strong>ID</strong>: 본인이 신청한 아이디 + <strong>@hecto.co.kr</strong><br>
+        <strong>PW</strong>: 본인 <strong>생년월일 6자리</strong> (예: 990101)</div>
+      </div>
+    </div>
+  </div>
+  <p class="note">로그인이 되지 않으면 인사팀 또는 IT 담당자에게 문의해주세요.</p>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">📋 입사 첫날 진행되는 행정 절차</div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th>구분</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>인사팀 면담</td><td>인사팀장(인사담당자)과 면담 진행</td></tr>
+      <tr><td>회사 소개</td><td>회사소개 및 복지제도 안내</td></tr>
+      <tr><td>카페 포인트</td><td>카페 포인트 바코드 생성 및 부여</td></tr>
+      <tr><td>근태 관리</td><td>근태자동화시트(또는 근태파일) 및 근태관리 시트에 등록</td></tr>
+      <tr><td>드시모네몰</td><td>유산균 몰 가입 안내 및 승인 절차 진행</td></tr>
+      <tr><td>웰니스포인트</td><td>웰니스포인트 신청</td></tr>
+      <tr><td>인사 데이터</td><td>ERP 등 시스템에 입사 데이터 등록</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">위 절차는 인사팀에서 순서대로 안내해 드리니, 별도로 준비하실 사항은 없습니다.</p>
+</div>`;
 }
 
 /* ════════════════════════════════════════
