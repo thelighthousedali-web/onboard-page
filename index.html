@@ -219,6 +219,7 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .hg-video-wrap{width:100%;max-width:560px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000;position:relative}
 .hg-video-wrap iframe{width:100%;height:100%;border:none;display:block}
 .hg-video-wrap .vid-block{position:absolute;top:0;right:0;width:140px;height:100px;z-index:999;cursor:not-allowed;transform:translateZ(0)}
+.hg-video-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:768px){
   .mob-header{display:flex}
   .sidebar{transform:translateX(-100%)}
@@ -227,6 +228,7 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
   .main{margin-left:0;padding:68px 16px 24px}
   .two-col{grid-template-columns:1fr}
   .hg-vision{grid-template-columns:1fr}
+  .hg-video-row{grid-template-columns:1fr}
   .hg-overview{grid-template-columns:1fr}
   .stats-row{grid-template-columns:1fr}
   .content-block{padding:18px 16px}
@@ -1239,11 +1241,22 @@ function renderHectoGroup(){
 
 <!-- 비전 선포식 영상 -->
 <div class="content-block">
-  <div class="sec-title">🎬 이경민 의장님 헥토 그룹 소개 영상</div>
-  <div class="sub" style="margin-bottom:12px">헥토 그룹 CI 변경 선포 및 미래 비전 선포식 영상입니다.</div>
-  <div class="hg-video-wrap">
-    <iframe src="https://drive.google.com/file/d/1frx0UdqxIQSdF4Po85vg5nBxTjjIEVaP/preview" allowfullscreen allow="autoplay; encrypted-media" loading="lazy"></iframe>
-    <div class="vid-block"></div>
+  <div class="sec-title">🎬 헥토 그룹 소개 영상</div>
+  <div class="hg-video-row">
+    <div>
+      <div class="sub" style="margin-bottom:12px">이경민 의장님 — 헥토 그룹 CI 변경 선포 및 미래 비전 선포식 영상입니다.</div>
+      <div class="hg-video-wrap">
+        <iframe src="https://drive.google.com/file/d/1frx0UdqxIQSdF4Po85vg5nBxTjjIEVaP/preview" allowfullscreen allow="autoplay; encrypted-media" loading="lazy"></iframe>
+        <div class="vid-block"></div>
+      </div>
+    </div>
+    <div>
+      <div class="sub" style="margin-bottom:12px">헥토 그룹 소개 영상입니다.</div>
+      <div class="hg-video-wrap">
+        <iframe src="https://drive.google.com/file/d/1mV71tVd-s14M2Yd2DLO99ygO92GlIEpy/preview" allowfullscreen allow="autoplay; encrypted-media" loading="lazy"></iframe>
+        <div class="vid-block"></div>
+      </div>
+    </div>
   </div>
 </div>
 
