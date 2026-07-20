@@ -220,6 +220,17 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .hg-video-wrap iframe{width:100%;height:100%;border:none;display:block}
 .hg-video-wrap .vid-block{position:absolute;top:0;right:0;width:140px;height:100px;z-index:999;cursor:not-allowed;transform:translateZ(0)}
 .hg-video-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.hg-slideshow{position:relative;width:100%;max-width:900px;aspect-ratio:16/9;background:#111;border-radius:10px;overflow:hidden;margin:0 auto}
+.hg-slideshow img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+.hg-slide-btn{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.hg-slide-btn:hover{background:rgba(0,0,0,.75)}
+.hg-slide-prev{left:12px}
+.hg-slide-next{right:12px}
+.hg-slide-fullscreen{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:8px;background:rgba(0,0,0,.5);color:#fff;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.hg-slide-fullscreen:hover{background:rgba(0,0,0,.75)}
+.hg-slide-counter{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);color:#fff;font-size:12px;padding:3px 10px;border-radius:10px}
+.hg-slideshow:fullscreen{max-width:none;aspect-ratio:auto;border-radius:0;display:flex;align-items:center;justify-content:center}
+.hg-slideshow:fullscreen img{width:auto;height:auto;max-width:100%;max-height:100%}
 @media(max-width:768px){
   .mob-header{display:flex}
   .sidebar{transform:translateX(-100%)}
@@ -545,6 +556,22 @@ const DB = {
 ════════════════════════════════════════ */
 let state = {page:'login', sub:null};
 let _pageContent = {};
+
+const HG_SLIDES = Array.from({length:25}, (_,i) => `hectogroup-slides/slide-${String(i+1).padStart(2,'0')}.png`);
+let _hgSlideIdx = 0;
+function hgSlideNav(dir){
+  _hgSlideIdx = Math.max(0, Math.min(HG_SLIDES.length-1, _hgSlideIdx + dir));
+  const img = document.getElementById('hg-slide-img');
+  const counter = document.getElementById('hg-slide-counter');
+  if(img) img.src = HG_SLIDES[_hgSlideIdx];
+  if(counter) counter.textContent = `${_hgSlideIdx+1} / ${HG_SLIDES.length}`;
+}
+function hgSlideFullscreen(){
+  const el = document.getElementById('hg-slideshow');
+  if(!el) return;
+  if(document.fullscreenElement) document.exitFullscreen();
+  else el.requestFullscreen?.();
+}
 
 const PAGE_META = [
   {key:'company',        label:'헥토큐앤엠 소개',  icon:'🏢'},
@@ -1232,11 +1259,24 @@ function renderOnboardingSurveyBanner(user){
    HECTO GROUP PAGE
 ════════════════════════════════════════ */
 function renderHectoGroup(){
+  _hgSlideIdx = 0;
   return `
 <div class="page-head">
   <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">헥토 그룹 소개</span></div>
   <div class="page-title">헥토 그룹 소개</div>
   <div class="page-sub">삶의 무한한 가능성을 실현하는 글로벌 라이프테크 컴퍼니</div>
+</div>
+
+<!-- 헥토 그룹사 소개 자료 슬라이드쇼 -->
+<div class="content-block">
+  <div class="sec-title">📑 헥토 그룹사 소개 자료</div>
+  <div class="hg-slideshow" id="hg-slideshow">
+    <img id="hg-slide-img" src="${HG_SLIDES[0]}" alt="헥토 그룹사 소개 자료">
+    <button type="button" class="hg-slide-btn hg-slide-prev" onclick="hgSlideNav(-1)" aria-label="이전 슬라이드">‹</button>
+    <button type="button" class="hg-slide-btn hg-slide-next" onclick="hgSlideNav(1)" aria-label="다음 슬라이드">›</button>
+    <button type="button" class="hg-slide-fullscreen" onclick="hgSlideFullscreen()" aria-label="전체화면">⛶</button>
+    <div class="hg-slide-counter" id="hg-slide-counter">1 / ${HG_SLIDES.length}</div>
+  </div>
 </div>
 
 <!-- 비전 선포식 영상 -->
