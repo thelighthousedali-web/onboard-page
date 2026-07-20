@@ -2471,6 +2471,7 @@ async function resetPageContent(pageKey){
 function getDefaultHtml(pageKey){
   const mock = {employeeType:'regular'};
   const map = {
+    'firstday':       ()=>renderFirstDay(),
     'company':        ()=>renderCompany(),
     'hectogroup':     ()=>renderHectoGroup(),
     'benefits':       ()=>renderBenefits(mock),
