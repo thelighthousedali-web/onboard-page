@@ -1229,7 +1229,7 @@ function renderOnboardingSurveyBanner(user){
   if(_dashSurveyStatus.none || !_dashSurveyStatus.schedule) return '';
 
   const {schedule, submitted} = _dashSurveyStatus;
-  const todayStr = new Date().toISOString().slice(0,10);
+  const todayStr = todayKstStr();
   // 90일 서베이는 수습 최종 '합격'자에게만 해당 — 오해 방지를 위해 대시보드에는 노출하지 않고 메일 링크로만 진입
   const items = [
     {type:'onboarding_30', label:'입사 30일 서베이', date:schedule.day30_date},
@@ -1354,7 +1354,7 @@ function renderSurveyPage(user, sub){
   }
 
   if(cached.window && !cached.window.missing){
-    const todayStr = new Date().toISOString().slice(0,10);
+    const todayStr = todayKstStr();
     if(cached.window.start_date && todayStr < cached.window.start_date){
       return `<div class="survey-page-wrap"><div class="survey-blocked-card">
         <div style="font-size:40px;margin-bottom:12px">⏳</div>
@@ -1378,6 +1378,12 @@ function fmtDateKo(d){
   if(!d) return '-';
   const [y,m,day] = String(d).split('-');
   return `${y}.${Number(m)}.${Number(day)}`;
+}
+
+// UTC 기준 toISOString()은 자정~오전 9시(KST) 사이에 전날 날짜를 반환하므로
+// 응답기간(start_date/end_date, KST 기준 저장) 비교에는 반드시 이 함수를 사용
+function todayKstStr(){
+  return new Date(Date.now() + 9*60*60*1000).toISOString().slice(0,10);
 }
 
 async function loadSurveyData(sub, cacheKey){
