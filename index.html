@@ -921,6 +921,9 @@ function renderLayout(user, content){
       <div class="nav-item ${state.page==='firstday'?'active':''}" data-nav="firstday">
         <span class="ni">🎉</span>입사 첫날 안내
       </div>
+      <div class="nav-item ${state.page==='mission'?'active':''}" data-nav="mission">
+        <span class="ni">🚀</span>온보딩 미션
+      </div>
       <div class="nav-sec">회사 소개</div>
       <div class="nav-item ${state.page==='company'?'active':''}" data-nav="company">
         <span class="ni">🏢</span>헥토큐앤엠 소개
@@ -1142,6 +1145,7 @@ function renderUserPage(user){
   if(p==='survey') return renderSurveyPage(user, state.sub);
   if(_pageContent[p]) return _pageContent[p].content_html;
   if(p==='firstday')    return renderFirstDay();
+  if(p==='mission')     return renderMission(user);
   if(p==='company')     return renderCompany();
   if(p==='hectogroup')  return renderHectoGroup();
   if(p==='benefits')                                return renderBenefits(user);
@@ -1169,7 +1173,8 @@ function renderUserPage(user){
 function renderDashboard(user){
   const isRegular = user.employeeType==='regular';
   const firstDayCard = `
-    <div class="card" data-nav="firstday"><div class="card-icon">🎉</div><div class="card-title">입사 첫날 안내</div><div class="card-desc">필수 앱 설치·로그인 방법, 첫날 진행되는 행정 절차 안내</div></div>`;
+    <div class="card" data-nav="firstday"><div class="card-icon">🎉</div><div class="card-title">입사 첫날 안내</div><div class="card-desc">필수 앱 설치·로그인 방법, 첫날 진행되는 행정 절차 안내</div></div>
+    <div class="card" data-nav="mission"><div class="card-icon">🚀</div><div class="card-title">온보딩 미션</div><div class="card-desc">입사 후 90일간의 시점별 미션과 README 작성 가이드</div></div>`;
   const commonCards = `
     <div class="card" data-nav="company"><div class="card-icon">🏢</div><div class="card-title">헥토큐앤엠 소개</div><div class="card-desc">회사 개요, 핵심 가치, 서비스, 주요 고객사</div></div>
     <div class="card" data-nav="hectogroup"><div class="card-icon">🌐</div><div class="card-title">헥토 그룹 소개</div><div class="card-desc">헥토 그룹 비전·미션, 주요 계열사 사업 소개</div></div>
@@ -1503,6 +1508,102 @@ function renderFirstDay(){
   </table>
   </div>
   <p class="note">위 절차는 경영지원팀에서 순서대로 안내해 드리니, 별도로 준비하실 사항은 없습니다.</p>
+</div>`;
+}
+
+/* ════════════════════════════════════════
+   ONBOARDING MISSION PAGE
+   (HQ_온보딩 프로세스 개편 운영안 기준 — 1주차 README는 전 직원 공통,
+    2주차 이후 식사·커피챗은 정규직 온보딩 예산에서 집행되어 정규직 전용)
+════════════════════════════════════════ */
+function renderMission(user){
+  const isRegular = user.employeeType==='regular';
+  const regularOnly = isRegular ? '' : `
+  <div class="note">2주차 이후의 식사·커피챗 프로그램은 정규직 대상으로 운영됩니다. 1주차 README 작성은 모든 구성원이 함께 참여합니다.</div>`;
+
+  const regularSteps = isRegular ? `
+    <div class="step">
+      <div class="step-num">2</div>
+      <div><div class="step-title">입사 2주차 · 팀 중심 식사</div>
+        <div class="step-desc">팀장·멘토가 이끄는 팀 식사로 팀 내 소통을 강화하고 실무 흐름을 익히는 자리입니다.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div><div class="step-title">입사 3주차 · HR 주관 협업식사</div>
+        <div class="step-desc">경영지원팀이 자리를 만들어 함께 일하게 될 타 부서 담당자들과 미리 관계를 트는 크로스 네트워킹 식사입니다.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div><div class="step-title">입사 1개월 · 1:1 커피챗</div>
+        <div class="step-desc">팀장·멘토와의 밀착 대화입니다. 실무 적응 과정에서 겪는 애로사항을 편하게 이야기해 주세요. 같은 시점에 1차 시용평가와 온보딩 서베이(30일)도 함께 진행됩니다.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div><div class="step-title">입사 2개월 · 1:1 커피챗</div>
+        <div class="step-desc">수습 최종 판단에 앞서 보완할 점을 함께 짚고 앞으로의 업무 방향을 맞추는 자리입니다. 2차 시용평가와 온보딩 서베이(60일)가 같은 시점에 진행됩니다.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div><div class="step-title">입사 75~90일 · 최종 피드백</div>
+        <div class="step-desc">수습 결과를 정식으로 통보드리고, 90일 온보딩 경험 서베이를 통해 3개월 전 과정에 대한 의견을 들려주시면 됩니다.</div>
+      </div>
+    </div>` : '';
+
+  return `
+<div class="page-head">
+  <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">온보딩 미션</span></div>
+  <div class="page-title">온보딩 미션</div>
+  <div class="page-sub">입사 후 90일 동안 시점별로 진행되는 온보딩 프로그램을 안내해 드립니다</div>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">🗓️ 입사 후 90일 온보딩 여정</div>
+  <div class="highlight">
+    <p>혼자 알아서 적응하지 않으셔도 됩니다. 회사가 <strong>시점마다 먼저 챙기고 먼저 물어보는</strong> 구조로 온보딩을 운영합니다. 각 시점이 되면 담당자에게 안내 메일이 발송되니, 일정에 맞춰 참여만 해주시면 됩니다.</p>
+  </div>
+  <div class="step-list">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div><div class="step-title">입사 1주차 · README 작성</div>
+        <div class="step-desc">네이버웍스 앨범 게시판에 나를 소개하는 README 게시글을 올려주세요. 아래 작성 가이드를 참고하시면 됩니다.</div>
+      </div>
+    </div>
+    ${regularSteps}
+  </div>
+  ${regularOnly}
+</div>
+
+<div class="content-block">
+  <div class="sec-title">📝 README 작성 가이드</div>
+  <div class="highlight">
+    <p>README는 원래 개발자들이 프로젝트를 처음 열었을 때 목적과 사용법을 빠르게 파악하도록 만든 첫 안내 문서입니다. 이 개념을 빌려와, 각자가 <strong>"나와 스마트하게 일하고 즐겁게 소통하는 매뉴얼"</strong>을 동료들과 나누는 것이 목적입니다.</p>
+  </div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th style="width:180px">기재 항목</th><th>작성 안내</th></tr></thead>
+    <tbody>
+      <tr><td>나를 대변하는 사진 한 장</td><td>꼭 얼굴 사진이 아니어도 됩니다. 관심사·취향·좋아하는 장소 등 대화를 시작할 실마리가 되는 사진이면 좋습니다.</td></tr>
+      <tr><td>소속 및 담당 실무</td><td>이름과 함께 주 업무, 그리고 동료가 어떤 일로 나를 찾으면 되는지 구체적으로 적어주세요.</td></tr>
+      <tr><td>선호하는 협업 &amp; 소통 방식</td><td>메신저·대면·메일 중 편한 수단과, 일할 때 중요하게 생각하는 가치를 적어주세요.</td></tr>
+      <tr><td>가벼운 대화 관심사</td><td>커피 한 잔 하며 편하게 꺼낼 수 있는 소소한 일상 주제를 공유해주세요.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="t-wrap">
+  <table class="info-tbl">
+    <thead><tr><th style="width:180px">작성 시 유의사항</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>민감한 개인정보</td><td>주민등록번호, 연락처, 가족사, 건강 정보, 과도한 종교적 내용 등 극히 개인적인 영역은 작성하지 않습니다.</td></tr>
+      <tr><td>영업 비밀 및 전 소속사 정보</td><td>이전 직장의 내부 정보나 타사 보안 자료, 당사의 비공개 프로젝트 소스 등의 노출은 일절 금지됩니다.</td></tr>
+      <tr><td>초상권 및 미승인 자료</td><td>동의받지 않은 동료 사진이나 승인되지 않은 외부 3자 저작물은 등록할 수 없습니다.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">팀별 README 작성률이 80%를 넘으면 해당 팀 전원에게 사내 카페 머니가 지급됩니다. 팀원들과 함께 참여해보세요.</p>
 </div>`;
 }
 
