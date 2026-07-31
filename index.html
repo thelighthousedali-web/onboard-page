@@ -1518,9 +1518,7 @@ function renderFirstDay(){
 ════════════════════════════════════════ */
 function renderMission(user){
   const isRegular = user.employeeType==='regular';
-  const regularOnly = isRegular ? '' : `
-  <div class="note">2주차 이후의 식사·커피챗 프로그램은 정규직 대상으로 운영됩니다. 1주차 README 작성은 모든 구성원이 함께 참여합니다.</div>`;
-
+  // 계약직에게는 정규직 전용 프로그램(2주차 이후)의 존재 자체를 노출하지 않음
   const regularSteps = isRegular ? `
     <div class="step">
       <div class="step-num">2</div>
@@ -1557,13 +1555,15 @@ function renderMission(user){
 <div class="page-head">
   <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">온보딩 미션</span></div>
   <div class="page-title">온보딩 미션</div>
-  <div class="page-sub">입사 후 90일 동안 시점별로 진행되는 온보딩 프로그램을 안내해 드립니다</div>
+  <div class="page-sub">${isRegular ? '입사 후 90일 동안 시점별로 진행되는 온보딩 프로그램을 안내해 드립니다' : '입사 후 진행되는 온보딩 미션을 안내해 드립니다'}</div>
 </div>
 
 <div class="content-block">
-  <div class="sec-title">🗓️ 입사 후 90일 온보딩 여정</div>
+  <div class="sec-title">🗓️ ${isRegular ? '입사 후 90일 온보딩 여정' : '입사 1주차 미션'}</div>
   <div class="highlight">
-    <p>혼자 알아서 적응하지 않으셔도 됩니다. 회사가 <strong>시점마다 먼저 챙기고 먼저 물어보는</strong> 구조로 온보딩을 운영합니다. 각 시점이 되면 담당자에게 안내 메일이 발송되니, 일정에 맞춰 참여만 해주시면 됩니다.</p>
+    <p>${isRegular
+      ? '혼자 알아서 적응하지 않으셔도 됩니다. 회사가 <strong>시점마다 먼저 챙기고 먼저 물어보는</strong> 구조로 온보딩을 운영합니다. 각 시점이 되면 담당자에게 안내 메일이 발송되니, 일정에 맞춰 참여만 해주시면 됩니다.'
+      : '혼자 알아서 적응하지 않으셔도 됩니다. 입사 후 안내 메일이 발송되니, 일정에 맞춰 참여만 해주시면 됩니다.'}</p>
   </div>
   <div class="step-list">
     <div class="step">
@@ -1574,7 +1574,6 @@ function renderMission(user){
     </div>
     ${regularSteps}
   </div>
-  ${regularOnly}
 </div>
 
 <div class="content-block">
