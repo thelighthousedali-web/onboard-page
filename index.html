@@ -853,6 +853,7 @@ function bindAuth(){
     if(!user){ showMsg('login-msg','error','이메일 또는 비밀번호가 올바르지 않습니다.'); return; }
     if(user.status==='rejected'){ showMsg('login-msg','error','계정이 거절되었습니다. 인사팀에 문의하세요.'); return; }
     DB.setCurrent(user);
+    logActivity('login', user);
     nav(user.role==='admin' ? 'admin-users' : 'dashboard', null, true);
     if(pendingSurvey) nav('survey', pendingSurvey);
   });
@@ -1049,9 +1050,22 @@ function bindNav(){
 }
 
 function logout(){
+  const cur = DB.getCurrent();
+  if (cur) logActivity('logout', cur);
   DB.clearCurrent();
   sessionStorage.removeItem('hq_impersonating');
   nav('login', null, true);
+}
+
+// HR 허브 "활동 로그"와 같은 login_log 테이블(같은 Supabase 프로젝트 공유)에 기록.
+// role은 employee_regular/employee_contract로 저장 — HR 허브 ROLE_LABELS에 이미 매핑되어 있음.
+function logActivity(eventType, user){
+  if (!user?.email) return;
+  supa.from('login_log').insert({
+    user_email: user.email, user_name: user.name,
+    role: `employee_${user.employeeType === 'regular' ? 'regular' : 'contract'}`,
+    event_type: eventType,
+  }).then(({error}) => { if (error) console.error('[활동 로그] 기록 실패:', error.message); });
 }
 
 /* ════════════════════════════════════════
