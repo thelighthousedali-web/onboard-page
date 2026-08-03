@@ -1054,6 +1054,7 @@ function logout(){
   if (cur) logActivity('logout', cur);
   DB.clearCurrent();
   sessionStorage.removeItem('hq_impersonating');
+  _missionStatus = null; _dashSurveyStatus = null; // 다음 로그인 사용자에게 이전 사용자 캐시가 새지 않도록
   nav('login', null, true);
 }
 
@@ -1225,6 +1226,18 @@ ${renderOnboardingSurveyBanner(user)}
   <div class="page-sub">아래 항목을 클릭하여 원하는 정보를 확인하세요</div>
 </div>
 <div class="cards">${firstDayCard}${commonCards}${regularCards}${welfareCards}${sysCards}${ruleCards}</div>`;
+}
+
+/* ── 온보딩 미션: 완료 처리 상태 (HR 허브 "온보딩 미션" 탭에서 관리자가 수기 완료 처리) ── */
+let _missionStatus = null;
+
+async function loadMissionStatus(user){
+  const {data: emp} = await supa.from('employees').select('id').eq('email', user.email).maybeSingle();
+  if(!emp){ _missionStatus = {none:true, completed:new Set()}; render(); return; }
+  const {data: rows} = await supa.from('onboarding_mission_status').select('mission_key,completed_at').eq('employee_id', emp.id);
+  const completed = new Set((rows||[]).filter(r=>r.completed_at).map(r=>r.mission_key));
+  _missionStatus = { employeeId: emp.id, completed };
+  render();
 }
 
 /* ── 대시보드: 온보딩 서베이 진입 배너 ── */
@@ -1530,31 +1543,49 @@ function renderFirstDay(){
    (HQ_온보딩 프로세스 개편 운영안 기준 — 1주차 README는 전 직원 공통,
     2주차 이후 식사·커피챗은 정규직 온보딩 예산에서 집행되어 정규직 전용)
 ════════════════════════════════════════ */
+// 타임라인 단계(1~5) ↔ HR 허브 온보딩 미션 키 매핑 — 6단계(최종 피드백)는 별도 메일이 없어 대상 아님
+const MISSION_STEP_KEYS = {1:'mission_week1', 2:'mission_week2', 3:'mission_week3', 4:'mission_week4', 5:'mission_month2'};
+
+function missionStepNum(n, completed){
+  const key = MISSION_STEP_KEYS[n];
+  const done = !!(key && completed.has(key));
+  return done ? `<div class="step-num" style="background:#16A34A">✓</div>` : `<div class="step-num">${n}</div>`;
+}
+function missionDoneTag(n, completed){
+  const key = MISSION_STEP_KEYS[n];
+  return (key && completed.has(key))
+    ? '<span style="margin-left:8px;font-size:11px;font-weight:700;color:#16A34A;background:#DCFCE7;padding:2px 8px;border-radius:999px;vertical-align:middle">완료</span>'
+    : '';
+}
+
 function renderMission(user){
   const isRegular = user.employeeType==='regular';
+  if(_missionStatus === null) loadMissionStatus(user);
+  const completed = _missionStatus?.completed || new Set();
+
   // 계약직에게는 정규직 전용 프로그램(2주차 이후)의 존재 자체를 노출하지 않음
   const regularSteps = isRegular ? `
     <div class="step">
-      <div class="step-num">2</div>
-      <div><div class="step-title">입사 2주차 · 팀 중심 식사</div>
+      ${missionStepNum(2, completed)}
+      <div><div class="step-title">입사 2주차 · 팀 중심 식사${missionDoneTag(2, completed)}</div>
         <div class="step-desc">팀장·멘토가 이끄는 팀 식사로 팀 내 소통을 강화하고 실무 흐름을 익히는 자리입니다.</div>
       </div>
     </div>
     <div class="step">
-      <div class="step-num">3</div>
-      <div><div class="step-title">입사 3주차 · HR 주관 협업식사</div>
+      ${missionStepNum(3, completed)}
+      <div><div class="step-title">입사 3주차 · HR 주관 협업식사${missionDoneTag(3, completed)}</div>
         <div class="step-desc">경영지원팀이 자리를 만들어 함께 일하게 될 타 부서 담당자들과 미리 관계를 트는 크로스 네트워킹 식사입니다.</div>
       </div>
     </div>
     <div class="step">
-      <div class="step-num">4</div>
-      <div><div class="step-title">입사 1개월 · 1:1 커피챗</div>
+      ${missionStepNum(4, completed)}
+      <div><div class="step-title">입사 1개월 · 1:1 커피챗${missionDoneTag(4, completed)}</div>
         <div class="step-desc">팀장·멘토와의 밀착 대화입니다. 실무 적응 과정에서 겪는 애로사항을 편하게 이야기해 주세요. 같은 시점에 1차 시용평가와 온보딩 서베이(30일)도 함께 진행됩니다.</div>
       </div>
     </div>
     <div class="step">
-      <div class="step-num">5</div>
-      <div><div class="step-title">입사 2개월 · 1:1 커피챗</div>
+      ${missionStepNum(5, completed)}
+      <div><div class="step-title">입사 2개월 · 1:1 커피챗${missionDoneTag(5, completed)}</div>
         <div class="step-desc">수습 최종 판단에 앞서 보완할 점을 함께 짚고 앞으로의 업무 방향을 맞추는 자리입니다. 2차 시용평가와 온보딩 서베이(60일)가 같은 시점에 진행됩니다.</div>
       </div>
     </div>
@@ -1581,8 +1612,8 @@ function renderMission(user){
   </div>
   <div class="step-list">
     <div class="step">
-      <div class="step-num">1</div>
-      <div><div class="step-title">입사 1주차 · README 작성</div>
+      ${missionStepNum(1, completed)}
+      <div><div class="step-title">입사 1주차 · README 작성${missionDoneTag(1, completed)}</div>
         <div class="step-desc">네이버웍스 <strong>README.md 게시판</strong>에 나를 소개하는 게시글을 올려주세요. 아래 작성 가이드를 참고하시면 됩니다.</div>
       </div>
     </div>
@@ -2768,6 +2799,7 @@ function formatDate(iso){
       const target = emp?.email ? _users.find(u=>u.email===emp.email) : null;
       if(target){
         DB.setCurrent(target);
+        _missionStatus = null; _dashSurveyStatus = null; // 대행로그인 대상이 바뀌었으니 이전 캐시 무효화
         sessionStorage.setItem('hq_impersonating','1');
       }
     }
