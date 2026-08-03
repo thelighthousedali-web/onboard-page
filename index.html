@@ -1220,6 +1220,7 @@ function renderDashboard(user){
   <div class="wb-badge">${isRegular?'정규직':'계약직'} 입사자 가이드</div>
   <div class="wb-slogan"><img src="slogan.png" alt="Perfecting Forward"></div>
 </div>
+${renderMissionProgressBanner(user)}
 ${renderOnboardingSurveyBanner(user)}
 <div class="page-head">
   <div class="page-title">빠른 메뉴</div>
@@ -1228,16 +1229,85 @@ ${renderOnboardingSurveyBanner(user)}
 <div class="cards">${firstDayCard}${commonCards}${regularCards}${welfareCards}${sysCards}${ruleCards}</div>`;
 }
 
-/* ── 온보딩 미션: 완료 처리 상태 (HR 허브 "온보딩 미션" 탭에서 관리자가 수기 완료 처리) ── */
+/* ── 온보딩 미션: 완료/발송 상태 (hr-hub의 ONB_MISSIONS·상태 로직과 동일 기준) ── */
+const MISSION_LIVE_FROM = '2026-07-13';
+const MISSION_DEFS = [
+  { key:'mission_week1',  label:'1주차 · README 작성', regularOnly:false, due:j=>addDaysStr_(j,1) },
+  { key:'mission_week2',  label:'2주차 · 팀 식사',     regularOnly:true,  due:j=>missionMonday_(j,1) },
+  { key:'mission_week3',  label:'3주차 · HR 협업식사', regularOnly:true,  due:j=>missionMonday_(j,2) },
+  { key:'mission_week4',  label:'1개월 · 커피챗',      regularOnly:true,  due:j=>missionMonday_(j,3) },
+  { key:'mission_month2', label:'2개월 · 커피챗',      regularOnly:true,  due:j=>mondayOnOrAfter_(addDaysStr_(j,70)) },
+];
+function ymdLocal_(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function addDaysStr_(dateStr, n){ const d=new Date(dateStr+'T00:00:00'); d.setDate(d.getDate()+n); return ymdLocal_(d); }
+function missionMonday_(joinStr, weeks){ const d=new Date(joinStr+'T00:00:00'); const dow=d.getDay(); d.setDate(d.getDate()+(dow===0?-6:1-dow)+weeks*7); return ymdLocal_(d); }
+function mondayOnOrAfter_(dateStr){ const d=new Date(dateStr+'T00:00:00'); const dow=d.getDay(); d.setDate(d.getDate()+(dow===1?0:(8-dow)%7)); return ymdLocal_(d); }
+
 let _missionStatus = null;
 
 async function loadMissionStatus(user){
-  const {data: emp} = await supa.from('employees').select('id').eq('email', user.email).maybeSingle();
-  if(!emp){ _missionStatus = {none:true, completed:new Set()}; render(); return; }
-  const {data: rows} = await supa.from('onboarding_mission_status').select('mission_key,completed_at').eq('employee_id', emp.id);
-  const completed = new Set((rows||[]).filter(r=>r.completed_at).map(r=>r.mission_key));
-  _missionStatus = { employeeId: emp.id, completed };
+  const {data: emp} = await supa.from('employees').select('id,join_date,type').eq('email', user.email).maybeSingle();
+  if(!emp || !emp.join_date || emp.join_date < MISSION_LIVE_FROM){ _missionStatus = {none:true, completed:new Set(), steps:[]}; render(); return; }
+
+  const keys = MISSION_DEFS.map(m=>m.key);
+  const [{data: logs}, {data: rows}] = await Promise.all([
+    supa.from('mail_log').select('mail_type,sent_at').eq('employee_id', emp.id).eq('status','success').in('mail_type', keys),
+    supa.from('onboarding_mission_status').select('mission_key,completed_at').eq('employee_id', emp.id),
+  ]);
+  const sentMap = Object.fromEntries((logs||[]).map(l=>[l.mail_type, l.sent_at]));
+  const doneMap = Object.fromEntries((rows||[]).filter(r=>r.completed_at).map(r=>[r.mission_key, r.completed_at]));
+  const today = todayKstStr();
+
+  const steps = MISSION_DEFS.filter(m => !m.regularOnly || emp.type === '정규직').map(m => {
+    const sentAt = sentMap[m.key] || null;
+    const completedAt = doneMap[m.key] || null;
+    let status;
+    if (completedAt) status = 'done';
+    else if (sentAt) status = (Math.floor((new Date(today) - new Date(sentAt.slice(0,10))) / 86400000) >= 7) ? 'delayed' : 'progress';
+    else status = (m.due(emp.join_date) <= today) ? 'waiting' : 'upcoming';
+    return { key:m.key, label:m.label, status };
+  });
+  const completed = new Set(steps.filter(s=>s.status==='done').map(s=>s.key));
+  _missionStatus = { employeeId: emp.id, completed, steps };
   render();
+}
+
+function renderMissionProgressBanner(user){
+  if(_missionStatus === null){
+    loadMissionStatus(user);
+    return `<div class="content-block" style="margin-bottom:20px"><div class="loading"><div class="spinner"></div></div></div>`;
+  }
+  if(_missionStatus.none || !_missionStatus.steps.length) return '';
+
+  const STATUS_STYLE = {
+    done:     { bg:'#16A34A', fg:'#fff', label:'완료' },
+    delayed:  { bg:'#FEE2E2', fg:'#991B1B', label:'지연' },
+    progress: { bg:'#DBEAFE', fg:'#1E40AF', label:'진행중' },
+    waiting:  { bg:'#FEF3C7', fg:'#92400E', label:'발송 대기' },
+    upcoming: { bg:'#F3F4F6', fg:'#9CA3AF', label:'예정' },
+  };
+  const steps = _missionStatus.steps;
+  const doneCount = steps.filter(s=>s.status==='done').length;
+
+  const dots = steps.map((s,i) => {
+    const st = STATUS_STYLE[s.status];
+    const isDone = s.status==='done';
+    return `
+      <div title="${s.label} · ${st.label}" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:${isDone?st.bg:st.bg};color:${isDone?st.fg:st.fg};flex-shrink:0">${isDone?'✓':i+1}</div>
+      ${i<steps.length-1 ? '<span style="color:#D1D5DB;font-size:15px;flex-shrink:0">›</span>' : ''}`;
+  }).join('');
+
+  return `
+<div class="content-block" style="margin-bottom:20px">
+  <div style="padding:16px 20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-weight:700;font-size:14px">🚀 온보딩 미션 진행 상황</div>
+      <div style="font-size:12px;color:var(--gray,#6B7280)">${doneCount}/${steps.length} 완료</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:2px;overflow-x:auto;padding-bottom:2px">${dots}</div>
+    <div style="margin-top:12px"><a href="#" id="mission-progress-more" style="font-size:12px;color:var(--primary);font-weight:600;text-decoration:underline">온보딩 미션 자세히 보기 →</a></div>
+  </div>
+</div>`;
 }
 
 /* ── 대시보드: 온보딩 서베이 진입 배너 ── */
@@ -2498,6 +2568,8 @@ function bindPageActions(){
   document.querySelectorAll('.card[data-nav]').forEach(el=>{
     el.addEventListener('click', ()=>nav(el.dataset.nav));
   });
+
+  document.getElementById('mission-progress-more')?.addEventListener('click', (e)=>{ e.preventDefault(); nav('mission'); });
 
   document.querySelectorAll('[data-survey-type]').forEach(el=>{
     el.addEventListener('click', ()=>{
