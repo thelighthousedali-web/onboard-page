@@ -1715,7 +1715,7 @@ function renderBenefits(user){
 <div class="content-block">
   <div class="sec-title">💐 경조사 지원</div>
   <ul class="blist">
-    <li><div><strong>소통비</strong><div class="sub">소속부서 팀워크 강화를 위해 지급 (1일 재직 기준 인당 50,000원)</div></div></li>
+    ${isRegular?`<li><div><strong>소통비</strong><div class="sub">소속부서 팀워크 강화를 위해 지급 (1일 재직 기준 인당 50,000원)</div></div></li>`:''}
     <li><div><strong>경조금·경조휴가·경조물품 지원</strong>
       <div class="sub">
         휴가: 발생일 포함, 역일 기준 계산 / 분할 사용 불가 (결혼 경조휴가 예외: 예식일로부터 1년 내 사용 가능)<br>
