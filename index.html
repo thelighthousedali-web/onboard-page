@@ -2909,6 +2909,17 @@ function formatDate(iso){
     state.page = 'login';
     render();
   } else {
+    // 세션이 localStorage로 오래 유지돼서 로그인 폼을 다시 안 타는 재방문자가 많아
+    // "로그인 이력"에 실사용이 거의 안 잡히던 문제(2026-08-05 발견) — 대행 로그인이
+    // 아니고 오늘 아직 기록 안 남긴 경우, 하루 1회 활동 기록을 남김
+    if(!sessionStorage.getItem('hq_impersonating')){
+      const todayKst = new Date(Date.now() + 9*60*60*1000).toISOString().slice(0,10);
+      const flagKey = `hq_activity_logged_${initUser.id}_${todayKst}`;
+      if(!localStorage.getItem(flagKey)){
+        logActivity('login', initUser);
+        localStorage.setItem(flagKey, '1');
+      }
+    }
     // 뒤로가기 시 앱 밖으로 나가지 않도록 기본 홈 히스토리부터 확보
     nav(initUser.role==='admin' ? 'admin-users' : 'dashboard', null, true);
     if(pendingSurvey) nav('survey', pendingSurvey);
