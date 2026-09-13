@@ -308,6 +308,27 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .dash-two-col{display:grid;grid-template-columns:3fr 2fr;gap:20px;margin-bottom:20px}
 .dash-two-col .content-block{margin-bottom:0;height:100%;box-sizing:border-box}
 @media(max-width:768px){.dash-two-col{grid-template-columns:1fr}.mission-row .onb-survey-label{white-space:normal}}
+
+/* ── 챗봇 위젯 ── */
+.chat-fab{display:none;position:fixed;right:24px;bottom:24px;width:58px;height:58px;border-radius:50%;background:var(--primary);color:#fff;border:none;box-shadow:0 6px 20px rgba(255,85,0,.4);cursor:pointer;font-size:26px;align-items:center;justify-content:center;z-index:9000;transition:transform .15s}
+.chat-fab:hover{transform:scale(1.06)}
+.chat-panel{display:none;position:fixed;right:24px;bottom:94px;width:370px;max-width:calc(100vw - 32px);height:520px;max-height:calc(100vh - 140px);background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.22);z-index:9001;flex-direction:column;overflow:hidden}
+.chat-panel.open{display:flex}
+.chat-head{background:var(--dark);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.chat-head-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.chat-head-close{background:none;border:none;color:#fff;opacity:.75;font-size:18px;cursor:pointer;padding:2px 6px}
+.chat-head-close:hover{opacity:1}
+.chat-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#F9FAFB}
+.chat-msg{max-width:84%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.chat-msg.user{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.chat-msg.bot{align-self:flex-start;background:#fff;border:1px solid var(--border);color:var(--dark);border-bottom-left-radius:4px}
+.chat-msg.typing{align-self:flex-start;background:#fff;border:1px solid var(--border);color:var(--gray);font-size:12px}
+.chat-msg code{background:var(--light);border-radius:4px;padding:1px 5px;font-family:Consolas,monospace;font-size:12px}
+.chat-foot{border-top:1px solid var(--border);padding:10px;display:flex;gap:8px;flex-shrink:0;background:#fff}
+.chat-input{flex:1;resize:none;border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;font-family:inherit;max-height:80px;-webkit-user-select:text;user-select:text}
+.chat-send{background:var(--primary);color:#fff;border:none;border-radius:10px;width:40px;flex-shrink:0;cursor:pointer;font-size:16px}
+.chat-send:disabled{opacity:.5;cursor:default}
+@media(max-width:520px){.chat-panel{right:12px;left:12px;width:auto;bottom:86px}.chat-fab{right:16px;bottom:16px}}
 </style>
 </head>
 <body>
@@ -618,11 +639,140 @@ window.addEventListener('popstate', (e) => {
 });
 
 /* ════════════════════════════════════════
+   챗봇 위젯 (우측 하단 플로팅) — Claude API 기반 사내 FAQ 봇
+   #app 바깥(document.body)에 한 번만 마운트해서 render() 재호출(SPA 페이지 전환)에도 유지됨.
+════════════════════════════════════════ */
+let _chatHistory = []; // {role:'user'|'assistant', text} — 새로고침 시 초기화(영구저장 안 함)
+let _chatOpen = false;
+let _chatSending = false;
+
+function mountChatWidget(){
+  if(document.getElementById('chat-fab')) return;
+  const fab = document.createElement('button');
+  fab.id = 'chat-fab';
+  fab.className = 'chat-fab';
+  fab.innerHTML = '💬';
+  fab.title = '궁금한 점 물어보기';
+  fab.onclick = toggleChatPanel;
+  document.body.appendChild(fab);
+
+  const panel = document.createElement('div');
+  panel.id = 'chat-panel';
+  panel.className = 'chat-panel';
+  panel.innerHTML = `
+    <div class="chat-head">
+      <div class="chat-head-title">🤖 헥토 도우미</div>
+      <button class="chat-head-close" onclick="toggleChatPanel()">✕</button>
+    </div>
+    <div class="chat-body" id="chat-body"></div>
+    <div class="chat-foot">
+      <textarea id="chat-input" class="chat-input" rows="1" placeholder="복지·제도 관련 질문을 입력하세요"></textarea>
+      <button id="chat-send" class="chat-send" onclick="sendChatMessage()">➤</button>
+    </div>`;
+  document.body.appendChild(panel);
+
+  document.getElementById('chat-input').addEventListener('keydown', e => {
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendChatMessage(); }
+  });
+}
+
+function setChatVisible(show){
+  const fab = document.getElementById('chat-fab');
+  if(fab) fab.style.display = show ? 'flex' : 'none';
+  if(!show){
+    const panel = document.getElementById('chat-panel');
+    if(panel) panel.classList.remove('open');
+    _chatOpen = false;
+  }
+}
+
+function toggleChatPanel(){
+  _chatOpen = !_chatOpen;
+  document.getElementById('chat-panel').classList.toggle('open', _chatOpen);
+  if(_chatOpen){
+    const body = document.getElementById('chat-body');
+    if(!body.childElementCount){
+      appendChatBubble('bot', '안녕하세요! 복지제도, 사내 규정, 시스템 사용법 등 궁금한 점을 편하게 물어보세요 😊');
+    }
+    document.getElementById('chat-input').focus();
+  }
+}
+
+// 봇 답변의 **굵게** / `코드` / "* 목록"만 최소 렌더링 — 반드시 HTML 이스케이프를 먼저 해서 XSS 차단
+function renderChatMarkdown(text){
+  const esc = text.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return esc
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+    .replace(/^[ \t]*[*-][ \t]+/gm, '• ');
+}
+
+function appendChatBubble(role, text){
+  const body = document.getElementById('chat-body');
+  const el = document.createElement('div');
+  el.className = 'chat-msg ' + (role==='user' ? 'user' : 'bot');
+  if(role==='bot') el.innerHTML = renderChatMarkdown(text);
+  else el.textContent = text; // 사용자 입력은 가공 없이 textContent, 줄바꿈은 CSS white-space:pre-wrap
+  body.appendChild(el);
+  body.scrollTop = body.scrollHeight;
+  return el;
+}
+
+async function sendChatMessage(){
+  if(_chatSending) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  const user = DB.getCurrent();
+
+  appendChatBubble('user', text);
+  input.value = '';
+  _chatSending = true;
+  document.getElementById('chat-send').disabled = true;
+  const typingEl = appendChatBubble('typing', '입력 중...');
+  typingEl.classList.add('typing');
+
+  try{
+    const res = await fetch(`${SUPA_CFG.url}/functions/v1/hub-chatbot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_CFG.key,
+        'Authorization': 'Bearer ' + SUPA_CFG.key,
+      },
+      body: JSON.stringify({
+        message: text,
+        history: _chatHistory,
+        user: { name: user?.name, email: user?.email, employeeType: user?.employeeType },
+      }),
+    });
+    const data = await res.json();
+    typingEl.remove();
+    if(!res.ok || data.error){
+      appendChatBubble('bot', data.error || '죄송합니다, 답변 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } else {
+      appendChatBubble('bot', data.reply);
+      _chatHistory.push({role:'user', text}, {role:'assistant', text:data.reply});
+      if(_chatHistory.length > 12) _chatHistory = _chatHistory.slice(-12);
+    }
+  } catch(e){
+    typingEl.remove();
+    appendChatBubble('bot', '챗봇 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+  } finally {
+    _chatSending = false;
+    document.getElementById('chat-send').disabled = false;
+  }
+}
+
+/* ════════════════════════════════════════
    RENDER DISPATCHER
 ════════════════════════════════════════ */
 function render(){
   const user = DB.getCurrent();
   const app  = document.getElementById('app');
+
+  mountChatWidget();
+  setChatVisible(!!user && user.status==='approved' && !user.mustChangePw);
 
   if(!user){
     if(state.page==='register') app.innerHTML = renderRegister();

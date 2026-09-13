@@ -1,0 +1,5 @@
+# 정적 사이트로 서빙할 필요 없는 파일 — Edge Function 소스(시스템 프롬프트/지식베이스)와 로컬 설정이
+# https://onboard.hectoqnm.co.kr/supabase/... 로 그대로 다운로드되지 않도록 배포에서 제외
+supabase/
+*.sql
+.claude/
