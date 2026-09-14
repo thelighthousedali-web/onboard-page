@@ -158,10 +158,12 @@ AAA급 게임 QA 경험 실무진 보유(리니지2레볼루션, B&S레볼루션
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? '';
-// 무료 티어는 모델별로 한도가 따로 잡힘(2026-09-11 실측: gemini-3.6-flash 분당 5회) —
-// 1순위가 429(한도초과)/404(단종)/5xx면 다음 모델로 자동 폴백해서 무료로도 동시 사용을 버팀.
+// 무료 티어는 모델별로 한도가 따로 잡힘(2026-09-14 AI Studio 확인: 3.6-flash 분당5/하루20, 3.5·3.1-flash-lite 각 분당15/하루500).
+// 3.6-flash를 1순위로 두면 하루 20건이 오전에 소진돼 답변 품질이 시간대별로 들쭉날쭉 → 사용자 요청으로 Lite를 1순위로(2026-09-14),
+// 3.6-flash는 Lite 둘 다 한도에 걸렸을 때의 예비. 429(한도초과)/404(단종)/5xx면 다음 모델로 자동 폴백.
 // gemini-2.5-flash는 "no longer available to new users"(404)라 제외. GEMINI_MODELS 시크릿(쉼표구분)으로 재배포 없이 교체 가능.
-const GEMINI_MODELS = (Deno.env.get('GEMINI_MODELS') || 'gemini-3.6-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite,gemini-flash-lite-latest')
+// ⚠️ 1순위를 바꾸면 HR 허브 CHAT_PRIMARY_MODEL(챗봇 대화 로그의 "대체 모델 응답" 판정 기준)도 같이 바꿀 것.
+const GEMINI_MODELS = (Deno.env.get('GEMINI_MODELS') || 'gemini-3.5-flash-lite,gemini-3.1-flash-lite,gemini-3.6-flash,gemini-flash-lite-latest')
   .split(',').map((s) => s.trim()).filter(Boolean);
 const MAX_HISTORY_TURNS = 6; // 컨텍스트 비용/무료한도 절감 — 최근 6턴만 유지
 
@@ -270,5 +272,5 @@ Deno.serve(async (req: Request) => {
     });
   } catch (_e) { /* 로그 실패는 무시 */ }
 
-  return json({ reply });
+  return json({ reply, model: usedModel }); // model은 위젯이 안 쓰지만 curl로 어느 모델이 답했는지 확인용
 });
