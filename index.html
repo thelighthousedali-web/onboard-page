@@ -1325,7 +1325,7 @@ function renderUserPage(user){
   const p = state.page;
   if(p==='survey') return renderSurveyPage(user, state.sub);
   if(_pageContent[p]) return _pageContent[p].content_html;
-  if(p==='firstday')    return renderFirstDay();
+  if(p==='firstday')    return renderFirstDay(user);
   if(p==='mission')     return renderMission(user);
   if(p==='company')     return renderCompany();
   if(p==='hectogroup')  return renderHectoGroup();
@@ -1361,7 +1361,7 @@ function renderDashboard(user){
     <div class="card" data-nav="hectogroup"><div class="card-icon">🌐</div><div class="card-title">헥토 그룹 소개</div><div class="card-desc">헥토 그룹 비전·미션, 주요 계열사 사업 소개</div></div>
     <div class="card" data-nav="benefits"><div class="card-icon">🎁</div><div class="card-title">복지제도 안내</div><div class="card-desc">4대보험, 경조사, 명절선물 등 복지 혜택 안내</div></div>`;
   const regularCards = isRegular ? `
-    <div class="card" data-nav="points"><div class="card-icon">💰</div><div class="card-title">현금성 포인트</div><div class="card-desc">뚜벅포인트, 웰니스포인트 등 연간 혜택 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
+    <div class="card" data-nav="points"><div class="card-icon">💰</div><div class="card-title">현금성 포인트</div><div class="card-desc">헥토코인, 웰니스코인 등 연간 혜택 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="loan"><div class="card-icon">🏦</div><div class="card-title">사내 대출제도</div><div class="card-desc">주택구입·전월세 무이자 대출 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>
     <div class="card" data-nav="longservice"><div class="card-icon">🏆</div><div class="card-title">장기 근속 포상</div><div class="card-desc">5년·10년·20년 근속 포상 안내</div><div class="card-tag exclusive-tag">✨ 정규직</div></div>` : '';
   const welfareCards = `
@@ -1736,7 +1736,8 @@ function renderSurveyForm(sub, emp, existing, window_){
 /* ════════════════════════════════════════
    FIRST DAY PAGE
 ════════════════════════════════════════ */
-function renderFirstDay(){
+function renderFirstDay(user){
+  const isRegular = user?.employeeType==='regular';
   return `
 <div class="page-head">
   <div class="breadcrumb"><span>홈</span><span>›</span><span class="cur">입사 첫날 안내</span></div>
@@ -1761,6 +1762,14 @@ function renderFirstDay(){
         <strong>PW</strong>: 본인 <strong>생년월일 6자리</strong> (예: 990101)</div>
       </div>
     </div>
+    ${isRegular?`<div class="step">
+      <div class="step-num">3</div>
+      <div><div class="step-title">헥토월렛(오하이월렛) 가입 · BPO 카드 신청</div>
+        <div class="step-desc"><strong>더헥토앱</strong> 내 <strong>헥토월렛(오하이월렛)</strong>에서 가입 신청 + 내 통장 연결까지 진행 (가입 승인까지 최대 3영업일)<br>
+        가입 승인 후 더헥토앱에서 <strong>BPO 카드</strong>를 신청하면 3~4영업일 내 배송됩니다<br>
+        헥토코인은 걸음 수 기반으로 자동 충전되어 사내 카페(틔움)·BPO 카드 가맹점 결제, 동료 선물에 사용할 수 있습니다 · 자세한 내용은 <a href="#" onclick="navigate('points');return false;" style="color:#e55a2b;font-weight:600;text-decoration:underline;">현금성 포인트</a> 메뉴 참고</div>
+      </div>
+    </div>`:''}
   </div>
   <p class="note">로그인이 되지 않으면 인사팀 또는 IT 담당자에게 문의해주세요.</p>
 </div>
@@ -1994,8 +2003,8 @@ function renderBenefits(user){
     <li><div><strong>연차 유급휴가</strong><div class="sub">그룹웨어(워크쓰루) 전자결재를 통해 휴가신청서 작성</div></div></li>
     <li><div><strong>퇴직연금(DC형)</strong><div class="sub">퇴직연금 운용사 : 우리은행</div></div></li>
     <li><div><strong>조식·중식·석식 제공</strong><div class="sub">Hecto 앱 '채움'에서 이용시간 및 메뉴 확인 가능</div></div></li>
-    ${isRegular?`<li><div><strong>사내 카페 (틔움포인트)</strong><div class="sub">월 22,000 포인트 제공 (매월 1일 자동 충전) · 복지포인트 2만원 차감<br>Hecto 앱 '틔움'에서 메뉴 및 잔여 포인트 확인 가능<br>판매 수익금은 기부되어 나눔 실천</div></div></li>`
-    :`<li><div><strong>무제한 간식 제공</strong><div class="sub">사내 구비된 음료·스낵 자유롭게 이용 가능</div></div></li>`}
+    <li><div><strong>무제한 간식 제공</strong><div class="sub">사내 구비된 음료·스낵 자유롭게 이용 가능</div></div></li>
+    ${isRegular?`<li><div><strong>사내 카페 (틔움)</strong><div class="sub">더헥토앱 헥토월렛(오하이월렛) 바코드로 헥토코인·헥토M코인 결제 (2026-09-01부터 헥토코인 제도로 통합 — 기존 월 22,000P 자동충전·복지포인트 2만원 차감 방식은 폐지)<br>Hecto 앱 '틔움'에서 메뉴 확인 가능 · 잔액은 더헥토앱 헥토월렛에서 확인<br>판매 수익금은 기부되어 나눔 실천</div></div></li>`:''}
     <li><div><strong>사내 도서관</strong><div class="sub">신간·추천·베스트셀러 도서 보유 · 태광타워 11층 위치<br>Hecto 앱 '배움'에서 대여 가능 (1인 1권 / 기본 2주 / 연장 가능)</div></div></li>
   </ul>
 </div>
@@ -2070,15 +2079,29 @@ function renderPoints(){
 <div class="exc-badge">✨ 정규직 전용 혜택</div>
 
 <div class="content-block" style="margin-top:18px">
-  <div class="sec-title">💡 포인트 종류 및 상세 안내</div>
+  <div class="sec-title">🪙 헥토코인 제도 안내 (2026-09-01부터, 1코인 = 1원)</div>
+  <div class="highlight">
+    <p>기존 <strong>뚜벅·틔움·뚜벅투게더·생일축하금</strong> 4개 항목이 <strong>헥토코인</strong> 하나로, <strong>웰니스포인트</strong>는 <strong>웰니스코인</strong>으로 통합됩니다.<br>
+    더헥토앱의 <strong>헥토월렛(오하이월렛)</strong>에 저장되며, <strong>BPO 카드</strong>를 발급받으면 체크카드처럼 일상 결제(국내 BC카드·해외 마스터카드 가맹점, 온라인 포함)에도 사용할 수 있습니다.<br>
+    가입 방법은 <a href="#" onclick="navigate('firstday');return false;" style="color:#e55a2b;font-weight:600;text-decoration:underline;">입사 첫날 안내</a>를 참고하세요.</p>
+  </div>
   <ul class="blist">
-    <li><div><strong>뚜벅포인트</strong> (최대 연 240만원)<div class="sub">걸음 수에 따라 월 최대 20만원 · 1~12월 월별 지급<br>Hecto 앱 'Home'에서 일일 걸음 수 자동 집계 (정확한 집계를 위해 매월 1일 앱에서 동기화 필수)</div></div></li>
-    <li><div><strong>뚜벅투게더</strong> (최대 연 40만원)<div class="sub">1회당 5인 이상 그룹사 임직원이 사진에 포함되어야 함<br>분기 5회 이상: 10만원 / 분기 3~4회: 5만원 / 분기 2회 이하: 지급 없음</div></div></li>
-    <li><div><strong>웰니스포인트</strong> (연 60만원)<div class="sub">중도입사자는 일할 계산 적용 · 자동 충전<br>사용처: 청담이든의원 2층 웰니스 클리닉 (검진, 수액, 피부시술 등)<br>사용 방법: 예약 후 방문 → 이름+전화번호 전달 시 자동 차감 · 영수증 제출 불필요<br>가족 사용 가능 (최초 1회 가족관계증명서 제출 필요)</div></div></li>
-    <li><div><strong>생일 상품권</strong> (연 10만원)<div class="sub">매년 생일 기준 10만원 상품권 지급</div></div></li>
-    <li><div><strong>명절선물</strong> (연 40만원)<div class="sub">설날·추석 각 1회 · 부모님 10만원 + 개인 10만원 = 회당 20만원</div></div></li>
+    <li><div><strong>헥토코인</strong> (연간 최대 290만 코인)<div class="sub">걸음 수 기반 자동 충전 · 월 최대 20만보 = 20만 코인 (Hecto 앱 'Home' 자동 집계, 매월 1일 동기화 필수)<br>뚜벅투게더: 분기 5회 이상 10만 코인 / 3~4회 5만 코인 / 2회 이하 없음<br>생일축하금: 매년 생일이 속한 달에 10만 코인 지급<br>사내 카페(틔움)·BPO 카드 가맹점·온라인·해외 결제, 동료에게 코인 선물 가능<br>현금 인출 불가, 유효기간 없음 · 지급월에 소득세 원천징수</div></div></li>
+    <li><div><strong>헥토M코인</strong> (내 통장 연결, 1만원 단위 자동충전)<div class="sub">본인 자금을 충전해 헥토코인과 함께 BPO 카드로 사용하는 결제수단 (1코인 = 1원)<br>내 통장으로 재송금(출금) 가능 · 소득세 적용 대상 아님<br>헥토코인 잔액이 부족해도 자동충전을 켜두면 결제가 끊기지 않음</div></div></li>
+    <li><div><strong>웰니스코인</strong> (연 60만 코인)<div class="sub">중도입사자는 일할 계산 적용 · 자동 충전<br>사용처: 청담이든의원 2층 웰니스 클리닉 (검진, 수액, 피부시술 등)<br>사용 방법: 예약 후 방문 → 이름+전화번호 전달 시 자동 차감 · 영수증 제출 불필요<br>가족 사용 가능 (최초 1회 가족관계증명서 제출 필요)<br>선물 불가 · 연말 미사용분 소멸 · 청담이든 사용월에 소득세 원천징수</div></div></li>
+    <li><div><strong>명절선물</strong> (연 40만원)<div class="sub">설날·추석 각 1회 · 부모님 10만원 + 개인 10만원 = 회당 20만원 (헥토코인 전환 대상 아님)</div></div></li>
     <li><div><strong>근속 포인트</strong> (최대 연 50만원)<div class="sub">입사일 기준 1년당 5만원 증가 (최대 50만원 / 10년)<br>1년이 지난 해의 다음 해 1월 1일부터 지급 · 증빙 없이 매월 분할 지급</div></div></li>
     <li><div><strong>평가 포인트</strong> (S등급: 100만원)<div class="sub">전년도 개인평가 S등급 시 지급 · 증빙 없이 매월 분할 지급</div></div></li>
+  </ul>
+  <p class="note">⚠️ 헥토코인과 헥토M코인, 웰니스코인은 서로 전환할 수 없습니다. BPO 카드로 결제한 금액(헥토코인·헥토M코인·웰니스코인)은 연말정산 소득공제 대상이며, 틔움 바코드로 결제한 금액은 사내시설 특성상 소득공제 대상에서 제외됩니다.</p>
+</div>
+
+<div class="content-block">
+  <div class="sec-title">💳 BPO 카드 안내</div>
+  <ul class="blist">
+    <li><div><strong>발급 절차</strong><div class="sub">① 더헥토앱에서 헥토월렛(오하이월렛) 가입 신청 + 내 통장 연결 (승인까지 최대 3영업일)<br>② 월렛 가입 승인 후 더헥토앱에서 BPO 카드 신청 (배송까지 3~4영업일)</div></div></li>
+    <li><div><strong>분실 시 재발급</strong><div class="sub">더헥토앱에서 재발급 신청 · 재발급 비용 7,000원은 본인 부담</div></div></li>
+    <li><div><strong>휴직·퇴사 시</strong><div class="sub">BPO 카드와 헥토코인은 잔액이 소진될 때까지 계속 사용 가능 (웰니스코인은 소멸)</div></div></li>
   </ul>
 </div>
 
@@ -2088,16 +2111,14 @@ function renderPoints(){
   <table class="info-tbl">
     <thead><tr><th>항목</th><th>금액</th></tr></thead>
     <tbody>
-      <tr><td>뚜벅포인트</td><td>최대 240만원</td></tr>
-      <tr><td>뚜벅투게더</td><td>최대 40만원</td></tr>
-      <tr><td>웰니스포인트</td><td>60만원</td></tr>
-      <tr><td>생일 상품권</td><td>10만원</td></tr>
+      <tr><td>헥토코인 (뚜벅·틔움·뚜벅투게더·생일축하금 통합)</td><td>최대 290만원</td></tr>
+      <tr><td>웰니스코인</td><td>60만원</td></tr>
       <tr><td>명절선물 (설·추석)</td><td>40만원</td></tr>
       <tr style="background:rgba(255,85,0,.06)"><td><strong>합계</strong></td><td><strong style="color:var(--primary);font-size:15px">최대 390만원</strong></td></tr>
     </tbody>
   </table>
   </div>
-  <p class="note">근속·평가 포인트는 근속연수 및 평가 결과에 따라 추가 지급됩니다.</p>
+  <p class="note">지급 방식만 코인으로 바뀔 뿐, 연간 최대 혜택 합계는 기존과 동일합니다. 근속·평가 포인트는 근속연수 및 평가 결과에 따라 별도로 추가 지급됩니다.</p>
 </div>`;
 }
 
@@ -2476,7 +2497,7 @@ function renderWorkthru(){
     <li><strong>전자결재</strong> — 품의서 작성, 개인경비 청구, 휴가 신청 등</li>
     <li><strong>인사정보시스템</strong> — 증명서 발급, 연차 조회, 급여명세서, 복지물품 신청</li>
     <li><strong>네이버웍스 연결</strong> — 메일·메신저 바로 접속</li>
-    <li><strong>뚜박틔움 포인트</strong> — 개인 걸음수·포인트 안내 (Hecto 앱 연동)</li>
+    <li><strong>헥토코인 잔액</strong> — 개인 걸음수·코인 잔액 안내 (더헥토앱 헥토월렛 연동)</li>
   </ul>
 </div>
 
@@ -2904,7 +2925,7 @@ async function resetPageContent(pageKey){
 function getDefaultHtml(pageKey){
   const mock = {employeeType:'regular'};
   const map = {
-    'firstday':       ()=>renderFirstDay(),
+    'firstday':       ()=>renderFirstDay(mock),
     'company':        ()=>renderCompany(),
     'hectogroup':     ()=>renderHectoGroup(),
     'benefits':       ()=>renderBenefits(mock),
