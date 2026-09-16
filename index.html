@@ -1762,16 +1762,19 @@ function renderFirstDay(user){
         <strong>PW</strong>: 본인 <strong>생년월일 6자리</strong> (예: 990101)</div>
       </div>
     </div>
-    ${isRegular?`<div class="step">
+    <div class="step">
       <div class="step-num">3</div>
-      <div><div class="step-title">헥토월렛(오하이월렛) 가입 · BPO 카드 신청</div>
-        <div class="step-desc"><strong>더헥토앱</strong> 내 <strong>헥토월렛(오하이월렛)</strong>에서 가입 신청 + 내 통장 연결까지 진행 (가입 승인까지 최대 3영업일)<br>
-        가입 승인 후 더헥토앱에서 <strong>BPO 카드</strong>를 신청하면 3~4영업일 내 배송됩니다<br>
-        헥토코인은 걸음 수 기반으로 자동 충전되어 사내 카페(틔움)·BPO 카드 가맹점 결제, 동료 선물에 사용할 수 있습니다 · 자세한 내용은 <a href="#" onclick="navigate('points');return false;" style="color:#e55a2b;font-weight:600;text-decoration:underline;">현금성 포인트</a> 메뉴 참고</div>
+      <div><div class="step-title">헥토월렛(오하이월렛) 가입${isRegular?' · BPO 카드 신청':''}</div>
+        <div class="step-desc"><strong>더헥토앱</strong> 내 <strong>헥토월렛(오하이월렛)</strong>에서 가입 신청${isRegular?' + 내 통장 연결까지 진행':''} (가입 승인까지 최대 3영업일)<br>
+        ${isRegular?`가입 승인 후 더헥토앱에서 <strong>BPO 카드</strong>를 신청하면 3~4영업일 내 배송됩니다<br>
+        가입 시 지급되는 <strong>입사 웰컴 쿠폰</strong>을 헥토월렛에 등록하면 헥토코인이 바로 지급되어, 걸음 수 적립을 기다리지 않고도 사내 카페(틔움) 등을 곧바로 이용할 수 있습니다<br>
+        이후 헥토코인은 걸음 수 기반으로도 자동 충전되어 사내 카페(틔움)·BPO 카드 가맹점 결제, 동료 선물에 사용할 수 있습니다 · 자세한 내용은 <a href="#" onclick="navigate('points');return false;" style="color:#e55a2b;font-weight:600;text-decoration:underline;">현금성 포인트</a> 메뉴 참고`
+        :`가입 시 지급되는 <strong>입사 웰컴 쿠폰(20,000코인)</strong>을 헥토월렛에 등록하면 헥토코인이 지급되어 사내 카페(틔움) 등에서 더헥토앱 바코드로 사용할 수 있습니다<br>
+        (걸음 수 기반 정기 적립·BPO 카드는 정규직 전용이며, 계약직은 입사 시 웰컴 쿠폰만 1회 지급됩니다)`}</div>
       </div>
-    </div>`:''}
+    </div>
   </div>
-  <p class="note">로그인이 되지 않으면 인사팀 또는 IT 담당자에게 문의해주세요.</p>
+  <p class="note">로그인이 되지 않으면 경영지원팀에게 문의해주세요.</p>
 </div>
 
 <div class="content-block">
@@ -1782,7 +1785,6 @@ function renderFirstDay(user){
     <tbody>
       <tr><td>인사담당자 티타임</td><td>인사담당자와 티타임 진행</td></tr>
       <tr><td>회사 소개</td><td>회사소개 및 복지제도 안내</td></tr>
-      <tr><td>카페 포인트</td><td>카페 포인트 바코드 생성 및 부여</td></tr>
       <tr><td>얼굴 등록</td><td>사무실 출입을 위한 얼굴 등록</td></tr>
     </tbody>
   </table>
@@ -2004,7 +2006,7 @@ function renderBenefits(user){
     <li><div><strong>퇴직연금(DC형)</strong><div class="sub">퇴직연금 운용사 : 우리은행</div></div></li>
     <li><div><strong>조식·중식·석식 제공</strong><div class="sub">Hecto 앱 '채움'에서 이용시간 및 메뉴 확인 가능</div></div></li>
     <li><div><strong>무제한 간식 제공</strong><div class="sub">사내 구비된 음료·스낵 자유롭게 이용 가능</div></div></li>
-    ${isRegular?`<li><div><strong>사내 카페 (틔움)</strong><div class="sub">더헥토앱 헥토월렛(오하이월렛) 바코드로 헥토코인·헥토M코인 결제 (2026-09-01부터 헥토코인 제도로 통합 — 기존 월 22,000P 자동충전·복지포인트 2만원 차감 방식은 폐지)<br>Hecto 앱 '틔움'에서 메뉴 확인 가능 · 잔액은 더헥토앱 헥토월렛에서 확인<br>판매 수익금은 기부되어 나눔 실천</div></div></li>`:''}
+    ${isRegular?`<li><div><strong>사내 카페 (틔움)</strong><div class="sub">더헥토앱 헥토월렛(오하이월렛) 바코드로 헥토코인·헥토M코인 결제<br>Hecto 앱 '틔움'에서 메뉴 확인 가능 · 잔액은 더헥토앱 헥토월렛에서 확인<br>판매 수익금은 기부되어 나눔 실천</div></div></li>`:''}
     <li><div><strong>사내 도서관</strong><div class="sub">신간·추천·베스트셀러 도서 보유 · 태광타워 11층 위치<br>Hecto 앱 '배움'에서 대여 가능 (1인 1권 / 기본 2주 / 연장 가능)</div></div></li>
   </ul>
 </div>
