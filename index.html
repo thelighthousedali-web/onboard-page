@@ -95,6 +95,13 @@ body.impersonating .layout{margin-top:38px}
 
 /* ── MAIN ── */
 .main{margin-left:256px;flex:1;padding:30px 36px;min-height:100vh}
+/* MY | 리더용 전환 스위치(2026-11-13) */
+.mode-switch-wrap{display:flex;justify-content:center;margin:-14px 0 18px}
+.mode-switch{display:inline-flex;background:#F3F4F6;border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px}
+.ms-item{border:none;background:transparent;padding:7px 22px;border-radius:8px;font-size:13px;font-weight:700;color:var(--gray);cursor:pointer;font-family:inherit}
+.ms-item:hover:not(.ms-on){color:var(--dark)}
+.ms-on{background:#fff;color:var(--dark);box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:default}
+.ms-item:disabled{opacity:.6;cursor:wait}
 .page-head{margin-bottom:24px}
 .page-title{font-size:24px;font-weight:700}
 .page-sub{font-size:13px;color:var(--gray);margin-top:4px}
@@ -448,6 +455,31 @@ async function portalCall(body){
 // 확인해 로그인 토큰을 준다(Client ID는 공개값, Secret은 Supabase Secrets에만). 돌아오는 주소는 등록값과 같게 항상 사이트 루트.
 const NAVERWORKS_CLIENT_ID = '0IltKJkoEO9sjnhgrioG';
 function naverworksRedirectUri(){ return location.origin + '/'; }
+
+// ── MY | 리더용 전환(2026-11-13) ──
+// HR 허브 계정(팀장·실장·인사·관리자)이 있으면 화면 위에 스위치를 보여준다. '리더용'을 누르면 portal-auth가 1분짜리 통행권을 만들고
+// HR 허브가 그 통행권으로 로그인한다(관리자·인사는 HR 허브에서 2차 인증을 그대로 거침). 통행권은 주소의 # 뒤에 실어 서버 기록에 안 남김.
+const HUB_SITE_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:3457/' : 'https://hr.hectoqnm.co.kr/';
+function hasHubAccess(){ return localStorage.getItem('hq_hashub') === '1' && !sessionStorage.getItem('hq_impersonating'); }
+function setHubAccess(v){ if(v) localStorage.setItem('hq_hashub','1'); else localStorage.removeItem('hq_hashub'); }
+function renderModeSwitch(){
+  if(!hasHubAccess()) return '';
+  return `<div class="mode-switch-wrap"><div class="mode-switch" role="tablist" aria-label="화면 전환">
+    <span class="ms-item ms-on" role="tab" aria-selected="true">MY</span>
+    <button type="button" class="ms-item" role="tab" aria-selected="false" onclick="goLeaderMode(this)">리더용</button>
+  </div></div>`;
+}
+async function goLeaderMode(btn){
+  if(btn) { btn.disabled = true; btn.textContent = '이동 중...'; }
+  const { ok, data } = await portalCall({ action: 'handoff_to_hub', token: DB.getToken() });
+  if(!ok || !data.handoffToken){
+    if(btn){ btn.disabled = false; btn.textContent = '리더용'; }
+    alert(data.error || '리더용 화면으로 이동하지 못했습니다');
+    if(data.expired) logout();
+    return;
+  }
+  location.href = HUB_SITE_URL + '#handoff=' + encodeURIComponent(data.handoffToken);
+}
 function startNaverWorksLogin(){
   const st = crypto.randomUUID();
   sessionStorage.setItem('nw_oauth_state', st);
@@ -853,19 +885,10 @@ function renderLogin(){
         <div class="tagline">헥토큐앤엠 신규입사자 온보딩 허브</div>
       </div>
       <h2 class="auth-h">로그인</h2>
-      <p class="auth-sub">회사 계정으로 로그인하세요</p>
+      <p class="auth-sub">네이버웍스 계정으로 로그인하세요</p>
       <div id="login-msg"></div>
-      <div class="fgroup">
-        <label class="flabel">이메일</label>
-        <input class="finput" id="l-email" type="email" placeholder="이메일 주소 입력" autocomplete="email">
-      </div>
-      <div class="fgroup">
-        <label class="flabel">비밀번호</label>
-        <input class="finput" id="l-pw" type="password" placeholder="비밀번호 입력">
-      </div>
-      <button class="btn btn-primary btn-full" id="login-btn">로그인</button>
-      <div style="display:flex;align-items:center;gap:10px;margin:16px 0 10px;color:#9CA3AF;font-size:12px"><div style="flex:1;height:1px;background:#E5E7EB"></div>또는<div style="flex:1;height:1px;background:#E5E7EB"></div></div>
-      <button class="btn btn-full" id="nw-login-btn" style="background:#00C73C;color:#fff;border:none;font-weight:700">네이버웍스로 로그인</button>
+      <!-- 2026-11-13: 신규입사자도 입사 후에만 쓰므로 비밀번호 로그인 없이 네이버웍스 로그인만. 리더는 로그인 후 위쪽 '리더용'으로 HR 허브 이동 -->
+      <button class="btn btn-full" id="nw-login-btn" style="background:#00C73C;color:#fff;border:none;font-weight:700;padding:15px;font-size:15px">네이버웍스로 로그인</button>
       <div class="auth-footer">
         계정 생성 문의는 김강현 책임에게 연락해 주세요
       </div>
@@ -1220,7 +1243,7 @@ ${impersonating ? `
       </button>
     </div>
   </aside>
-  <main class="main">${content}</main>
+  <main class="main">${renderModeSwitch()}${content}</main>
 </div>`;
 }
 
@@ -1251,6 +1274,7 @@ function logout(){
   if (cur) logActivity('logout', cur);
   DB.clearCurrent();
   sessionStorage.removeItem('hq_impersonating');
+  setHubAccess(false);
   _missionStatus = null; _dashSurveyStatus = null; pmReset(); // 다음 로그인 사용자에게 이전 사용자 캐시가 새지 않도록
   nav('login', null, true);
 }
@@ -3320,6 +3344,23 @@ function formatDate(iso){
   // 2026-11-12 서버 로그인 전환 전에 저장된 로그인(토큰 없음, 비밀번호가 들어 있던 정보)은 버리고 다시 로그인하게 함
   if(DB.getCurrent() && !DB.getToken()) DB.clearCurrent();
 
+  // HR 허브 '리더용 → MY' 전환으로 넘어온 경우(#handoff=통행권, 1분 유효)
+  let handoffError = '';
+  const handoffMatch = location.hash.match(/^#handoff=([^&]+)/);
+  if(handoffMatch){
+    history.replaceState({}, '', location.pathname + location.search); // 통행권을 주소창·기록에서 바로 지움
+    const { ok: hoOk, data: ho } = await portalCall({ action: 'handoff_login', handoffToken: decodeURIComponent(handoffMatch[1]) });
+    if(hoOk){
+      DB.setCurrent(ho.user, ho.token);
+      sessionStorage.removeItem('hq_impersonating');
+      setHubAccess(!!ho.hasHub);
+      _missionStatus = null; _dashSurveyStatus = null; pmReset();
+      logActivity('login', ho.user);
+    } else {
+      handoffError = ho.error || 'MY 화면으로 전환하지 못했습니다. 다시 로그인해 주세요.';
+    }
+  }
+
   // 관리자 대행 로그인 토큰 처리 (HR 허브 → 온보딩 허브 크로스도메인 임퍼스네이션) — 1회용 토큰을 portal-auth가 소비
   const impParams = new URLSearchParams(location.search);
   const impToken = impParams.get('impersonate_token');
@@ -3329,6 +3370,7 @@ function formatDate(iso){
       DB.setCurrent(imp.user, imp.token);
       _missionStatus = null; _dashSurveyStatus = null; pmReset(); // 대행로그인 대상이 바뀌었으니 이전 캐시 무효화
       sessionStorage.setItem('hq_impersonating','1');
+      setHubAccess(false);
     }
     history.replaceState({}, '', location.pathname);
   }
@@ -3349,6 +3391,7 @@ function formatDate(iso){
       if(nwOk){
         DB.setCurrent(nw.user, nw.token);
         sessionStorage.removeItem('hq_impersonating');
+        setHubAccess(!!nw.hasHub);
         _missionStatus = null; _dashSurveyStatus = null; pmReset();
         logActivity('login', nw.user);
       } else {
@@ -3361,7 +3404,7 @@ function formatDate(iso){
   let loadOk = true;
   if(DB.getCurrent()){
     const { ok: sessOk, status: sessStatus, data: sess } = await portalCall({ action: 'session', token: DB.getToken() });
-    if(sessOk) DB.setCurrent(sess.user);
+    if(sessOk){ DB.setCurrent(sess.user); if(!sessionStorage.getItem('hq_impersonating')) setHubAccess(!!sess.hasHub); }
     else if(sessStatus === 0) loadOk = false;
     else DB.clearCurrent();
   }
@@ -3384,7 +3427,7 @@ function formatDate(iso){
   if(!initUser){
     state.page = 'login';
     render();
-    if(nwError) showMsg('login-msg', 'error', nwError);
+    if(nwError || handoffError) showMsg('login-msg', 'error', nwError || handoffError);
   } else {
     // 세션이 localStorage로 오래 유지돼서 로그인 폼을 다시 안 타는 재방문자가 많아
     // "로그인 이력"에 실사용이 거의 안 잡히던 문제(2026-08-05 발견) — 대행 로그인이
