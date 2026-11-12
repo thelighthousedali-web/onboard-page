@@ -102,6 +102,8 @@ body.impersonating .layout{margin-top:38px}
 .ms-item:hover:not(.ms-on){color:var(--dark)}
 .ms-on{background:#fff;color:var(--dark);box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:default}
 .ms-item:disabled{opacity:.6;cursor:wait}
+/* 넓은 화면에서는 스위치를 따로 한 줄 차지하지 않고 페이지 제목 줄 가운데에 겹쳐 둔다(위쪽 여백 줄이기, 2026-11-13) */
+@media(min-width:1280px){.mode-switch-wrap{position:relative;height:0;margin:0;z-index:5}.mode-switch-wrap .mode-switch{position:absolute;left:50%;transform:translateX(-50%);top:-6px}}
 .page-head{margin-bottom:24px}
 .page-title{font-size:24px;font-weight:700}
 .page-sub{font-size:13px;color:var(--gray);margin-top:4px}
