@@ -330,6 +330,36 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .chat-send{background:var(--primary);color:#fff;border:none;border-radius:10px;width:40px;flex-shrink:0;cursor:pointer;font-size:16px}
 .chat-send:disabled{opacity:.5;cursor:default}
 @media(max-width:520px){.chat-panel{right:12px;left:12px;width:auto;bottom:74px}.chat-fab{right:16px;bottom:16px;height:46px;font-size:14px}}
+/* 내 목표(성과관리) */
+.pm-banner .sec-title{margin-bottom:10px}
+.pm-banner-warn{border-color:#FCA5A5;background:#FEF2F2}
+.pm-status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-8px 0 16px}
+.pm-badge{display:inline-block;padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:700;background:#F3F4F6;color:#374151}
+.pm-badge-submitted{background:#EFF6FF;color:#1D4ED8}.pm-badge-approved{background:#ECFDF5;color:#047857}
+.pm-badge-rejected{background:#FEF2F2;color:#B91C1C}.pm-badge-draft{background:#FFF7ED;color:#C2410C}
+.pm-meta{font-size:12.5px;color:var(--gray)}
+.pm-notice{padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:13.5px;font-weight:600}
+.pm-notice-success{background:#ECFDF5;color:#047857;border:1px solid #A7F3D0}.pm-notice-error{background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA}
+.pm-reject{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13.5px;white-space:pre-wrap}
+.pm-reject b{display:block;margin-bottom:4px}
+.pm-goal{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;background:#FAFAFA}
+.pm-goal-ro{background:#fff}
+.pm-goal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:14px}
+.pm-in,.pm-ta{width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;background:#fff;margin-bottom:8px}
+.pm-ta{resize:vertical;min-height:70px;line-height:1.55}
+.pm-in:focus,.pm-ta:focus,.pm-w input:focus{outline:none;border-color:var(--primary)}
+.pm-w{font-size:13px;color:var(--gray);display:flex;align-items:center;gap:6px}
+.pm-w input{width:80px;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-family:inherit;font-size:14px;text-align:right}
+.pm-wt{font-weight:700;color:var(--primary);white-space:nowrap}
+.pm-crit{font-size:13.5px;color:#374151;line-height:1.6}
+.pm-link{background:none;border:none;color:var(--gray);font-size:12.5px;cursor:pointer;text-decoration:underline;font-family:inherit}
+.pm-actions-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:4px 0 16px}
+.pm-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.pm-btn-ghost{background:#fff;border:1px solid var(--border);color:#374151}
+.pm-btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.pm-sum{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px}
+.pm-sum-ok{background:#ECFDF5;color:#047857}.pm-sum-bad{background:#FEF2F2;color:#B91C1C}
+.pm-guide ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.8;color:#374151}
 </style>
 </head>
 <body>
@@ -1091,6 +1121,7 @@ function renderLayout(user, content){
       <div class="nav-item ${state.page==='mission'?'active':''}" data-nav="mission">
         <span class="ni">🚀</span>온보딩 미션
       </div>
+      ${renderGoalNavItem()}
       <div class="nav-sec">회사 소개</div>
       <div class="nav-item ${state.page==='company'?'active':''}" data-nav="company">
         <span class="ni">🏢</span>헥토큐앤엠 소개
@@ -1220,7 +1251,7 @@ function logout(){
   if (cur) logActivity('logout', cur);
   DB.clearCurrent();
   sessionStorage.removeItem('hq_impersonating');
-  _missionStatus = null; _dashSurveyStatus = null; // 다음 로그인 사용자에게 이전 사용자 캐시가 새지 않도록
+  _missionStatus = null; _dashSurveyStatus = null; pmReset(); // 다음 로그인 사용자에게 이전 사용자 캐시가 새지 않도록
   nav('login', null, true);
 }
 
@@ -1321,9 +1352,233 @@ function renderAdminAll(users){
 /* ════════════════════════════════════════
    USER PAGES DISPATCHER
 ════════════════════════════════════════ */
+/* ════════════════════════════════════════
+   내 목표 (자체 성과관리, 2026-11 — 레몬베이스 대체)
+   데이터는 pm 함수(hr-hub 저장소 supabase/functions/pm)만 다룬다. pm_* 테이블은 공개 키로 못 읽음.
+   메뉴는 열린(또는 지난) 목표 사이클이 있을 때만 보인다 → 사이클을 열기 전에는 직원에게 안 보임.
+════════════════════════════════════════ */
+const PM_URL = `${SUPA_CFG.url}/functions/v1/pm`;
+let _pmMe = null;      // pm 'me' 결과(메뉴·대시보드 안내용). 실패하면 {cycles:[]}
+let _pmMeLoading = false;
+let _pmSheet = null;   // 내 목표 화면 데이터
+let _pmDraft = null;   // 편집 중인 목표 [{title,criteria,weight}]
+let _pmNotice = null;  // 저장·제출 후 화면 위에 잠시 보여줄 안내 {type,text,until}
+function pmNotify(type, text){ _pmNotice = { type, text, until: Date.now() + 8000 }; }
+let _pmBusy = false;
+const PM_STATUS = { none:'미작성', draft:'작성중', submitted:'제출 · 승인 대기', approved:'승인 완료', rejected:'반려 · 수정 필요' };
+
+async function pmCall(body){
+  try {
+    const res = await fetch(PM_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPA_CFG.key}` },
+      body: JSON.stringify({ portalToken: DB.getToken(), ...body }),
+    });
+    const data = await res.json().catch(()=>({}));
+    return { ok: res.ok, status: res.status, data };
+  } catch(e){
+    return { ok: false, status: 0, data: { error: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.' } };
+  }
+}
+function pmReset(){ _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; }
+
+async function loadPmMe(){
+  if(_pmMeLoading) return;
+  _pmMeLoading = true;
+  const { ok, data } = await pmCall({ action: 'me' });
+  _pmMeLoading = false;
+  _pmMe = ok ? data : { cycles: [] };
+  if(ok && (data.cycles||[]).length) render(); // 메뉴·대시보드 안내가 생길 때만 다시 그림
+}
+
+function renderGoalNavItem(){
+  if(_pmMe === null){ loadPmMe(); return ''; }
+  if(!(_pmMe.cycles||[]).length) return '';
+  return `<div class="nav-item ${state.page==='goals'?'active':''}" data-nav="goals"><span class="ni">🎯</span>내 목표</div>`;
+}
+
+function renderGoalBanner(){
+  const g = _pmMe?.myOpenGoal;
+  if(!g || g.status === 'approved') return '';
+  const msg = {
+    none: '목표를 아직 작성하지 않았습니다.',
+    draft: '작성 중인 목표가 있습니다. 제출해야 팀장에게 전달됩니다.',
+    rejected: '목표가 반려되었습니다. 사유를 확인하고 다시 제출해 주세요.',
+    submitted: '목표를 제출했습니다. 팀장 승인을 기다리는 중입니다.',
+  }[g.status] || '';
+  const until = g.ends_on ? ` <span style="color:var(--gray);font-weight:400">(${fmtGoalDate(g.ends_on)}까지)</span>` : '';
+  return `
+<div class="content-block pm-banner ${g.status==='rejected'?'pm-banner-warn':''}" style="margin-bottom:20px">
+  <div class="sec-title">🎯 ${escapeHtml(g.cycleName)} 수립${until}</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div>${msg}</div>
+    <button class="btn btn-primary btn-sm" data-nav="goals">${g.status==='submitted'?'내 목표 보기':'목표 작성하기'}</button>
+  </div>
+</div>`;
+}
+function fmtGoalDate(s){ if(!s) return ''; const [y,m,d] = String(s).split('-'); return `${Number(m)}월 ${Number(d)}일`; }
+
+async function loadPmSheet(){
+  const { ok, status, data } = await pmCall({ action: 'my_sheet' });
+  if(!ok){
+    _pmSheet = { error: status === 401 ? '로그인이 만료되었습니다. 로그아웃 후 다시 로그인해 주세요.' : (data.error || '목표 정보를 불러오지 못했습니다.') };
+  } else {
+    _pmSheet = data;
+    const goals = (data.goals||[]).map(g=>({ title:g.title||'', criteria:g.criteria||'', weight: g.weight ?? '' }));
+    const min = data.cycle?.min_goals || 3;
+    while(goals.length < min) goals.push({ title:'', criteria:'', weight:'' });
+    _pmDraft = goals;
+  }
+  render();
+}
+
+function pmSum(){ return (_pmDraft||[]).reduce((a,g)=>a + (parseInt(g.weight,10)||0), 0); }
+function pmRefreshSum(){
+  const el = document.getElementById('pm-sum');
+  if(!el) return;
+  const sum = pmSum();
+  el.textContent = `가중치 합 ${sum} / 100`;
+  el.className = 'pm-sum ' + (sum === 100 ? 'pm-sum-ok' : 'pm-sum-bad');
+}
+function pmSet(i, key, val){
+  if(!_pmDraft?.[i]) return;
+  _pmDraft[i][key] = key === 'weight' ? (val === '' ? '' : parseInt(val,10)) : val;
+  if(key === 'weight') pmRefreshSum();
+}
+function pmAddGoal(){
+  const max = _pmSheet?.cycle?.max_goals || 5;
+  if((_pmDraft||[]).length >= max) return;
+  _pmDraft.push({ title:'', criteria:'', weight:'' });
+  render();
+}
+function pmDelGoal(i){
+  const g = _pmDraft?.[i];
+  if(!g) return;
+  if((g.title || g.criteria) && !confirm(`${i+1}번 목표를 지울까요?`)) return;
+  _pmDraft.splice(i,1);
+  render();
+}
+async function pmSave(submit){
+  if(_pmBusy) return;
+  const c = _pmSheet?.cycle;
+  if(!c) return;
+  const goals = (_pmDraft||[]).map(g=>({ title:String(g.title||'').trim(), criteria:String(g.criteria||'').trim(), weight: parseInt(g.weight,10)||0 }));
+  if(submit){
+    const filled = goals.filter(g=>g.title||g.criteria||g.weight);
+    if(filled.length < c.min_goals || filled.length > c.max_goals){ pmNotify('error', `목표는 ${c.min_goals}~${c.max_goals}개여야 합니다.`); render(); return; }
+    if(pmSum() !== 100){ pmNotify('error', `가중치 합이 100이어야 합니다(지금 ${pmSum()}).`); render(); return; }
+    if(!confirm('제출하면 팀장이 승인·반려하기 전까지 고칠 수 없습니다. 제출할까요?')) return;
+  }
+  _pmBusy = true;
+  const payloadGoals = submit ? goals.filter(g=>g.title||g.criteria||g.weight) : goals;
+  const { ok, data } = await pmCall({ action: submit ? 'submit' : 'save_draft', cycleId: c.id, goals: payloadGoals });
+  _pmBusy = false;
+  if(!ok){ pmNotify('error',  data.error || '저장하지 못했습니다.'); render(); return; }
+  pmNotify('success', submit
+    ? `제출했습니다. ${data.approver?.name ? data.approver.name + '님에게' : '경영지원팀에'} 승인 요청이 전달됩니다.`
+    : '임시저장했습니다. 제출 전까지 언제든 고칠 수 있습니다.');
+  _pmSheet = null; _pmMe = null;
+  render();
+}
+async function pmRecall(){
+  if(_pmBusy || !_pmSheet?.cycle) return;
+  if(!confirm('제출을 취소하고 다시 고칠까요? 팀장 승인 요청도 함께 취소됩니다.')) return;
+  _pmBusy = true;
+  const { ok, data } = await pmCall({ action: 'recall', cycleId: _pmSheet.cycle.id });
+  _pmBusy = false;
+  if(ok) pmNotify('success', '제출을 취소했습니다. 고친 뒤 다시 제출해 주세요.');
+  else pmNotify('error', data.error || '제출 취소에 실패했습니다.');
+  _pmSheet = null; _pmMe = null;
+  render();
+}
+
+function renderGoals(user){
+  if(_pmSheet === null){
+    loadPmSheet();
+    return `<div class="content-block"><div class="loading"><div class="spinner"></div></div></div>`;
+  }
+  // 저장 직후 화면이 몇 번 다시 그려져도(메뉴·안내 새로고침) 안내가 남도록 몇 초 동안 유지
+  const notice = (_pmNotice && Date.now() < _pmNotice.until) ? `<div class="pm-notice pm-notice-${_pmNotice.type}">${escapeHtml(_pmNotice.text)}</div>` : '';
+  if(_pmSheet.error) return `${notice}<div class="content-block">${escapeHtml(_pmSheet.error)}</div>`;
+  const d = _pmSheet, c = d.cycle;
+  if(!c) return `<div class="page-head"><div class="page-title">🎯 내 목표</div></div><div class="content-block">지금 진행 중인 목표 수립이 없습니다.</div>`;
+  const st = d.sheet?.status || 'none';
+  const period = (c.starts_on || c.ends_on) ? `${c.starts_on ? fmtGoalDate(c.starts_on) : ''} ~ ${c.ends_on ? fmtGoalDate(c.ends_on) : ''}` : '';
+  const approverName = d.approver?.name ? `${escapeHtml(d.approver.name)}님` : '경영지원팀';
+  const head = `
+<div class="page-head">
+  <div class="page-title">🎯 ${escapeHtml(c.name)}</div>
+  <div class="page-sub">${period ? `작성 기간 ${period} · ` : ''}${c.status==='closed' ? '작성 기간이 끝났습니다 · ' : ''}승인자 ${approverName}</div>
+</div>
+${notice}
+<div class="pm-status-row"><span class="pm-badge pm-badge-${st}">${PM_STATUS[st]}</span>
+  ${d.sheet?.submitted_at ? `<span class="pm-meta">제출 ${fmtGoalDate(d.sheet.submitted_at.slice(0,10))}</span>` : ''}
+  ${st==='approved' && d.sheet?.decided_at ? `<span class="pm-meta">승인 ${fmtGoalDate(d.sheet.decided_at.slice(0,10))}</span>` : ''}
+</div>`;
+
+  if(!d.eligible && !d.sheet){
+    return head + `<div class="content-block">이번 목표 수립 대상이 아닙니다. 대상이어야 한다면 경영지원팀에 알려 주세요.</div>`;
+  }
+  const rejectBox = st === 'rejected' && d.sheet?.reject_reason
+    ? `<div class="pm-reject"><b>반려 사유</b><div>${escapeHtml(d.sheet.reject_reason)}</div></div>` : '';
+  const reopenBox = st === 'draft' && d.sheet?.decided_at && d.sheet?.reject_reason
+    ? `<div class="pm-reject" style="background:#FFFBEB;border-color:#FDE68A"><b>승인 취소 사유</b><div>${escapeHtml(d.sheet.reject_reason)}</div></div>` : '';
+
+  if(d.canEdit){
+    const max = c.max_goals || 5;
+    const rows = (_pmDraft||[]).map((g,i)=>`
+<div class="pm-goal">
+  <div class="pm-goal-head"><b>목표 ${i+1}</b>${(_pmDraft.length > 1) ? `<button class="pm-link" onclick="pmDelGoal(${i})">삭제</button>` : ''}</div>
+  <input class="pm-in" maxlength="200" placeholder="목표 제목 (예: 급여 마감 자동화)" value="${escapeHtml(g.title)}" oninput="pmSet(${i},'title',this.value)">
+  <textarea class="pm-ta" maxlength="2000" rows="3" placeholder="달성 기준 — 무엇을, 얼마나, 언제까지 (예: 2027년 6월까지 급여 대사 수작업 0건)" oninput="pmSet(${i},'criteria',this.value)">${escapeHtml(g.criteria)}</textarea>
+  <div class="pm-w">가중치 <input type="number" min="0" max="100" step="5" value="${g.weight===''?'':Number(g.weight)}" oninput="pmSet(${i},'weight',this.value)"> %</div>
+</div>`).join('');
+    const sum = pmSum();
+    return head + rejectBox + reopenBox + `
+<div class="content-block">
+  <div class="sec-title">목표 작성 <span style="font-weight:400;font-size:13px;color:var(--gray)">${c.min_goals}~${max}개 · 가중치 합 100</span></div>
+  ${rows}
+  <div class="pm-actions-top">
+    ${(_pmDraft||[]).length < max ? `<button class="btn pm-btn-ghost btn-sm" onclick="pmAddGoal()">+ 목표 추가</button>` : `<span class="pm-meta">최대 ${max}개</span>`}
+    <span id="pm-sum" class="pm-sum ${sum===100?'pm-sum-ok':'pm-sum-bad'}">가중치 합 ${sum} / 100</span>
+  </div>
+  <div class="pm-actions">
+    <button class="btn btn-sm pm-btn-ghost" onclick="pmSave(false)">임시저장</button>
+    <button class="btn btn-primary btn-sm" onclick="pmSave(true)">제출</button>
+  </div>
+</div>
+<div class="content-block pm-guide">
+  <div class="sec-title">작성 안내</div>
+  <ul>
+    <li>올해 꼭 해내야 할 일을 ${c.min_goals}~${max}개로 추립니다. 승인된 목표는 연말 본인평가의 업적 항목이 됩니다.</li>
+    <li>달성 기준은 다른 사람이 읽어도 달성 여부를 판단할 수 있게 숫자·기한으로 적습니다.</li>
+    <li>가중치는 중요한 목표에 더 크게, 합계 100으로 맞춥니다.</li>
+    <li>제출하면 ${approverName}에게 승인 요청이 갑니다. 승인 후 바꾸려면 승인자에게 "승인 취소"를 요청합니다.</li>
+  </ul>
+</div>`;
+  }
+
+  // 읽기 전용(제출·승인·기간 종료)
+  const goals = d.goals || [];
+  const list = goals.length ? goals.map((g,i)=>`
+<div class="pm-goal pm-goal-ro">
+  <div class="pm-goal-head"><b>${i+1}. ${escapeHtml(g.title)}</b><span class="pm-wt">${g.weight}%</span></div>
+  <div class="pm-crit">${escapeHtml(g.criteria).replace(/\n/g,'<br>')}</div>
+</div>`).join('') : `<div style="color:var(--gray)">작성한 목표가 없습니다.</div>`;
+  const canRecall = st === 'submitted' && c.status === 'open';
+  return head + rejectBox + `
+<div class="content-block">
+  <div class="sec-title">내 목표</div>
+  ${list}
+  ${canRecall ? `<div class="pm-actions"><button class="btn btn-sm pm-btn-ghost" onclick="pmRecall()">제출 취소하고 고치기</button></div>` : ''}
+  ${st === 'approved' ? `<div class="pm-meta" style="margin-top:10px">목표를 바꿔야 하면 ${approverName}에게 승인 취소를 요청해 주세요.</div>` : ''}
+</div>`;
+}
+
 function renderUserPage(user){
   const p = state.page;
   if(p==='survey') return renderSurveyPage(user, state.sub);
+  if(p==='goals') return renderGoals(user);
   if(_pageContent[p]) return _pageContent[p].content_html;
   if(p==='firstday')    return renderFirstDay(user);
   if(p==='mission')     return renderMission(user);
@@ -1393,6 +1648,7 @@ ${(() => {
     if (!surveyHtml)  return missionHtml;               // 서베이 일정이 아직 없음 → 미션만 단독 노출
     return `<div class="dash-two-col">${missionHtml}${surveyHtml}</div>`;
   })()}
+${renderGoalBanner()}
 <div class="page-head">
   <div class="page-title">빠른 메뉴</div>
   <div class="page-sub">아래 항목을 클릭하여 원하는 정보를 확인하세요</div>
@@ -3071,7 +3327,7 @@ function formatDate(iso){
     const { ok: impOk, data: imp } = await portalCall({ action: 'impersonate', impersonate_token: impToken });
     if(impOk){
       DB.setCurrent(imp.user, imp.token);
-      _missionStatus = null; _dashSurveyStatus = null; // 대행로그인 대상이 바뀌었으니 이전 캐시 무효화
+      _missionStatus = null; _dashSurveyStatus = null; pmReset(); // 대행로그인 대상이 바뀌었으니 이전 캐시 무효화
       sessionStorage.setItem('hq_impersonating','1');
     }
     history.replaceState({}, '', location.pathname);
@@ -3093,7 +3349,7 @@ function formatDate(iso){
       if(nwOk){
         DB.setCurrent(nw.user, nw.token);
         sessionStorage.removeItem('hq_impersonating');
-        _missionStatus = null; _dashSurveyStatus = null;
+        _missionStatus = null; _dashSurveyStatus = null; pmReset();
         logActivity('login', nw.user);
       } else {
         nwError = nw.error || '네이버웍스 로그인에 실패했습니다.';
