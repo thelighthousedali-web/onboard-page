@@ -414,6 +414,19 @@ async function portalCall(body){
   }
 }
 
+// 네이버웍스 로그인(2026-11-12) — 총무 근태 시스템과 같은 네이버웍스 앱. 네이버웍스가 돌려준 code는 portal-auth가 서버에서
+// 확인해 로그인 토큰을 준다(Client ID는 공개값, Secret은 Supabase Secrets에만). 돌아오는 주소는 등록값과 같게 항상 사이트 루트.
+const NAVERWORKS_CLIENT_ID = '0IltKJkoEO9sjnhgrioG';
+function naverworksRedirectUri(){ return location.origin + '/'; }
+function startNaverWorksLogin(){
+  const st = crypto.randomUUID();
+  sessionStorage.setItem('nw_oauth_state', st);
+  if(pendingSurvey) sessionStorage.setItem('nw_survey', JSON.stringify(pendingSurvey));
+  else sessionStorage.removeItem('nw_survey');
+  const qs = new URLSearchParams({ client_id: NAVERWORKS_CLIENT_ID, redirect_uri: naverworksRedirectUri(), scope: 'user.profile.read', response_type: 'code', state: st });
+  location.href = 'https://auth.worksmobile.com/oauth2/v2.0/authorize?' + qs.toString();
+}
+
 /* ════════════════════════════════════════
    서베이 정의 (온보딩 30/60/90) — 구글폼 원본 문항 그대로 내재화
 ════════════════════════════════════════ */
@@ -821,6 +834,8 @@ function renderLogin(){
         <input class="finput" id="l-pw" type="password" placeholder="비밀번호 입력">
       </div>
       <button class="btn btn-primary btn-full" id="login-btn">로그인</button>
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 0 10px;color:#9CA3AF;font-size:12px"><div style="flex:1;height:1px;background:#E5E7EB"></div>또는<div style="flex:1;height:1px;background:#E5E7EB"></div></div>
+      <button class="btn btn-full" id="nw-login-btn" style="background:#00C73C;color:#fff;border:none;font-weight:700">네이버웍스로 로그인</button>
       <div class="auth-footer">
         계정 생성 문의는 김강현 책임에게 연락해 주세요
       </div>
@@ -1012,6 +1027,7 @@ function bindAuth(){
     if(pendingSurvey) nav('survey', pendingSurvey);
   });
   document.getElementById('l-pw')?.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-btn').click(); });
+  document.getElementById('nw-login-btn')?.addEventListener('click', startNaverWorksLogin);
 
   document.getElementById('reg-btn')?.addEventListener('click', async ()=>{
     const name  = document.getElementById('r-name').value.trim();
@@ -3061,6 +3077,30 @@ function formatDate(iso){
     history.replaceState({}, '', location.pathname);
   }
 
+  // 네이버웍스 로그인에서 돌아온 경우(?code=&state=)
+  let nwError = '';
+  const nwCode = impParams.get('code'), nwState = impParams.get('state');
+  if(nwCode && nwState && !impToken){
+    const savedState = sessionStorage.getItem('nw_oauth_state');
+    sessionStorage.removeItem('nw_oauth_state');
+    try { const sv = JSON.parse(sessionStorage.getItem('nw_survey') || 'null'); if(sv) pendingSurvey = sv; } catch(e){}
+    sessionStorage.removeItem('nw_survey');
+    history.replaceState({}, '', location.pathname);
+    if(!savedState || savedState !== nwState){
+      nwError = '로그인 요청이 만료됐습니다. 다시 시도해 주세요.';
+    } else {
+      const { ok: nwOk, data: nw } = await portalCall({ action: 'naverworks_login', code: nwCode, redirect_uri: naverworksRedirectUri() });
+      if(nwOk){
+        DB.setCurrent(nw.user, nw.token);
+        sessionStorage.removeItem('hq_impersonating');
+        _missionStatus = null; _dashSurveyStatus = null;
+        logActivity('login', nw.user);
+      } else {
+        nwError = nw.error || '네이버웍스 로그인에 실패했습니다.';
+      }
+    }
+  }
+
   // 세션 갱신 (최신 승인 상태·비밀번호 변경 필요 여부 반영). 토큰이 만료·무효면 로그아웃.
   let loadOk = true;
   if(DB.getCurrent()){
@@ -3088,6 +3128,7 @@ function formatDate(iso){
   if(!initUser){
     state.page = 'login';
     render();
+    if(nwError) showMsg('login-msg', 'error', nwError);
   } else {
     // 세션이 localStorage로 오래 유지돼서 로그인 폼을 다시 안 타는 재방문자가 많아
     // "로그인 이력"에 실사용이 거의 안 잡히던 문제(2026-08-05 발견) — 대행 로그인이
