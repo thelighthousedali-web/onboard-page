@@ -445,6 +445,12 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
   .pr-main{display:block}.pr-l{border-right:0;border-bottom:1px solid var(--border);padding:14px 16px;overflow:visible}.pr-steps{display:flex;gap:16px;overflow:auto}
   .pr-c{overflow:visible;padding:18px 16px 30px}.pr-r{border-left:0;border-top:8px solid #F3F4F6;overflow:visible;padding:16px}
 }
+.pr-gtag{display:inline-block;min-width:22px;text-align:center;background:#1E90FF;color:#fff;font-size:12px;font-weight:800;border-radius:6px;padding:1px 7px;margin-left:6px}.pr-gtag-none{background:#E5E7EB;color:#6B7280}
+.pr-other{background:#F3F4F6;border-radius:10px;padding:10px 14px;margin-bottom:10px}.pr-other-h{font-size:12.5px;font-weight:800;color:#4B5563;margin-bottom:4px}
+.pr-preview{background:#F0F7FF;border:1px solid #BFDBFE;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13.5px}
+.pr-retbox{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#9A3412}
+.pr-in-bad{border-color:#FCA5A5;background:#FFFBFB}
+.pr-guide{margin-bottom:16px}.pr-dist{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:420px}.pr-dist div{border:1px solid var(--border);border-radius:8px;text-align:center;padding:8px 0}.pr-dist b{display:block;font-size:16px}.pr-dist span{font-size:12.5px;color:var(--gray)}
 /* 작성·변경 요청 화면: 목표 목록 + 오른쪽 편집 패널 */
 .pm-dr-row{display:grid;grid-template-columns:minmax(0,1fr) 190px 120px 56px 78px;gap:8px;align-items:center;padding:10px 8px;border-bottom:1px solid #F1F2F4;font-size:13.5px;cursor:pointer;min-height:46px}
 .pm-dr-row:hover{background:#FAFAFB}.pm-dr-row.pm-th{cursor:default;min-height:0}.pm-dr-row.pm-th:hover{background:none}
@@ -2620,6 +2626,9 @@ function renderReviews(user){
 </div>
 ${(_pmNotice && Date.now() < _pmNotice.until) ? `<div class="pm-notice pm-notice-${_pmNotice.type}">${escapeHtml(_pmNotice.text)}</div>` : ''}
 ${sel}
+${down.length && d.guide?.dist ? `<div class="content-block pr-guide"><div class="sec-title">등급 배분 가이드 <span class="pm-meta">참고용 · 최종 등급은 전사 캘리브레이션에서 정합니다</span></div>
+  <div class="pm-meta" style="margin-bottom:8px">법인평가 ${escapeHtml(d.guide.corp_grade)}등급 기준 개인 등급 배분율(전사)</div>
+  <div class="pr-dist">${['S', 'A', 'B', 'C'].map(g => `<div><b>${g}</b><span>${d.guide.dist[g][0]}~${d.guide.dist[g][1]}%</span></div>`).join('')}</div></div>` : ''}
 <div class="content-block">
   <div class="sec-title">작성할 리뷰</div>
   ${tasks.length ? mine.map(row).join('') + (down.length ? `<div class="pr-sep">내가 평가할 구성원 (${down.length}명)</div>` + down.map(row).join('') : '') : '<div class="pm-tbl-empty">작성할 리뷰가 없습니다. 평가 대상이 아니거나 아직 대상자 확정 전입니다.</div>'}
@@ -2636,6 +2645,11 @@ async function prOpenReview(cid, email, kind){
   const rv = data.review;
   _prRv = { cycleId: cid, email, kind, d: data, items: JSON.parse(JSON.stringify(rv.items || [])), comps: JSON.parse(JSON.stringify(rv.comps || [])), overall: rv.overall || '',
     refTab: 'goals', notice: null, attempt: false };
+  if(kind !== 'self'){ // 하향 평가: 본인평가 항목마다 등급·의견 칸을 하나씩 보장
+    const n = (data.ref.self?.items || []).length, by = {};
+    _prRv.items.forEach(x => { by[x.ref] = x; });
+    _prRv.items = Array.from({ length: n }, (_, i) => by[i] || { ref: i, grade: null, comment: '' });
+  }
   _prRv.sig0 = prRvSig(); _prRvY = 0; render();
 }
 function prRvClose(){
@@ -2678,12 +2692,17 @@ function prSelfRules(){
   rows.push({ ok: compBad.every(p => !p.length), text: `공통역량 ${comps.length}개 모두 등급·의견`, now: `${compBad.filter(p => p.length).length}개 미작성` });
   return { rows, bad, compBad, ok: rows.every(r => r.ok) && bad.every(p => !p.length) };
 }
+function prRvRules(){ return _prRv.kind === 'self' ? prSelfRules() : prDownRules(); }
 function prRulesHtml(){
-  const r = prSelfRules();
+  const r = prRvRules();
   return `<div class="pm-rules-title">제출 전 점검 <span class="pm-meta">${r.ok ? '모두 통과했습니다' : '빨간 항목을 채우면 제출할 수 있습니다'}</span></div>` +
     r.rows.map(x => `<div class="pm-rule ${x.ok ? 'pm-rule-ok' : 'pm-rule-bad'}"><span class="pm-rule-ic">${x.ok ? '✓' : '✗'}</span>${escapeHtml(x.text)}${!x.ok && x.now ? ` <span class="pm-meta">(${escapeHtml(x.now)})</span>` : ''}</div>`).join('');
 }
-function prRefreshRules(){ const el = document.getElementById('pr-rules'); if(el) el.innerHTML = prRulesHtml(); const w = document.getElementById('pr-wsum'); if(w) w.textContent = _prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0); }
+function prRefreshRules(){
+  const el = document.getElementById('pr-rules'); if(el) el.innerHTML = prRulesHtml();
+  const w = document.getElementById('pr-wsum'); if(w) w.textContent = _prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0);
+  const pv = document.getElementById('pr-preview'); if(pv) pv.innerHTML = prPreviewInner();
+}
 
 // 입력 반영(글자 입력은 다시 그리지 않음, 구조가 바뀌면 다시 그림)
 function prRvField(i, f, v){
@@ -2773,15 +2792,110 @@ function prCenterSelfHtml(){
   ${edit ? `<div class="pm-rules" id="pr-rules" style="margin-top:24px">${prRulesHtml()}</div>
   <div class="pm-actions" style="margin-top:14px"><button class="btn btn-sm pm-btn-ghost" onclick="prRvSave(false)" ${_prBusy?'disabled':''}>임시저장</button><button class="btn btn-primary btn-sm" onclick="prRvSave(true)" ${_prBusy?'disabled':''}>제출</button></div>` : ''}`;
 }
+// ── 하향 평가(1차·2차): 본인평가 내용을 읽기 전용으로 보여주고 그 옆에 평가자 등급·의견 ──
+function prDownRules(){
+  const si = _prRv.d.ref.self?.items || [], items = _prRv.items, comps = _prRv.comps, defs = prCompDef();
+  const bad = si.map((_, i) => (items.find(x => x.ref === i)?.grade ? [] : ['등급']));
+  const compBad = comps.map(cp => (cp.grade ? [] : ['등급']));
+  const rows = [
+    { ok: bad.every(p => !p.length), text: `성과 항목 ${si.length}개 모두 등급`, now: `${bad.filter(p => p.length).length}개 미선택` },
+    { ok: compBad.every(p => !p.length), text: `공통역량 ${comps.length}개 모두 등급`, now: `${compBad.filter(p => p.length).length}개 미선택` },
+    { ok: !!String(_prRv.overall || '').trim(), text: '종합 의견', now: '' },
+  ];
+  return { rows, bad, compBad, ok: rows.every(r => r.ok) };
+}
+// 서버와 같은 식: 업적 = 항목 가중 평균(본인평가 가중치), 역량 = 등급 점수 평균
+function prPreviewCalc(){
+  const st = _prRv.d.cycle.settings, si = _prRv.d.ref.self?.items || [];
+  let sw = 0, s = 0;
+  si.forEach((it, i) => { const g = _prRv.items.find(x => x.ref === i)?.grade, sc = g ? st.scale[g] : null; if(sc == null) return; const w = Number(it.weight) || 0; sw += w; s += w * sc; });
+  const cs = _prRv.comps.map(c => (c.grade ? st.scale[c.grade] : null)).filter(x => x != null);
+  const r2 = n => Math.round(n * 100) / 100;
+  return { perf: sw ? r2(s / sw) : null, comp: cs.length ? r2(cs.reduce((a, b) => a + b, 0) / cs.length) : null };
+}
+function prPreviewInner(){
+  if(_prRv.kind === 'self') return '';
+  const p = prPreviewCalc(), f = v => (v == null ? '-' : v.toFixed(2).replace(/\.?0+$/, ''));
+  return `이 평가로 <b>업적 ${f(p.perf)}점</b> · <b>역량 ${f(p.comp)}점</b> <span class="pm-meta">(고른 등급까지 반영한 미리보기 · 제출하면 서버가 확정합니다)</span>`;
+}
+const prGradeTag = g => g ? `<span class="pr-gtag">${g}</span>` : '<span class="pr-gtag pr-gtag-none">-</span>';
+function prOtherBox(label, grade, text, html){
+  return `<div class="pr-other"><div class="pr-other-h">${label} ${prGradeTag(grade)}</div>${html ? `<div class="pr-rich">${pmSafeHtml(html)}</div>` : ''}${text ? `<div class="pr-rich">${escapeHtml(text).replace(/\n/g, '<br>')}</div>` : ''}${!html && !text ? '<div class="pm-meta">작성한 내용이 없습니다.</div>' : ''}</div>`;
+}
+function prDownItemHtml(si, i, rules, edit){
+  const d = _prRv.d, x = _prRv.items.find(y => y.ref === i) || { ref: i, grade: null, comment: '' };
+  const probs = _prRv.attempt ? rules.bad[i] : [];
+  const d1 = _prRv.kind === 'd2' ? (d.ref.d1?.items || []).find(y => y.ref === i) : null;
+  return `<div class="pr-item ${probs.length ? 'pr-item-bad' : ''}">
+    <div class="pr-item-top"><span class="pr-wchip">가중치 ${si.weight || 0}%</span><span class="pm-kind pm-kind-${si.kind==='ai'?'ai':'business'}" style="margin:0">${si.kind==='ai'?'AI':'KPI'}</span></div>
+    <div class="pr-title-ro">${escapeHtml(si.title)}</div>
+    ${prOtherBox('본인 평가', si.grade, si.summary, si.detail_html)}
+    ${d1 ? prOtherBox('1차 평가자', d1.grade, d1.comment, '') : ''}
+    <div class="pr-glabel">내 등급 <span class="pm-meta">S ${d.cycle.settings.scale.S} · A ${d.cycle.settings.scale.A} · B ${d.cycle.settings.scale.B} · C ${d.cycle.settings.scale.C}</span></div>
+    ${prGradeBtns(x.grade, `prDownGrade(${i},'%G')`, !edit)}
+    ${edit ? `<textarea class="pr-in pr-ta" rows="3" maxlength="3000" placeholder="의견 입력하기 (선택)" oninput="prDownComment(${i},this.value)">${escapeHtml(x.comment)}</textarea>` : (x.comment ? `<div class="pr-rich">${escapeHtml(x.comment).replace(/\n/g, '<br>')}</div>` : '')}
+    ${probs.length ? `<div class="pr-bad-msg">빠진 것: ${probs.join(', ')}</div>` : ''}
+  </div>`;
+}
+function prDownCompHtml(cp, def, i, rules, edit){
+  const d = _prRv.d, me = (d.ref.self?.comps || []).find(z => z.key === cp.key), d1 = _prRv.kind === 'd2' ? (d.ref.d1?.comps || []).find(z => z.key === cp.key) : null;
+  const probs = _prRv.attempt ? rules.compBad[i] : [];
+  return `<div class="pr-item ${probs.length ? 'pr-item-bad' : ''}">
+    <div class="pr-q">${escapeHtml(def.name)} <span class="pr-req">*</span></div>
+    ${def.desc ? `<div class="pr-desc">${escapeHtml(def.desc).replace(/\n/g, '<br>')}</div>` : ''}
+    ${prOtherBox('본인 평가', me?.grade, me?.comment, '')}
+    ${d1 ? prOtherBox('1차 평가자', d1.grade, d1.comment, '') : ''}
+    <div class="pr-glabel">내 등급</div>
+    ${prGradeBtns(cp.grade, `prRvCompGrade('${cp.key}','%G')`, !edit)}
+    ${edit ? `<textarea class="pr-in pr-ta" rows="3" maxlength="3000" placeholder="의견 입력하기 (선택)" oninput="prRvCompText('${cp.key}',this.value)">${escapeHtml(cp.comment)}</textarea>` : (cp.comment ? `<div class="pr-rich">${escapeHtml(cp.comment).replace(/\n/g, '<br>')}</div>` : '')}
+    ${probs.length ? `<div class="pr-bad-msg">빠진 것: ${probs.join(', ')}</div>` : ''}
+  </div>`;
+}
+function prDownGrade(ref, g){ const x = _prRv.items.find(y => y.ref === ref); if(x){ x.grade = x.grade === g ? null : g; prRerender(); } }
+function prDownComment(ref, v){ const x = _prRv.items.find(y => y.ref === ref); if(x) x.comment = v; }
+async function prRvReturn(){
+  const d = _prRv?.d; if(!d || !d.canReturn || _prBusy) return;
+  const reason = prompt(`${d.target.name}님의 본인평가를 돌려보냅니다. 수정이 필요한 이유를 적어 주세요(본인에게 보입니다)`);
+  if(reason == null) return;
+  if(!reason.trim()){ alert('사유를 입력해 주세요.'); return; }
+  _prBusy = true;
+  const { ok, data } = await prCall({ action: 'review_return', cycleId: _prRv.cycleId, email: _prRv.email, reason: reason.trim() });
+  _prBusy = false;
+  if(!ok){ _prRv.notice = { type: 'error', text: data.error || '반려하지 못했습니다.' }; prRerender(); return; }
+  _prRv = null; _prMe = null; _prList = null; _prRvY = 0; pmNotify('success', '본인평가를 돌려보냈습니다.'); render();
+}
+function prCenterDownHtml(){
+  const d = _prRv.d, edit = prRvEditable(), rules = prDownRules(), rv = d.review, defs = prCompDef(), si = d.ref.self;
+  const ro = !edit ? `<div class="pm-notice pr-notice-info">${rv.status === 'submitted' ? '제출한 평가입니다. 고칠 수 없습니다.' : escapeHtml(d.why || '지금은 작성할 수 없습니다.')}</div>` : '';
+  const notice = _prRv.notice ? `<div class="pm-notice pm-notice-${_prRv.notice.type}">${escapeHtml(_prRv.notice.text)}</div>` : '';
+  if(!si || !(si.items || []).length) return `${notice}<div class="pm-notice pr-notice-info">본인평가가 아직 없어 평가할 내용이 없습니다.</div>`;
+  const dOver = _prRv.kind === 'd2' && d.ref.d1 ? prOtherBox('1차 평가자 종합 의견', null, d.ref.d1.overall, '').replace(/<span class="pr-gtag[^>]*>-<\/span>/, '') : '';
+  return `${notice}${ro}
+  <div class="pr-preview" id="pr-preview">${prPreviewInner()}</div>
+  ${d.canReturn ? `<div class="pr-retbox"><span>본인평가에 보완이 필요하면 사유와 함께 돌려보낼 수 있습니다(본인 작성 기간 안에서만).</span><button class="btn btn-sm pm-btn-ghost" onclick="prRvReturn()">본인평가 반려</button></div>` : ''}
+  <div class="pr-sec-h">① 성과 <span class="pm-meta">본인평가 ${si.items.length}개 항목 · 가중치는 본인평가 값 그대로</span></div>
+  ${si.items.map((it, i) => prDownItemHtml(it, i, rules, edit)).join('')}
+  <div class="pr-sec-h" style="margin-top:28px">② 공통역량</div>
+  ${_prRv.comps.map((cp, i) => prDownCompHtml(cp, defs.find(z => z.key === cp.key) || { name: cp.key, desc: '' }, i, rules, edit)).join('')}
+  <div class="pr-sec-h" style="margin-top:28px">③ 종합 의견 <span class="pr-req">*</span></div>
+  ${si.overall ? prOtherBox('본인 종합 의견', null, si.overall, '').replace(/<span class="pr-gtag[^>]*>-<\/span>/, '') : ''}${dOver}
+  ${edit ? `<textarea class="pr-in pr-ta ${_prRv.attempt && !String(_prRv.overall || '').trim() ? 'pr-in-bad' : ''}" rows="4" maxlength="5000" placeholder="종합 의견을 적어 주세요 (필수)" oninput="prRvOverall(this.value);prRefreshRules()">${escapeHtml(_prRv.overall)}</textarea>` : (rv.overall ? `<div class="pr-rich">${escapeHtml(rv.overall).replace(/\n/g, '<br>')}</div>` : '')}
+  ${edit ? `<div class="pm-rules" id="pr-rules" style="margin-top:24px">${prRulesHtml()}</div>
+  <div class="pm-actions" style="margin-top:14px"><button class="btn btn-sm pm-btn-ghost" onclick="prRvSave(false)" ${_prBusy?'disabled':''}>임시저장</button><button class="btn btn-primary btn-sm" onclick="prRvSave(true)" ${_prBusy?'disabled':''}>제출</button></div>` : ''}`;
+}
 function prCenterHtml(){
-  if(_prRv.kind === 'self') return prCenterSelfHtml();
-  return `<div class="pm-notice pr-notice-info">하향 평가 화면은 곧 열립니다.</div>`;
+  return _prRv.kind === 'self' ? prCenterSelfHtml() : prCenterDownHtml();
 }
 
 // 오른쪽 참고 정보
 function prRefHtml(){
   const d = _prRv.d, ref = d.ref, tab = _prRv.refTab;
-  const tabs = `<div class="pr-rtabs"><button class="${tab==='goals'?'on':''}" onclick="prRvRef('goals')">목표</button><button class="${tab==='archive'?'on':''}" onclick="prRvRef('archive')">지난 리뷰</button></div>`;
+  const tabs = `<div class="pr-rtabs"><button class="${tab==='goals'?'on':''}" onclick="prRvRef('goals')">목표</button>${_prRv.kind !== 'self' ? `<button class="${tab==='self'?'on':''}" onclick="prRvRef('self')">본인평가</button>` : ''}<button class="${tab==='archive'?'on':''}" onclick="prRvRef('archive')">지난 리뷰</button></div>`;
+  if(tab === 'self' && _prRv.kind !== 'self'){
+    const s = ref.self; if(!s) return tabs + '<div class="pm-tbl-empty">본인평가가 없습니다.</div>';
+    return tabs + (s.items || []).map(x => `<div class="pr-refcard"><div class="pr-refcard-h">${escapeHtml(x.title)} <span class="pm-meta">${x.weight}%</span> ${prGradeTag(x.grade)}</div>${x.summary ? `<div class="pr-rich">${escapeHtml(x.summary)}</div>` : ''}</div>`).join('')
+      + `<div class="pr-refcard"><div class="pr-refcard-h">공통역량</div>${(s.comps || []).map(c => `<div class="pm-meta" style="margin:3px 0">${escapeHtml((prCompDef().find(z => z.key === c.key) || {}).name || c.key)} ${prGradeTag(c.grade)}</div>`).join('')}</div>`;
+  }
   if(tab === 'archive'){
     const a = ref.archive || [];
     return tabs + (a.length ? a.map(x => `<div class="pr-refcard"><div class="pr-refcard-h">${x.year}년 · ${x.kind === 'review' ? '평가' : '목표'} <span class="pm-meta">${x.source === 'lemonbase' ? '레몬베이스' : escapeHtml(x.source)}</span></div>${prPayloadHtml(x.payload)}</div>`).join('') : '<div class="pm-tbl-empty">지난 리뷰가 없습니다.</div>');
@@ -2830,7 +2944,7 @@ async function prRvSave(submit){
   if(_prBusy || !_prRv || !prRvEditable()) return;
   if(submit){
     _prRv.attempt = true;
-    const r = _prRv.kind === 'self' ? prSelfRules() : { ok: true };
+    const r = prRvRules();
     if(!r.ok){ _prRv.notice = { type: 'error', text: '제출 전 점검에서 빠진 항목이 있습니다. 빨간 표시를 채워 주세요.' }; prRerender(); document.querySelector('.pr-c')?.scrollTo({ top: 0 }); return; }
     if(!confirm('제출하면 수정할 수 없습니다. 제출할까요?')) return;
   }
