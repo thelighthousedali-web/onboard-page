@@ -390,6 +390,16 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .pm-org-desc{font-size:12px;color:var(--gray);margin-top:2px}
 .pm-lv{display:inline-block;font-size:11px;font-weight:800;padding:1px 7px;border-radius:999px;margin-right:6px;background:#F3F4F6;color:#374151}
 .pm-lv-company{background:#FFF0EB;color:#C2410C}.pm-lv-division{background:#EFF6FF;color:#1D4ED8}.pm-lv-team{background:#ECFDF5;color:#047857}
+/* 작성·변경 요청 화면: 목표 목록 + 오른쪽 편집 패널 */
+.pm-dr-row{display:grid;grid-template-columns:minmax(0,1fr) 190px 120px 56px 78px;gap:8px;align-items:center;padding:10px 8px;border-bottom:1px solid #F1F2F4;font-size:13.5px;cursor:pointer;min-height:46px}
+.pm-dr-row:hover{background:#FAFAFB}.pm-dr-row.pm-th{cursor:default;min-height:0}.pm-dr-row.pm-th:hover{background:none}
+.pm-dr-row.pm-tr-sel,.pm-dr-row.pm-tr-sel:hover{background:#FFF5EF}
+.pm-dr-sub{font-size:12.5px;color:var(--gray);min-height:34px;padding-top:4px;padding-bottom:4px}
+.pm-dr-sub .pm-tt{padding-left:26px}
+.pm-dr-par{font-size:12px;color:var(--gray);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm-bad{display:inline-block;font-size:11px;font-weight:800;color:#B91C1C;background:#FEF2F2;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.pm-dr-body .pm-goal{border:0;background:#fff;padding:0;margin:0}
+@media(max-width:760px){.pm-dr-row{grid-template-columns:minmax(0,1fr) 56px 78px}.pm-dr-row>.c-par,.pm-dr-row>.c-mode{display:none}}
 /* 목표 목록 트리 표(레몬베이스 '목표' 화면 배치) */
 .pm-ttabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:14px;overflow-x:auto;overflow-y:hidden}
 .pm-ttabs button{background:none;border:0;padding:10px 12px;font-size:14.5px;color:var(--gray);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:inherit;white-space:nowrap}
@@ -1641,7 +1651,7 @@ async function loadPmSheet(){
     const goals = pmDraftFromRows(data.goals, data.cycle);
     const min = data.cycle?.min_goals || 3;
     while(goals.length < min) goals.push(pmBlankGoal(data.cycle));
-    _pmDraft = goals;
+    _pmDraft = goals; _pmEd = null;
   }
   render();
 }
@@ -1678,7 +1688,53 @@ function pmRulesHtml(){
   const c = _pmSheet?.cycle; if(!c) return '';
   return pmRules(c, _pmDraft||[]).map(r=>`<div class="pm-rule ${r.ok?'pm-rule-ok':'pm-rule-bad'}"><span>${r.ok?'✓':'!'}</span><b>${escapeHtml(r.label)}</b><em>${escapeHtml(r.now)}</em></div>`).join('');
 }
-function pmRefreshRules(){ const el = document.getElementById('pm-rules'); if(el) el.innerHTML = pmRulesHtml(); }
+function pmRefreshRules(){ const el = document.getElementById('pm-rules'); if(el) el.innerHTML = pmRulesHtml(); const dl = document.getElementById('pm-dlist'); if(dl) dl.innerHTML = pmDraftRowsHtml(); }
+// ── 작성·변경 요청: 목표 목록(제목·상위 목표·진척도 방식·가중치·빠진 것) + 오른쪽 편집 패널 ──
+let _pmEd = null; // 편집 패널로 열어 둔 목표 번호(_pmDraft 인덱스)
+function pmEdOpen(i){ _pmEd = i; _pmDrY = 0; render(); }
+function pmEdClose(){ _pmEd = null; render(); }
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && _pmEd != null && state.page === 'goals') pmEdClose(); });
+function pmDraftProblems(g, c){
+  const w = parseInt(g.weight,10) || 0, m = g.progress_mode || 'metric', p = [];
+  if(!String(g.title||'').trim()) p.push('제목');
+  if(!(w > 0)) p.push('가중치');
+  if((c?.require_link !== false) && !g.parent_org_goal_id) p.push('상위 목표');
+  if(m === 'manual' || m === 'none'){ if(!String(g.criteria||'').trim()) p.push('평가 기준'); }
+  else if(m === 'children'){ if(!(g.tasks||[]).length) p.push('핵심 과제'); }
+  else if(pmMetricsBad(g.metrics)) p.push('지표');
+  if((g.tasks||[]).some(t => !String(t.title||'').trim() || ((t.progress_mode||'metric') === 'metric' && pmMetricsBad(t.metrics)))) p.push('핵심 과제 내용');
+  return p;
+}
+function pmDraftRowsHtml(){
+  const c = _pmSheet?.cycle, list = _pmDraft || [];
+  if(!list.length) return '<div class="pm-tbl-empty">아직 목표가 없습니다. 오른쪽 위 \'+ 목표 생성\'으로 시작하세요.</div>';
+  return list.map((g,i)=>{
+    const pr = pmDraftProblems(g, c), par = g.parent_org_goal_id ? pmOrgTitle(g.parent_org_goal_id) : '';
+    const filled = !!(g.title || parseInt(g.weight,10));
+    return `<div class="pm-dr-row ${_pmEd===i?'pm-tr-sel':''}" onclick="pmEdOpen(${i})">
+      <div class="pm-tt"><span class="pm-kind pm-kind-${g.kind||'business'}" style="margin:0">${g.kind==='ai'?'AI':'KPI'}</span><b class="t" title="${escapeHtml(g.title)}" ${g.title ? '' : 'style="color:#9CA3AF;font-weight:600"'}>${g.title ? escapeHtml(g.title) : '(제목 없음)'}</b></div>
+      <div class="c-par pm-dr-par" title="${escapeHtml(par)}">${par ? escapeHtml(par) : '<span style="color:#B45309">상위 목표 미연결</span>'}</div>
+      <div class="c-mode" style="font-size:12.5px">${escapeHtml(PM_MODES[g.progress_mode||'metric']||'')}</div>
+      <div><b>${parseInt(g.weight,10) ? parseInt(g.weight,10) + '%' : '-'}</b></div>
+      <div>${filled && pr.length ? `<span class="pm-bad" title="빠진 것: ${escapeHtml(pr.join(', '))}">! ${pr.length}개</span>` : ''}</div></div>`
+      + (g.tasks||[]).map(t=>`<div class="pm-dr-row pm-dr-sub" onclick="pmEdOpen(${i})"><div class="pm-tt"><span class="pm-ic">⚑</span><span class="t">${t.title ? escapeHtml(t.title) : '(핵심 과제 제목 없음)'}</span></div><div class="c-par"></div><div class="c-mode">${escapeHtml(PM_TMODES[t.progress_mode||'metric']||'')}</div><div></div><div></div></div>`).join('');
+  }).join('');
+}
+function pmDraftListHtml(){
+  return `<div class="pm-dr-row pm-th"><div>목표</div><div class="c-par">상위 목표</div><div class="c-mode">진척도 방식</div><div>가중치</div><div></div></div><div id="pm-dlist">${pmDraftRowsHtml()}</div>`;
+}
+function pmEdDrawerHtml(c){
+  const g = _pmDraft?.[_pmEd];
+  if(!g){ _pmEd = null; return ''; }
+  requestAnimationFrame(()=>{ const b = document.querySelector('.pm-dr-body'); if(b && _pmDrY) b.scrollTop = _pmDrY; });
+  return `
+<div class="pm-ov" onclick="pmEdClose()"></div>
+<aside class="pm-drawer" role="dialog" aria-label="목표 편집">
+  <div class="pm-dr-top"><button class="pm-dr-x" onclick="pmEdClose()" title="닫기 (Esc)">»</button><b style="margin-left:6px">목표 ${_pmEd+1} 편집</b></div>
+  <div class="pm-dr-body" onscroll="_pmDrY=this.scrollTop">${pmGoalEditor(g, _pmEd, c)}</div>
+  <div class="pm-dr-foot"><button class="btn btn-sm btn-primary" onclick="pmEdClose()">완료</button></div>
+</aside>`;
+}
 // 편집: KPI 칸 / 지표 칸 / 핵심 과제 칸 / 과제 지표 칸. 칸 구성이 바뀌는 것만 다시 그림
 function pmSet(i, key, val){
   if(!_pmDraft?.[i]) return;
@@ -1709,6 +1765,7 @@ function pmAddGoal(){
   const max = _pmSheet?.cycle?.max_goals || 5;
   if((_pmDraft||[]).length >= max) return;
   _pmDraft.push(pmBlankGoal(_pmSheet?.cycle));
+  _pmEd = _pmDraft.length - 1; _pmDrY = 0;
   render();
 }
 function pmDelGoal(i){
@@ -1716,7 +1773,7 @@ function pmDelGoal(i){
   if(!g) return;
   const hasCk = g.id && (_pmSheet?.checkins||[]).some(k=>k.goal_id===g.id);
   if((g.title || g.criteria || (g.tasks||[]).length) && !confirm(`${i+1}번 목표를 지울까요?${(g.tasks||[]).length ? ' 핵심 과제도 함께 지워집니다.' : ''}${hasCk ? '\n이 목표의 체크인 기록과 코멘트도 함께 지워집니다.' : ''}`)) return;
-  _pmDraft.splice(i,1);
+  _pmDraft.splice(i,1); _pmEd = null;
   render();
 }
 const pmNumOrNull = v => (v === '' || v == null ? null : Number(v));
@@ -1873,10 +1930,10 @@ async function pmDelComment(cid){
 function pmStartChange(){
   const d = _pmSheet; if(!d) return;
   _pmDraft = pmDraftFromRows(d.goals, d.cycle);
-  _pmChange = { reason:'' };
+  _pmChange = { reason:'' }; _pmEd = null;
   render(); window.scrollTo(0,0);
 }
-function pmCancelChange(){ _pmChange = null; _pmSheet = null; render(); }
+function pmCancelChange(){ _pmChange = null; _pmEd = null; _pmSheet = null; render(); }
 async function pmSendChange(){
   if(_pmBusy || !_pmChange) return;
   const c = _pmSheet?.cycle; if(!c) return;
@@ -2313,15 +2370,16 @@ ${notice}
   <label class="pm-lbl">변경 사유 <span>(리더와 경영지원팀이 봅니다. 예: 조직 개편으로 담당 업무가 바뀜)</span></label>
   <textarea class="pm-ta" rows="2" maxlength="1000" oninput="_pmChange.reason=this.value">${escapeHtml(_pmChange.reason)}</textarea>
   <div class="pm-rules" id="pm-rules">${pmRulesHtml()}</div>
-  ${(_pmDraft||[]).map((g,i)=>pmGoalEditor(g,i,c)).join('')}
   <div class="pm-actions-top">
-    ${(_pmDraft||[]).length < max ? `<button class="btn btn-sm pm-btn-ghost" onclick="pmAddGoal()">+ 목표 추가</button>` : `<span class="pm-meta">최대 ${max}개</span>`}
+    ${(_pmDraft||[]).length < max ? `<button class="btn btn-sm btn-primary" onclick="pmAddGoal()">+ 목표 생성</button>` : `<span class="pm-meta">최대 ${max}개</span>`}
+    <span class="pm-meta">목표를 누르면 오른쪽에서 고칠 수 있습니다</span>
   </div>
+  ${pmDraftListHtml()}
   <div class="pm-actions">
     <button class="btn btn-sm pm-btn-ghost" onclick="pmCancelChange()">취소</button>
     <button class="btn btn-primary btn-sm" onclick="pmSendChange()">변경 요청 보내기</button>
   </div>
-</div>`;
+</div>${pmEdDrawerHtml(c)}`;
   }
 
   if(d.canEdit){
@@ -2330,15 +2388,16 @@ ${notice}
 <div class="content-block">
   <div class="sec-title">KPI 작성 <span style="font-weight:400;font-size:13px;color:var(--gray)">${c.min_goals}~${max}개${(c.ai_weight ?? 20) > 0 ? ` · AI KPI ${c.ai_min ?? 1}~${c.ai_max ?? 2}개 합 ${c.ai_weight ?? 20}%` : ''} · 가중치 합 100</span></div>
   <div class="pm-rules" id="pm-rules">${pmRulesHtml()}</div>
-  ${(_pmDraft||[]).map((g,i)=>pmGoalEditor(g,i,c)).join('')}
   <div class="pm-actions-top">
-    ${(_pmDraft||[]).length < max ? `<button class="btn btn-sm pm-btn-ghost" onclick="pmAddGoal()">+ 목표 추가</button>` : `<span class="pm-meta">최대 ${max}개</span>`}
+    ${(_pmDraft||[]).length < max ? `<button class="btn btn-sm btn-primary" onclick="pmAddGoal()">+ 목표 생성</button>` : `<span class="pm-meta">최대 ${max}개</span>`}
+    <span class="pm-meta">목표를 누르면 오른쪽에서 고칠 수 있습니다</span>
   </div>
+  ${pmDraftListHtml()}
   <div class="pm-actions">
     <button class="btn btn-sm pm-btn-ghost" onclick="pmSave(false)">임시저장</button>
     <button class="btn btn-primary btn-sm" onclick="pmSave(true)">제출</button>
   </div>
-</div>
+</div>${pmEdDrawerHtml(c)}
 <div class="content-block pm-guide">
   <div class="sec-title">작성 안내 <span style="font-weight:400;font-size:13px;color:var(--gray)">26년 성과관리 제도 안내 기준</span></div>
   <ul>
