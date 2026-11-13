@@ -1526,13 +1526,18 @@ async function loadPmMe(){
   if(ok && (data.cycles||[]).length) render(); // 메뉴·대시보드 안내가 생길 때만 다시 그림
 }
 
+// 목표 메뉴는 완성 전까지 지정한 사람에게만(2026-11-13 사용자 지시: 김강현만)
+const PM_ALLOW = ['thelighthouse@hecto.co.kr'];
+function pmAllowed(){ return PM_ALLOW.includes(String(DB.getCurrent()?.email || '').toLowerCase()); }
 function renderGoalNavItem(){
+  if(!pmAllowed()) return '';
   if(_pmMe === null){ loadPmMe(); return ''; }
   if(!(_pmMe.cycles||[]).length) return '';
   return `<div class="nav-item ${state.page==='goals'?'active':''}" data-nav="goals"><span class="ni">🎯</span>내 목표</div>`;
 }
 
 function renderGoalBanner(){
+  if(!pmAllowed()) return '';
   const g = _pmMe?.myOpenGoal;
   const ck = _pmMe?.myCheckin;
   if(ck && ck.done < ck.total && (!g || g.status === 'approved')){
@@ -2148,7 +2153,7 @@ ${notice}
 function renderUserPage(user){
   const p = state.page;
   if(p==='survey') return renderSurveyPage(user, state.sub);
-  if(p==='goals') return renderGoals(user);
+  if(p==='goals' && pmAllowed()) return renderGoals(user);
   if(_pageContent[p]) return _pageContent[p].content_html;
   if(p==='firstday')    return renderFirstDay(user);
   if(p==='mission')     return renderMission(user);
