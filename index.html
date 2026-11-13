@@ -1683,6 +1683,7 @@ function pmSafeHtml(html){
     const inner = [...n.childNodes].map(out).join('');
     const t = n.tagName;
     if(t === 'A'){ const h = n.getAttribute('href') || ''; return /^https?:\/\//i.test(h) ? `<a href="${escapeHtml(h)}" target="_blank" rel="noopener">${inner}</a>` : inner; }
+    if(t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') return '';
     if(t === 'BR') return '<br>';
     if(!ALLOW.has(t)) return inner;
     return `<${t.toLowerCase()}>${inner}</${t.toLowerCase()}>`;
