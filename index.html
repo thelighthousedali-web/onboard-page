@@ -390,6 +390,34 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .pm-org-desc{font-size:12px;color:var(--gray);margin-top:2px}
 .pm-lv{display:inline-block;font-size:11px;font-weight:800;padding:1px 7px;border-radius:999px;margin-right:6px;background:#F3F4F6;color:#374151}
 .pm-lv-company{background:#FFF0EB;color:#C2410C}.pm-lv-division{background:#EFF6FF;color:#1D4ED8}.pm-lv-team{background:#ECFDF5;color:#047857}
+/* 목표 목록 트리 표(레몬베이스 '목표' 화면 배치) */
+.pm-ttabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:14px;overflow-x:auto;overflow-y:hidden}
+.pm-ttabs button{background:none;border:0;padding:10px 12px;font-size:14.5px;color:var(--gray);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:inherit;white-space:nowrap}
+.pm-ttabs button.on{color:var(--dark);font-weight:700;border-bottom-color:var(--dark)}
+.pm-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.pm-filters select,.pm-filters input{height:36px;border:1px solid var(--border);border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;background:#fff;color:var(--dark)}
+.pm-filters input{min-width:200px}
+.pm-tr{display:grid;grid-template-columns:minmax(0,1fr) 108px 100px 64px 210px 78px;align-items:center;gap:8px;padding:9px 8px;border-bottom:1px solid #F1F2F4;font-size:13.5px;min-height:48px}
+.pm-th{font-size:12.5px;color:var(--gray);font-weight:600;min-height:0;border-bottom:1px solid var(--border)}
+.pm-tr-click{cursor:pointer}.pm-tr-click:hover{background:#FAFAFB}
+.pm-tr-sel,.pm-tr-sel:hover{background:#FFF5EF}
+.pm-tr-grp{display:flex;gap:6px;background:#F6F7F8;font-size:14px;cursor:pointer}
+.pm-tt{display:flex;align-items:center;gap:6px;min-width:0}
+.pm-tt .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm-tt .w{color:var(--gray);font-size:12px;white-space:nowrap}
+.pm-tw{width:18px;flex:0 0 18px;border:0;background:none;color:#9CA3AF;cursor:pointer;font-size:11px;padding:0;text-align:center;font-family:inherit}
+.pm-ic{flex:0 0 auto;color:#6B7280;font-size:13px}
+.pm-pc{display:flex;align-items:center;gap:8px}
+.pm-sbar{position:relative;flex:1;height:22px;border-radius:6px;background:#E5E7EB;overflow:hidden}
+.pm-sbar-f{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.pm-sbar span{position:absolute;left:8px;top:0;line-height:22px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pm-sbar-p{min-width:38px;text-align:right;font-size:13px}
+.pm-av{display:inline-flex;width:26px;height:26px;border-radius:50%;background:#FFE8DB;color:#C2410C;font-size:11px;font-weight:700;align-items:center;justify-content:center}
+.pm-ap{font-size:12.5px;white-space:nowrap}
+.pm-tr .c-act .btn{white-space:nowrap}
+.pm-ap i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:0}
+.pm-tbl-empty{padding:28px 8px;text-align:center;color:var(--gray);font-size:13.5px}
+@media(max-width:760px){.pm-tr{grid-template-columns:minmax(0,1fr) 140px}.pm-tr>.c-ap,.pm-tr>.c-dept,.pm-tr>.c-own,.pm-tr>.c-act{display:none}.pm-filters input{min-width:0;flex:1}}
 /* 목표 2단계: 체크인·진척·코멘트·변경 요청 */
 .pm-prog{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 4px;font-size:12.5px;color:var(--gray)}
 .pm-bar{flex:1;min-width:120px;height:8px;border-radius:999px;background:#F3F4F6;overflow:hidden}
@@ -1948,6 +1976,90 @@ function pmApprovedCard(g, i, d){
 </div>`;
 }
 
+// ── 승인 후 목표 목록: 레몬베이스 '목표' 화면 배치(탭 + 진행 상황·검색 필터 + 트리 표) ──
+// 내 목표 = 내 KPI·핵심 과제 / 내 팀 목표 = 우리 팀 목표와 거기 연결된 내 KPI / 전체 목표 = 전사→실→팀 목표 트리에 내 KPI를 연결 위치에
+let _pmTree = { tab:'mine', q:'', st:'', closed:{} };
+const PM_TREE_TABS = { mine:'내 목표', team:'내 팀 목표', all:'전체 목표' };
+function pmTreeSet(k, v){ _pmTree[k] = v; if(k === 'q'){ const el = document.getElementById('pm-tree-body'); if(el){ el.innerHTML = pmTreeBody(_pmSheet); return; } } render(); }
+function pmTreeToggle(key){ _pmTree.closed[key] = !_pmTree.closed[key]; const el = document.getElementById('pm-tree-body'); if(el) el.innerHTML = pmTreeBody(_pmSheet); else render(); }
+function pmSBar(p, state){
+  const s = state ? (PM_STATE[state] || PM_STATE.not_started) : null, col = s ? s[3] : '#9CA3AF', w = Math.min(Math.max(p || 0, 0), 100);
+  return `<div class="pm-pc"><div class="pm-sbar"><div class="pm-sbar-f" style="width:${w}%;background:${col}"></div>${s ? `<span style="color:${w >= 30 ? '#fff' : s[1]}">${s[0]}</span>` : ''}</div><b class="pm-sbar-p">${p == null ? '-' : p + '%'}</b></div>`;
+}
+function pmTreeNodes(d, tab){
+  const goals = d.goals || [], emp = d.employee || {};
+  const owner = emp.name || DB.getCurrent()?.name || '', dept = d.sheet?.dept || emp.dept || '';
+  const task = t => ({ key:'g'+t.id, kind:'task', g:t, title:t.title, owner, dept, children:[] });
+  const kpi = k => ({ key:'g'+k.id, kind:'kpi', g:k, title:k.title, owner, dept, children: goals.filter(t=>t.parent_goal_id===k.id).map(task) });
+  const kpis = goals.filter(g=>!g.parent_goal_id);
+  if(tab === 'mine') return [{ key:'me', kind:'group', title:`${owner}${emp.position || dept ? ` (${[emp.position, dept].filter(Boolean).join(' · ')})` : ''}`, children: kpis.map(kpi) }];
+  const orgs = d.linkable || [], ids = new Set(orgs.map(o=>o.id));
+  const orgNode = o => ({ key:'o'+o.id, kind:'org', o, title:o.title, dept: o.level === 'company' ? '전사' : (o.dept || ''), owner:'',
+    children: [...orgs.filter(x=>x.parent_id===o.id).map(orgNode), ...kpis.filter(k=>String(k.parent_org_goal_id)===String(o.id)).map(kpi)] });
+  if(tab === 'team') return orgs.filter(o=>o.level === 'team' && o.dept === dept).map(orgNode);
+  return [...orgs.filter(o=>!o.parent_id || !ids.has(o.parent_id)).map(orgNode), ...kpis.filter(k=>!k.parent_org_goal_id || !ids.has(Number(k.parent_org_goal_id))).map(kpi)];
+}
+// 검색·진행 상황으로 거르기: 맞는 줄과 그 상위 줄을 남김
+function pmTreeFilter(nodes, q, st){
+  if(!q && !st) return nodes;
+  const out = [];
+  for(const n of nodes){
+    const isGoal = n.kind === 'kpi' || n.kind === 'task';
+    const self = (isGoal && (!st || (n.g.state || 'not_started') === st) && (!q || n.title.toLowerCase().includes(q)))
+      || (!st && n.kind === 'org' && q && n.title.toLowerCase().includes(q));
+    const ch = pmTreeFilter(n.children || [], q, st);
+    if(self) out.push(n); else if(ch.length) out.push({ ...n, children: ch });
+  }
+  return out;
+}
+function pmTreeRow(n, depth, d, filtering){
+  const kids = n.children || [], open = filtering || !_pmTree.closed[n.key];
+  const tog = kids.length ? `<button class="pm-tw" onclick="event.stopPropagation();pmTreeToggle('${n.key}')" aria-label="${open?'접기':'펼치기'}">${open ? '▼' : '▶'}</button>` : `<span class="pm-tw">${depth > 0 ? '•' : ''}</span>`;
+  const sub = open ? kids.map(c=>pmTreeRow(c, depth + 1, d, filtering)).join('') : '';
+  if(n.kind === 'group') return `<div class="pm-tr pm-tr-grp" onclick="pmTreeToggle('${n.key}')">${tog}<b>${escapeHtml(n.title)}</b></div>${sub}`;
+  const pad = `style="padding-left:${depth * 20}px"`;
+  if(n.kind === 'org'){
+    const o = n.o;
+    return `<div class="pm-tr"><div class="pm-tt" ${pad}>${tog}<span class="pm-lv pm-lv-${o.level}" style="margin:0">${PM_LEVEL[o.level]}</span><b class="t" title="${escapeHtml(o.title)}">${escapeHtml(o.title)}</b></div>
+      <div class="c-ap pm-ap" style="color:var(--gray)">-</div><div class="c-dept">${escapeHtml(n.dept || '-')}</div><div class="c-own" style="color:var(--gray)">-</div>
+      <div>${pmSBar(o.progress, null)}</div><div class="c-act"></div></div>${sub}`;
+  }
+  const g = n.g, mode = g.progress_mode || 'metric', st = d.sheet?.status;
+  const ap = d.change?.status === 'pending' ? ['변경 승인 대기', '#F59E0B'] : st === 'approved' ? ['승인 완료', '#10B981'] : st === 'submitted' ? ['승인 대기 중', '#F59E0B'] : ['승인 요청 전', '#9CA3AF'];
+  const icon = n.kind === 'task' ? '<span class="pm-ic" title="핵심 과제">⚑</span>' : `<span class="pm-kind pm-kind-${g.kind||'business'}" style="margin:0">${g.kind==='ai'?'AI':'KPI'}</span>`;
+  const canCk = d.canCheckin && (n.kind === 'task' || mode !== 'children');
+  return `<div class="pm-tr pm-tr-click ${_pmPanel?.goalId===g.id?'pm-tr-sel':''}" onclick="pmOpenPanel(${g.id})">
+    <div class="pm-tt" ${pad}>${tog}${icon}<b class="t" title="${escapeHtml(g.title)}">${escapeHtml(g.title)}</b>${n.kind === 'kpi' && g.weight ? `<span class="w">${g.weight}%</span>` : ''}</div>
+    <div class="c-ap pm-ap"><i style="background:${ap[1]}"></i>${ap[0]}</div><div class="c-dept">${escapeHtml(n.dept || '-')}</div>
+    <div class="c-own"><span class="pm-av" title="${escapeHtml(n.owner)}">${escapeHtml(String(n.owner || '').replace(/[A-Za-z0-9]+$/, '').slice(-2))}</span></div>
+    <div>${mode === 'none' ? `<div class="pm-pc">${pmStateChip(g.state)}<span class="pm-meta">진척도 없음</span></div>` : pmSBar(g.progress_pct, g.state || 'not_started')}</div>
+    <div class="c-act">${canCk ? `<button class="btn btn-sm pm-btn-ghost" onclick="event.stopPropagation();pmStartCheckin(${g.id})">체크인</button>` : ''}</div></div>${sub}`;
+}
+function pmTreeBody(d){
+  const q = String(_pmTree.q || '').trim().toLowerCase(), st = _pmTree.st;
+  const nodes = pmTreeFilter(pmTreeNodes(d, _pmTree.tab), q, st);
+  if(!nodes.length) return `<div class="pm-tbl-empty">${q || st ? '조건에 맞는 목표가 없습니다.' : _pmTree.tab === 'team' ? '우리 팀 목표가 아직 없습니다. 팀장이 팀 목표를 올리면 여기에 보입니다.' : '목표가 없습니다.'}</div>`;
+  return nodes.map(n=>pmTreeRow(n, 0, d, !!(q || st))).join('');
+}
+function pmTreeHtml(d){
+  return `
+<div class="content-block">
+  <div class="pm-ttabs" role="tablist">${Object.entries(PM_TREE_TABS).map(([k,l])=>`<button type="button" role="tab" class="${_pmTree.tab===k?'on':''}" onclick="pmTreeSet('tab','${k}')">${l}</button>`).join('')}</div>
+  <div class="pm-filters">
+    <select onchange="pmTreeSet('st',this.value)" aria-label="진행 상황"><option value="">진행 상황 전체</option>${PM_STATE_ORDER.map(s=>`<option value="${s}" ${_pmTree.st===s?'selected':''}>${PM_STATE[s][0]}</option>`).join('')}</select>
+    <input type="search" placeholder="🔍 목표 검색" value="${escapeHtml(_pmTree.q)}" oninput="pmTreeSet('q',this.value)">
+    <span style="flex:1"></span>
+    <span class="pm-meta" style="display:flex;align-items:center;gap:8px;min-width:200px">내 전체 진척도 <span style="flex:1;min-width:80px">${pmBar(d.progress)}</span><b style="color:var(--dark)">${d.progress == null ? '-' : d.progress + '%'}</b></span>
+  </div>
+  <div class="pm-tr pm-th"><div>목표</div><div class="c-ap">승인 상태</div><div class="c-dept">담당 조직</div><div class="c-own">담당자</div><div>진척도</div><div class="c-act"></div></div>
+  <div id="pm-tree-body">${pmTreeBody(d)}</div>
+  <div class="pm-actions" style="justify-content:space-between;align-items:center;margin-top:10px">
+    <span class="pm-meta">목표를 누르면 진척 그래프·체크인·코멘트·변경 내역을 볼 수 있습니다. 체크인은 한 달에 한 번 이상 권장. 내 전체 진척도는 가중치 반영(목표별 100% 상한).</span>
+    ${d.canChange ? `<button class="btn btn-sm pm-btn-ghost" onclick="pmStartChange()">목표 변경 요청</button>` : ''}
+  </div>
+</div>`;
+}
+
 // 패널의 지표 부분: 지표별 카드 / 하위 목표 목록 / 정성 % / 진척도 없음
 function pmPanelMeasure(g, d){
   const mode = g.progress_mode || 'metric', p = g.progress_pct;
@@ -2245,16 +2357,7 @@ ${notice}
     const ckb = goals.filter(g=>g.parent_goal_id || g.progress_mode !== 'children'); // 체크인 대상(과제 + 하위 과제로 계산이 아닌 KPI)
     const doneN = op ? ckb.filter(g=>(d.checkins||[]).some(k=>k.goal_id===g.id && k.period_id===op.id && !k.auto)).length : 0;
     const periodBox = op ? `<div class="pm-period"><div><b>📌 ${escapeHtml(op.name)}</b>${op.ends_on ? ` · ${fmtGoalDate(op.ends_on)}까지` : ''}<div class="pm-meta" style="margin-top:2px">이 기간 안에 KPI마다 한 번 이상 체크인해 주세요. 체크인은 기간과 상관없이 언제든 할 수 있습니다.</div></div><span class="pm-badge ${doneN===ckb.length?'pm-badge-approved':'pm-badge-draft'}">${ckb.length}개 중 ${doneN}개 완료</span></div>` : '';
-    return head + weightBox + pmChangeBox(d) + periodBox + pmOrgTreeHtml() + `
-<div class="content-block">
-  <div class="sec-title" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">내 KPI
-    <span style="flex:1;min-width:160px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:400;color:var(--gray)">전체 진척도 ${pmBar(d.progress)}<b style="color:var(--dark)">${d.progress == null ? '-' : d.progress + '%'}</b></span></div>
-  ${goals.filter(g=>!g.parent_goal_id).map((g,i)=>pmApprovedCard(g,i,d)).join('') || `<div style="color:var(--gray)">작성한 목표가 없습니다.</div>`}
-  <div class="pm-actions" style="justify-content:space-between;align-items:center;margin-top:6px">
-    <span class="pm-meta">KPI를 누르면 진척 그래프·체크인·코멘트·변경 내역을 볼 수 있습니다. 체크인은 한 달에 한 번 이상 권장. 전체 진척도는 가중치 반영(목표별 100% 상한).</span>
-    ${d.canChange ? `<button class="btn btn-sm pm-btn-ghost" onclick="pmStartChange()">목표 변경 요청</button>` : ''}
-  </div>
-</div>` + pmPanelHtml(d);
+    return head + weightBox + pmChangeBox(d) + periodBox + pmTreeHtml(d) + pmPanelHtml(d);
   }
 
   // 읽기 전용(제출·기간 종료)
