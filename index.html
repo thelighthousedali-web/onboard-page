@@ -390,6 +390,61 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .pm-org-desc{font-size:12px;color:var(--gray);margin-top:2px}
 .pm-lv{display:inline-block;font-size:11px;font-weight:800;padding:1px 7px;border-radius:999px;margin-right:6px;background:#F3F4F6;color:#374151}
 .pm-lv-company{background:#FFF0EB;color:#C2410C}.pm-lv-division{background:#EFF6FF;color:#1D4ED8}.pm-lv-team{background:#ECFDF5;color:#047857}
+/* 내 리뷰(평가) */
+.pr-dot{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:999px;background:var(--primary);color:#fff;font-size:11px;font-weight:800;text-align:center;line-height:18px}
+.pr-task{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:14px 4px;border-bottom:1px solid #F1F2F4}
+.pr-task-l{display:flex;align-items:center;gap:12px}.pr-task-r{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pr-sep{margin:16px 0 4px;font-size:12.5px;font-weight:700;color:var(--gray)}
+.pr-chip{display:inline-block;min-width:74px;text-align:center;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;background:#F3F4F6;color:#374151}
+.pr-chip-self{background:#EFF6FF;color:#1D4ED8}.pr-chip-d1{background:#FFF7ED;color:#C2410C}.pr-chip-d2{background:#F5F3FF;color:#6D28D9}
+.pr-st{font-size:12.5px;font-weight:700;color:var(--gray)}.pr-st-submitted{color:#047857}.pr-st-draft{color:#C2410C}.pr-st-returned{color:#B91C1C}
+.pr-return{flex-basis:100%;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:10px 14px;font-size:13px;color:#B91C1C;font-weight:600}
+.pr-notice-info{background:#F3F4F6;color:#374151;border:1px solid var(--border)}
+.pr-ov{position:fixed;inset:0;background:#fff;z-index:9200;display:flex;flex-direction:column}
+.pr-top{display:flex;align-items:center;gap:12px;height:58px;padding:0 20px;border-bottom:1px solid var(--border);flex:none;font-size:16px}
+.pr-back{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:16px}.pr-back:hover{background:#F3F4F6}
+.pr-main{flex:1;min-height:0;display:grid;grid-template-columns:230px minmax(0,1fr) 380px}
+.pr-l{border-right:1px solid var(--border);background:#FAFAFB;padding:28px 22px;overflow:auto}
+.pr-steps{display:grid;gap:22px}.pr-step{display:flex;align-items:flex-start;gap:12px;color:#6B7280}.pr-step.on{color:#2563EB;font-weight:700}
+.pr-dotc{flex:none;width:24px;height:24px;border-radius:50%;background:#E5E7EB;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800}
+.pr-step.on .pr-dotc{background:#fff;border:6px solid #2563EB}.pr-dotc.done{background:#10B981;border:0}.pr-step-n{font-size:14.5px}
+.pr-c{overflow:auto;padding:28px 24px 60px}.pr-c-in{max-width:760px;margin:0 auto}
+.pr-r{border-left:1px solid var(--border);overflow:auto;padding:18px 20px 40px}.pr-r-h{font-weight:800;font-size:14.5px;margin-bottom:12px}
+.pr-sec-h{font-size:16px;font-weight:800;margin:6px 0 12px}
+.pr-item{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:#fff}
+.pr-item-bad{border-color:#FCA5A5;background:#FFFBFB}
+.pr-item-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.pr-wchip{display:inline-flex;align-items:center;gap:4px;background:#E0F2FE;color:#0369A1;font-size:12px;font-weight:800;padding:3px 10px;border-radius:6px}
+.pr-wchip input{width:46px;border:0;border-bottom:1px solid #7DD3FC;background:transparent;text-align:right;font-weight:800;color:#0369A1;font-size:12px}
+.pr-kind{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}.pr-kind button{border:0;background:#fff;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer;color:#6B7280}
+.pr-kind button.on{background:#EFF6FF;color:#1D4ED8}.pr-kind button.on.ai{background:#F5F3FF;color:#6D28D9}
+.pr-link{max-width:260px;font-size:12.5px;padding:5px 8px;border:1px solid var(--border);border-radius:8px;background:#fff}
+.pr-x{margin-left:auto;border:0;background:none;cursor:pointer;color:#9CA3AF;font-size:15px}.pr-x:hover{color:#B91C1C}
+.pr-in{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;margin-bottom:8px;background:#fff}
+.pr-title{font-weight:700;font-size:15px}.pr-ta{resize:vertical;min-height:76px}
+.pr-title-ro{font-weight:800;font-size:15px;margin-bottom:6px}.pr-sum-ro{font-size:14px;color:#374151;margin-bottom:8px}
+.pr-rte-box{border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.pr-rte{min-height:96px;max-height:340px;overflow:auto;padding:10px 12px;font-size:14px;line-height:1.65;outline:none}
+.pr-rte:empty:before{content:attr(data-ph);color:#9CA3AF}
+.pr-rte-bar{display:flex;gap:2px;padding:4px 6px;border-top:1px solid var(--border);background:#FAFAFB}.pr-rte-bar button{border:0;background:none;padding:3px 9px;cursor:pointer;border-radius:5px;font-size:13px}.pr-rte-bar button:hover{background:#E5E7EB}
+.pr-rich{font-size:14px;line-height:1.65;color:#374151;margin-bottom:8px;word-break:break-word}
+.pr-glabel{font-size:12.5px;font-weight:700;margin:6px 0 6px}
+.pr-grades{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:8px}
+.pr-grades button{border:0;border-right:1px solid var(--border);background:#fff;padding:12px 0;font-size:15px;font-weight:700;cursor:pointer;color:#1F2937}.pr-grades button:last-child{border-right:0}
+.pr-grades button:hover:not(:disabled){background:#F0F7FF}.pr-grades button.on{background:#1E90FF;color:#fff}.pr-grades button:disabled{cursor:default;color:#9CA3AF}.pr-grades button.on:disabled{background:#93C5FD;color:#fff}
+.pr-q{font-size:16px;font-weight:800;margin-bottom:8px}.pr-req{color:#EF4444}
+.pr-desc{background:#F3F4F6;border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.7;color:#374151;margin-bottom:12px}
+.pr-bad-msg{font-size:12.5px;font-weight:700;color:#B91C1C;margin-top:4px}
+.pr-rtabs{display:flex;gap:18px;border-bottom:1px solid var(--border);margin-bottom:14px}.pr-rtabs button{border:0;background:none;padding:8px 2px;font-size:14px;font-weight:700;color:#9CA3AF;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}.pr-rtabs button.on{color:#111827;border-bottom-color:#111827}
+.pr-refcard{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px}.pr-refcard-h{font-size:13.5px;font-weight:800;margin-bottom:8px;line-height:1.5}
+.pr-prog{display:flex;align-items:center;gap:8px;margin-bottom:8px}.pr-ck{border-top:1px dashed #E5E7EB;padding-top:8px;margin-top:8px}
+.pr-task-ref{font-size:12.5px;color:#374151;margin-top:6px}
+.pr-pl{margin:4px 0}.pr-pl-k{font-size:12px;font-weight:700;color:var(--gray)}
+@media(max-width:900px){
+  .pr-ov{overflow:auto;display:block}.pr-top{position:sticky;top:0;background:#fff;z-index:2}
+  .pr-main{display:block}.pr-l{border-right:0;border-bottom:1px solid var(--border);padding:14px 16px;overflow:visible}.pr-steps{display:flex;gap:16px;overflow:auto}
+  .pr-c{overflow:visible;padding:18px 16px 30px}.pr-r{border-left:0;border-top:8px solid #F3F4F6;overflow:visible;padding:16px}
+}
 /* 작성·변경 요청 화면: 목표 목록 + 오른쪽 편집 패널 */
 .pm-dr-row{display:grid;grid-template-columns:minmax(0,1fr) 190px 120px 56px 78px;gap:8px;align-items:center;padding:10px 8px;border-bottom:1px solid #F1F2F4;font-size:13.5px;cursor:pointer;min-height:46px}
 .pm-dr-row:hover{background:#FAFAFB}.pm-dr-row.pm-th{cursor:default;min-height:0}.pm-dr-row.pm-th:hover{background:none}
@@ -1299,6 +1354,7 @@ function renderLayout(user, content){
         <span class="ni">🚀</span>온보딩 미션
       </div>
       ${renderGoalNavItem()}
+      ${renderReviewNavItem()}
       <div class="nav-sec">회사 소개</div>
       <div class="nav-item ${state.page==='company'?'active':''}" data-nav="company">
         <span class="ni">🏢</span>헥토큐앤엠 소개
@@ -1558,7 +1614,7 @@ async function pmCall(body){
     return { ok: false, status: 0, data: { error: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.' } };
   }
 }
-function pmReset(){ _pmTeam = null; _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; _pmOpen = {}; _pmCk = null; _pmChange = null; _pmCm = {}; }
+function pmReset(){ prReset(); _pmTeam = null; _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; _pmOpen = {}; _pmCk = null; _pmChange = null; _pmCm = {}; }
 let _pmOpen = {};     // 펼친 목표(기록·코멘트) {goalId:true}
 let _pmCk = null;     // 작성 중인 체크인 {goalId, value, progress, state, note}
 let _pmChange = null; // 작성 중인 변경 요청 {reason}
@@ -2486,10 +2542,317 @@ ${notice}
 </div>`;
 }
 
+// ── 내 리뷰(자체 평가, 2026-11) ───────────────────────────────────────────
+// 본인평가·하향 1·2차 작성과 결과 확인. 데이터는 pr 함수만 읽고 쓴다(pr_* 테이블은 공개 키 차단). 완성 전까지 pmAllowed() 사용자에게만.
+// 작성 화면은 레몬베이스 '리뷰 작성'처럼 전체 화면: 왼쪽 단계 · 가운데 문항 · 오른쪽 참고 정보(목표·지난 리뷰).
+const PR_URL = `${SUPA_CFG.url}/functions/v1/pr`;
+const PR_KIND = { self:'본인평가', d1:'1차 평가', d2:'2차 평가' };
+const PR_STEP = { self:'셀프', d1:'하향 1차', d2:'하향 2차' };
+const PR_ST = { none:'작성 전', draft:'작성중', submitted:'제출 완료', returned:'반려 · 수정 필요' };
+const PR_GRADE_LIST = ['S', 'A', 'B', 'C'];
+let _prMe = null, _prMeLoading = false, _prList = null, _prCycleId = null, _prRv = null, _prBusy = false, _prRvY = 0;
+
+async function prCall(body){
+  try {
+    const res = await fetch(PR_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPA_CFG.key}` },
+      body: JSON.stringify({ portalToken: DB.getToken(), ...body }),
+    });
+    const data = await res.json().catch(()=>({}));
+    return { ok: res.ok, status: res.status, data };
+  } catch(e){
+    return { ok: false, status: 0, data: { error: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.' } };
+  }
+}
+function prReset(){ _prMe = null; _prList = null; _prCycleId = null; _prRv = null; _prRvY = 0; }
+async function prLoadMe(){
+  if(_prMeLoading) return;
+  _prMeLoading = true;
+  const { ok, data } = await prCall({ action: 'me' });
+  _prMeLoading = false;
+  _prMe = ok ? data : { cycles: [], tasks: [] };
+  if(ok && (data.cycles||[]).length) render(); // 메뉴가 새로 생길 때만 다시 그림
+}
+function renderReviewNavItem(){
+  if(!pmAllowed()) return '';
+  if(_prMe === null){ prLoadMe(); return ''; }
+  if(!(_prMe.cycles||[]).length) return '';
+  const n = (_prMe.tasks||[]).filter(t => t.open).length;
+  return `<div class="nav-item ${state.page==='reviews'?'active':''}" data-nav="reviews"><span class="ni">🧾</span>내 리뷰${n ? ` <span class="pr-dot">${n}</span>` : ''}</div>`;
+}
+const prMD = s => { if(!s) return ''; const [, m, d] = String(s).split('-'); return `${Number(m)}.${Number(d)}`; };
+const prRange = (a, b) => (a || b) ? `${prMD(a)} ~ ${prMD(b)}` : '';
+async function prLoadList(){
+  const cs = _prMe?.cycles || [];
+  if(!_prCycleId || !cs.some(c => c.id === _prCycleId)) _prCycleId = (cs.find(c => c.status === 'open') || cs[0])?.id || null;
+  if(!_prCycleId){ _prList = { cycle: null, tasks: [] }; render(); return; }
+  const { ok, data } = await prCall({ action: 'my_reviews', cycleId: _prCycleId });
+  _prList = ok ? data : { error: data.error || '리뷰 목록을 불러오지 못했습니다.' };
+  render();
+}
+function prSetCycle(id){ _prCycleId = Number(id); _prList = null; render(); }
+
+function renderReviews(user){
+  if(_prMe === null){ prLoadMe(); return `<div class="content-block"><div class="loading"><div class="spinner"></div></div></div>`; }
+  if(_prList === null){ prLoadList(); return `<div class="content-block"><div class="loading"><div class="spinner"></div></div></div>`; }
+  if(_prList.error) return `<div class="page-head"><div class="page-title">🧾 내 리뷰</div></div><div class="content-block">${escapeHtml(_prList.error)}</div>`;
+  const d = _prList, c = d.cycle, cs = _prMe.cycles || [];
+  if(!c) return `<div class="page-head"><div class="page-title">🧾 내 리뷰</div></div><div class="content-block">지금 진행 중인 평가가 없습니다.</div>`;
+  const sel = cs.length > 1 ? `<select class="fselect" style="width:auto;min-width:220px;margin-bottom:14px" onchange="prSetCycle(this.value)">${cs.map(x => `<option value="${x.id}" ${x.id===c.id?'selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select>` : '';
+  const tasks = d.tasks || [];
+  const row = t => {
+    const label = t.kind === 'self' ? '본인평가' : `${PR_KIND[t.kind]} · ${escapeHtml(t.reviewee.name)}님`;
+    const act = t.status === 'submitted'
+      ? `<button class="btn btn-sm pm-btn-ghost" onclick="prOpenReview(${c.id},'${escapeHtml(t.reviewee.email)}','${t.kind}')">보기</button>`
+      : t.open ? `<button class="btn btn-sm btn-primary" onclick="prOpenReview(${c.id},'${escapeHtml(t.reviewee.email)}','${t.kind}')">${t.status === 'none' ? '작성하기' : '이어서 작성'}</button>`
+      : `<span class="pm-meta">${escapeHtml(t.why || '')}</span>`;
+    return `<div class="pr-task">
+      <div class="pr-task-l"><span class="pr-chip pr-chip-${t.kind}">${PR_STEP[t.kind]}</span><div><b>${label}</b>${t.kind !== 'self' ? `<div class="pm-meta">${escapeHtml([t.reviewee.position, t.reviewee.dept].filter(Boolean).join(' · '))}</div>` : ''}</div></div>
+      <div class="pr-task-r"><span class="pr-st pr-st-${t.status}">${PR_ST[t.status] || t.status}</span>${t.due ? `<span class="pm-meta">${prMD(t.due)}까지</span>` : ''}${act}</div>
+      ${t.status === 'returned' && t.return_reason ? `<div class="pr-return">반려 사유: ${escapeHtml(t.return_reason)}</div>` : ''}</div>`;
+  };
+  const mine = tasks.filter(t => t.kind === 'self'), down = tasks.filter(t => t.kind !== 'self');
+  return `
+<div class="page-head">
+  <div class="page-title">🧾 ${escapeHtml(c.name)}</div>
+  <div class="page-sub">본인평가 ${prRange(c.self_from, c.self_to)} · 1차 ${prRange(c.d1_from, c.d1_to)} · 2차 ${prRange(c.d2_from, c.d2_to)}${c.status === 'closed' ? ' · 마감됐습니다' : ''}</div>
+</div>
+${(_pmNotice && Date.now() < _pmNotice.until) ? `<div class="pm-notice pm-notice-${_pmNotice.type}">${escapeHtml(_pmNotice.text)}</div>` : ''}
+${sel}
+<div class="content-block">
+  <div class="sec-title">작성할 리뷰</div>
+  ${tasks.length ? mine.map(row).join('') + (down.length ? `<div class="pr-sep">내가 평가할 구성원 (${down.length}명)</div>` + down.map(row).join('') : '') : '<div class="pm-tbl-empty">작성할 리뷰가 없습니다. 평가 대상이 아니거나 아직 대상자 확정 전입니다.</div>'}
+</div>
+${prRvOverlayHtml()}`;
+}
+
+// ── 작성 화면 ──
+async function prOpenReview(cid, email, kind){
+  if(_prBusy) return;
+  _prRv = { loading: true, cycleId: cid, email, kind }; render();
+  const { ok, data } = await prCall({ action: 'review_get', cycleId: cid, email, kind });
+  if(!ok){ _prRv = null; render(); alert(data.error || '리뷰를 불러오지 못했습니다.'); return; }
+  const rv = data.review;
+  _prRv = { cycleId: cid, email, kind, d: data, items: JSON.parse(JSON.stringify(rv.items || [])), comps: JSON.parse(JSON.stringify(rv.comps || [])), overall: rv.overall || '',
+    refTab: 'goals', notice: null, attempt: false };
+  _prRv.sig0 = prRvSig(); _prRvY = 0; render();
+}
+function prRvClose(){
+  if(_prRv && !_prRv.loading && prRvEditable() && prRvDirty() && !confirm('저장하지 않은 내용이 있습니다. 닫을까요?')) return;
+  _prRv = null; _prRvY = 0; render();
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && _prRv && !_prRv.loading && state.page === 'reviews' && !document.querySelector('.pm-drawer')) prRvClose(); });
+const prRvEditable = () => !!(_prRv && _prRv.d && _prRv.d.canEdit);
+function prRvSig(){ return JSON.stringify([_prRv.items, _prRv.comps, _prRv.overall]); }
+function prRvDirty(){ return !!(_prRv && _prRv.d && _prRv.sig0 !== prRvSig()); }
+function prRerender(){ const el = document.querySelector('.pr-c'); if(el) _prRvY = el.scrollTop; render(); }
+function prCompDef(){ return _prRv.d.cycle.settings.comps || []; }
+const prStrip = h => String(h || '').replace(/<[^>]*>/g, '').trim();
+
+// 본인평가 규칙 점검(서버와 같은 기준). 항목별 문제와 규칙별 통과 여부를 함께 돌려준다.
+function prSelfRules(){
+  const st = _prRv.d.cycle.settings, it = st.items, items = _prRv.items, comps = _prRv.comps;
+  const n = items.length, sum = items.reduce((a, x) => a + (Number(x.weight) || 0), 0);
+  const ai = items.filter(x => x.kind === 'ai'), aiSum = ai.reduce((a, x) => a + (Number(x.weight) || 0), 0);
+  const mine = new Set((_prRv.d.ref.goals || []).filter(g => !g.parent_goal_id).map(g => g.id));
+  const needLink = it.requireLink && _prRv.d.cycle.goal_cycle_id;
+  const bad = items.map((x, i) => {
+    const p = [];
+    if(!x.title) p.push('항목 이름');
+    if(x.kind !== 'kpi' && x.kind !== 'ai') p.push('KPI/AI 구분');
+    if(needLink && (!x.goal_id || !mine.has(x.goal_id))) p.push('목표 연결');
+    if(!x.summary && !prStrip(x.detail_html)) p.push('성과 내용');
+    if(!x.grade) p.push('자기 등급');
+    return p;
+  });
+  const compBad = comps.map(cp => { const p = []; if(!cp.grade) p.push('등급'); if(!String(cp.comment || '').trim()) p.push('의견'); return p; });
+  const rows = [
+    { ok: n >= it.min && n <= it.max, text: `성과 항목 ${it.min}~${it.max}개`, now: `지금 ${n}개` },
+    { ok: sum === 100, text: '가중치 합 100', now: `지금 ${sum}` },
+    { ok: items.every(x => x.kind === 'kpi' || x.kind === 'ai'), text: '모든 항목 KPI / AI 구분', now: '' },
+  ];
+  if(st.w.aiShare > 0) rows.push({ ok: ai.length >= it.aiMin && ai.length <= it.aiMax && aiSum === st.w.aiShare, text: `AI 항목 ${it.aiMin}~${it.aiMax}개 · 가중치 합 ${st.w.aiShare}`, now: `지금 ${ai.length}개 · ${aiSum}` });
+  if(needLink) rows.push({ ok: bad.every(p => !p.includes('목표 연결')), text: '모든 항목을 내 목표에 연결', now: `${bad.filter(p => p.includes('목표 연결')).length}개 미연결` });
+  rows.push({ ok: bad.every(p => !p.includes('성과 내용') && !p.includes('자기 등급') && !p.includes('항목 이름')), text: '항목마다 이름·성과 내용·자기 등급', now: '' });
+  rows.push({ ok: compBad.every(p => !p.length), text: `공통역량 ${comps.length}개 모두 등급·의견`, now: `${compBad.filter(p => p.length).length}개 미작성` });
+  return { rows, bad, compBad, ok: rows.every(r => r.ok) && bad.every(p => !p.length) };
+}
+function prRulesHtml(){
+  const r = prSelfRules();
+  return `<div class="pm-rules-title">제출 전 점검 <span class="pm-meta">${r.ok ? '모두 통과했습니다' : '빨간 항목을 채우면 제출할 수 있습니다'}</span></div>` +
+    r.rows.map(x => `<div class="pm-rule ${x.ok ? 'pm-rule-ok' : 'pm-rule-bad'}"><span class="pm-rule-ic">${x.ok ? '✓' : '✗'}</span>${escapeHtml(x.text)}${!x.ok && x.now ? ` <span class="pm-meta">(${escapeHtml(x.now)})</span>` : ''}</div>`).join('');
+}
+function prRefreshRules(){ const el = document.getElementById('pr-rules'); if(el) el.innerHTML = prRulesHtml(); const w = document.getElementById('pr-wsum'); if(w) w.textContent = _prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0); }
+
+// 입력 반영(글자 입력은 다시 그리지 않음, 구조가 바뀌면 다시 그림)
+function prRvField(i, f, v){
+  const x = _prRv.items[i]; if(!x) return;
+  if(f === 'weight'){ const n = parseInt(v, 10); x.weight = Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0; }
+  else x[f] = v;
+  prRefreshRules();
+}
+function prRvKind(i, k){ _prRv.items[i].kind = k; prRerender(); }
+function prRvGrade(i, g){ _prRv.items[i].grade = _prRv.items[i].grade === g ? null : g; prRerender(); }
+function prRvLink(i, gid){
+  const x = _prRv.items[i], g = (_prRv.d.ref.goals || []).find(y => String(y.id) === String(gid));
+  x.goal_id = g ? g.id : null;
+  if(g){ if(!x.title) x.title = g.title; x.kind = g.kind === 'ai' ? 'ai' : 'kpi'; }
+  prRerender();
+}
+function prRvAdd(){
+  const max = _prRv.d.cycle.settings.items.max;
+  if(_prRv.items.length >= max) return;
+  _prRv.items.push({ goal_id: null, title: '', kind: 'kpi', weight: 0, summary: '', detail_html: '', grade: null });
+  prRerender();
+  setTimeout(() => { const c = document.querySelector('.pr-c'); if(c) c.scrollTop = c.scrollHeight; }, 0);
+}
+function prRvDel(i){ if(!confirm('이 성과 항목을 삭제할까요?')) return; _prRv.items.splice(i, 1); prRerender(); }
+function prRvCompGrade(key, g){ const c = _prRv.comps.find(x => x.key === key); if(c){ c.grade = c.grade === g ? null : g; prRerender(); } }
+function prRvCompText(key, v){ const c = _prRv.comps.find(x => x.key === key); if(c){ c.comment = v; prRefreshRules(); } }
+function prRvOverall(v){ _prRv.overall = v; }
+function prRte(i, cmd){
+  const ed = document.getElementById('pr-rte-' + i); if(!ed) return;
+  ed.focus();
+  if(cmd === 'link'){ const u = prompt('링크 주소(https://...)'); if(u && /^https?:\/\//i.test(u)) document.execCommand('createLink', false, u); }
+  else document.execCommand(cmd, false, null);
+  _prRv.items[i].detail_html = ed.innerHTML; prRefreshRules();
+}
+function prRteInput(i, el){ _prRv.items[i].detail_html = el.innerHTML; prRefreshRules(); }
+function prRvRef(t){ _prRv.refTab = t; prRerender(); }
+
+function prGradeBtns(cur, onclickFn, disabled){
+  return `<div class="pr-grades">${PR_GRADE_LIST.map(g => `<button type="button" class="${cur === g ? 'on' : ''}" ${disabled ? 'disabled' : `onclick="${onclickFn.replace('%G', g)}"`}>${g}</button>`).join('')}</div>`;
+}
+function prItemCardHtml(x, i, rules, edit){
+  const d = _prRv.d, st = d.cycle.settings, goals = (d.ref.goals || []).filter(g => !g.parent_goal_id);
+  const probs = _prRv.attempt ? rules.bad[i] : [];
+  const link = goals.find(g => g.id === x.goal_id);
+  return `<div class="pr-item ${probs.length ? 'pr-item-bad' : ''}">
+    <div class="pr-item-top">
+      <span class="pr-wchip">가중치 ${edit ? `<input type="number" min="0" max="100" value="${x.weight || ''}" oninput="prRvField(${i},'weight',this.value)" aria-label="가중치"> %` : `${x.weight || 0}%`}</span>
+      ${edit ? `<span class="pr-kind"><button type="button" class="${x.kind==='kpi'?'on':''}" onclick="prRvKind(${i},'kpi')">KPI</button><button type="button" class="${x.kind==='ai'?'on ai':''}" onclick="prRvKind(${i},'ai')">AI</button></span>` : `<span class="pm-kind pm-kind-${x.kind==='ai'?'ai':'business'}" style="margin:0">${x.kind==='ai'?'AI':'KPI'}</span>`}
+      ${edit && (d.cycle.goal_cycle_id) ? `<select class="pr-link" onchange="prRvLink(${i},this.value)" aria-label="연결할 목표"><option value="">목표 연결 안 함</option>${goals.map(g => `<option value="${g.id}" ${g.id===x.goal_id?'selected':''}>${escapeHtml(g.title)}</option>`).join('')}</select>` : (link ? `<span class="pm-meta">연결 목표: ${escapeHtml(link.title)}</span>` : '')}
+      ${edit && _prRv.items.length > 0 ? `<button type="button" class="pr-x" onclick="prRvDel(${i})" title="항목 삭제">✕</button>` : ''}
+    </div>
+    ${edit ? `<input class="pr-in pr-title" maxlength="200" placeholder="성과 항목 이름" value="${escapeHtml(x.title)}" oninput="prRvField(${i},'title',this.value)">` : `<div class="pr-title-ro">${escapeHtml(x.title)}</div>`}
+    ${edit ? `<input class="pr-in" maxlength="300" placeholder="성과 요약 (한 줄)" value="${escapeHtml(x.summary)}" oninput="prRvField(${i},'summary',this.value)">` : (x.summary ? `<div class="pr-sum-ro">${escapeHtml(x.summary)}</div>` : '')}
+    ${edit ? `<div class="pr-rte-box"><div id="pr-rte-${i}" class="pr-rte" contenteditable="true" data-ph="성과 상세 내용을 적어 주세요 (결과·기여·수치 등)" oninput="prRteInput(${i},this)">${pmSafeHtml(x.detail_html)}</div>
+      <div class="pr-rte-bar"><button type="button" onmousedown="event.preventDefault();prRte(${i},'bold')"><b>B</b></button><button type="button" onmousedown="event.preventDefault();prRte(${i},'italic')"><i>I</i></button><button type="button" onmousedown="event.preventDefault();prRte(${i},'underline')"><u>U</u></button><button type="button" onmousedown="event.preventDefault();prRte(${i},'insertUnorderedList')">• 목록</button><button type="button" onmousedown="event.preventDefault();prRte(${i},'link')">링크</button></div></div>`
+      : (x.detail_html ? `<div class="pr-rich">${pmSafeHtml(x.detail_html)}</div>` : '')}
+    <div class="pr-glabel">자기 등급 ${st.scale ? `<span class="pm-meta">S ${st.scale.S} · A ${st.scale.A} · B ${st.scale.B} · C ${st.scale.C}</span>` : ''}</div>
+    ${prGradeBtns(x.grade, `prRvGrade(${i},'%G')`, !edit)}
+    ${probs.length ? `<div class="pr-bad-msg">빠진 것: ${probs.map(escapeHtml).join(', ')}</div>` : ''}
+  </div>`;
+}
+function prCompBlockHtml(cp, def, i, rules, edit){
+  const probs = _prRv.attempt ? rules.compBad[i] : [];
+  return `<div class="pr-item ${probs.length ? 'pr-item-bad' : ''}">
+    <div class="pr-q">${escapeHtml(def.name)} <span class="pr-req">*</span></div>
+    ${def.desc ? `<div class="pr-desc">${escapeHtml(def.desc).replace(/\n/g, '<br>')}</div>` : ''}
+    ${prGradeBtns(cp.grade, `prRvCompGrade('${cp.key}','%G')`, !edit)}
+    ${edit ? `<textarea class="pr-in pr-ta" rows="3" maxlength="3000" placeholder="의견 입력하기 (필수)" oninput="prRvCompText('${cp.key}',this.value)">${escapeHtml(cp.comment)}</textarea>` : (cp.comment ? `<div class="pr-rich">${escapeHtml(cp.comment).replace(/\n/g, '<br>')}</div>` : '')}
+    ${probs.length ? `<div class="pr-bad-msg">빠진 것: ${probs.join(', ')}</div>` : ''}
+  </div>`;
+}
+function prCenterSelfHtml(){
+  const d = _prRv.d, edit = prRvEditable(), rules = prSelfRules(), rv = d.review, st = d.cycle.settings;
+  const returned = rv.status === 'returned' && rv.return_reason ? `<div class="pr-return" style="margin-bottom:14px">1차 평가자가 돌려보냈습니다 — ${escapeHtml(rv.return_reason)}</div>` : '';
+  const ro = !edit ? `<div class="pm-notice pr-notice-info">${rv.status === 'submitted' ? '제출한 평가입니다. 고칠 수 없습니다.' : escapeHtml(d.why || '지금은 작성할 수 없습니다.')}</div>` : '';
+  const notice = _prRv.notice ? `<div class="pm-notice pm-notice-${_prRv.notice.type}">${escapeHtml(_prRv.notice.text)}</div>` : '';
+  const max = st.items.max, goalsN = (d.ref.goals || []).filter(g => !g.parent_goal_id).length;
+  return `${notice}${returned}${ro}
+  <div class="pr-sec-h">① 성과 <span class="pm-meta">항목 ${st.items.min}~${max}개 · 가중치 합 <b id="pr-wsum">${_prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0)}</b> / 100</span></div>
+  ${d.cycle.goal_cycle_id && !goalsN ? `<div class="pm-notice pr-notice-info">승인된 목표가 없어 목표를 불러오지 못했습니다. 성과 항목에 연결할 목표가 필요합니다.</div>` : ''}
+  ${_prRv.items.map((x, i) => prItemCardHtml(x, i, rules, edit)).join('') || '<div class="pm-tbl-empty">성과 항목이 없습니다.</div>'}
+  ${edit && _prRv.items.length < max ? `<button class="btn btn-sm pm-btn-ghost" onclick="prRvAdd()">+ 성과 추가</button>` : ''}
+  <div class="pr-sec-h" style="margin-top:28px">② 공통역량</div>
+  ${_prRv.comps.map((cp, i) => prCompBlockHtml(cp, prCompDef().find(z => z.key === cp.key) || { name: cp.key, desc: '' }, i, rules, edit)).join('')}
+  <div class="pr-sec-h" style="margin-top:28px">③ 종합 의견 <span class="pm-meta">(선택)</span></div>
+  ${edit ? `<textarea class="pr-in pr-ta" rows="4" maxlength="5000" placeholder="올해를 돌아보며 하고 싶은 말을 적어 주세요" oninput="prRvOverall(this.value)">${escapeHtml(_prRv.overall)}</textarea>` : (rv.overall ? `<div class="pr-rich">${escapeHtml(rv.overall).replace(/\n/g, '<br>')}</div>` : '<div class="pm-meta">작성한 종합 의견이 없습니다.</div>')}
+  ${edit ? `<div class="pm-rules" id="pr-rules" style="margin-top:24px">${prRulesHtml()}</div>
+  <div class="pm-actions" style="margin-top:14px"><button class="btn btn-sm pm-btn-ghost" onclick="prRvSave(false)" ${_prBusy?'disabled':''}>임시저장</button><button class="btn btn-primary btn-sm" onclick="prRvSave(true)" ${_prBusy?'disabled':''}>제출</button></div>` : ''}`;
+}
+function prCenterHtml(){
+  if(_prRv.kind === 'self') return prCenterSelfHtml();
+  return `<div class="pm-notice pr-notice-info">하향 평가 화면은 곧 열립니다.</div>`;
+}
+
+// 오른쪽 참고 정보
+function prRefHtml(){
+  const d = _prRv.d, ref = d.ref, tab = _prRv.refTab;
+  const tabs = `<div class="pr-rtabs"><button class="${tab==='goals'?'on':''}" onclick="prRvRef('goals')">목표</button><button class="${tab==='archive'?'on':''}" onclick="prRvRef('archive')">지난 리뷰</button></div>`;
+  if(tab === 'archive'){
+    const a = ref.archive || [];
+    return tabs + (a.length ? a.map(x => `<div class="pr-refcard"><div class="pr-refcard-h">${x.year}년 · ${x.kind === 'review' ? '평가' : '목표'} <span class="pm-meta">${x.source === 'lemonbase' ? '레몬베이스' : escapeHtml(x.source)}</span></div>${prPayloadHtml(x.payload)}</div>`).join('') : '<div class="pm-tbl-empty">지난 리뷰가 없습니다.</div>');
+  }
+  const goals = ref.goals || [], kpis = goals.filter(g => !g.parent_goal_id);
+  if(!kpis.length) return tabs + '<div class="pm-tbl-empty">승인된 목표가 없습니다.</div>';
+  return tabs + kpis.map(g => {
+    const tasks = goals.filter(t => t.parent_goal_id === g.id);
+    return `<div class="pr-refcard">
+      <div class="pr-refcard-h"><span class="pm-kind pm-kind-${g.kind==='ai'?'ai':'business'}" style="margin:0">${g.kind==='ai'?'AI':'KPI'}</span> ${escapeHtml(g.title)} <span class="pm-meta">${g.weight}%</span></div>
+      <div class="pr-prog">${pmBar(g.progress_pct, g.state)}<b>${g.progress_pct == null ? '-' : g.progress_pct + '%'}</b>${pmStateChip(g.state)}</div>
+      ${(g.checkins || []).map(k => `<div class="pr-ck"><div class="pm-meta">${prMD(k.date)} 체크인</div><div class="pr-rich">${pmSafeHtml(k.note)}</div></div>`).join('')}
+      ${tasks.map(t => `<div class="pr-task-ref">⚑ ${escapeHtml(t.title)} <span class="pm-meta">${t.progress_pct == null ? '' : t.progress_pct + '%'}</span> ${pmStateChip(t.state)}</div>`).join('')}
+    </div>`;
+  }).join('');
+}
+// 지난 리뷰 내용을 모양과 상관없이 읽기 좋게(문자열·배열·객체)
+function prPayloadHtml(p, depth = 0){
+  if(p == null || p === '') return '';
+  if(typeof p === 'string') return `<div class="pr-rich">${pmSafeHtml(p)}</div>`;
+  if(typeof p !== 'object') return `<span>${escapeHtml(String(p))}</span>`;
+  if(depth > 4) return '';
+  if(Array.isArray(p)) return p.map(x => `<div class="pr-pl">${prPayloadHtml(x, depth + 1)}</div>`).join('');
+  return Object.entries(p).filter(([, v]) => v != null && v !== '').map(([k, v]) => `<div class="pr-pl"><div class="pr-pl-k">${escapeHtml(k)}</div>${prPayloadHtml(v, depth + 1)}</div>`).join('');
+}
+function prStepperHtml(){
+  const d = _prRv.d, c = d.cycle, cur = _prRv.kind;
+  const done = k => k === cur ? d.review.status === 'submitted' : (k === 'self' && cur !== 'self' ? d.ref.self?.status === 'submitted' : (k === 'd1' && cur === 'd2' ? d.ref.d1?.status === 'submitted' : false));
+  return `<div class="pr-steps">${['self', 'd1', 'd2'].map(k => `<div class="pr-step ${k === cur ? 'on' : ''}"><span class="pr-dotc ${done(k) ? 'done' : ''}">${done(k) ? '✓' : ''}</span><div><div class="pr-step-n">${PR_STEP[k]}</div><div class="pm-meta">${prRange(c[k + '_from'], c[k + '_to'])}</div></div></div>`).join('')}</div>`;
+}
+function prRvOverlayHtml(){
+  if(!_prRv) return '';
+  if(_prRv.loading) return `<div class="pr-ov"><div class="pr-top"><button class="pr-back" onclick="prRvClose()" aria-label="뒤로">←</button><b>불러오는 중…</b></div><div class="loading" style="margin-top:80px"><div class="spinner"></div></div></div>`;
+  const d = _prRv.d, c = d.cycle, who = _prRv.kind === 'self' ? '' : ` · ${escapeHtml(d.target.name)}님`;
+  requestAnimationFrame(() => { const el = document.querySelector('.pr-c'); if(el && _prRvY) el.scrollTop = _prRvY; });
+  return `<div class="pr-ov" role="dialog" aria-label="리뷰 작성">
+  <div class="pr-top"><button class="pr-back" onclick="prRvClose()" aria-label="뒤로 (Esc)">←</button><b>${escapeHtml(c.name)}</b><span class="pm-meta" style="margin-left:8px">${PR_KIND[_prRv.kind]}${who}</span></div>
+  <div class="pr-main">
+    <div class="pr-l">${prStepperHtml()}</div>
+    <div class="pr-c"><div class="pr-c-in">${prCenterHtml()}</div></div>
+    <aside class="pr-r"><div class="pr-r-h">참고 정보</div>${prRefHtml()}</aside>
+  </div></div>`;
+}
+
+async function prRvSave(submit){
+  if(_prBusy || !_prRv || !prRvEditable()) return;
+  if(submit){
+    _prRv.attempt = true;
+    const r = _prRv.kind === 'self' ? prSelfRules() : { ok: true };
+    if(!r.ok){ _prRv.notice = { type: 'error', text: '제출 전 점검에서 빠진 항목이 있습니다. 빨간 표시를 채워 주세요.' }; prRerender(); document.querySelector('.pr-c')?.scrollTo({ top: 0 }); return; }
+    if(!confirm('제출하면 수정할 수 없습니다. 제출할까요?')) return;
+  }
+  _prBusy = true; prRerender();
+  const { ok, data } = await prCall({ action: 'review_save', cycleId: _prRv.cycleId, email: _prRv.email, kind: _prRv.kind, items: _prRv.items, comps: _prRv.comps, overall: _prRv.overall, submit });
+  _prBusy = false;
+  if(!ok){
+    _prRv.notice = { type: 'error', text: (data.problems && data.problems.length ? data.problems.join(' · ') : data.error) || '저장하지 못했습니다.' };
+    _prRv.attempt = true; prRerender(); document.querySelector('.pr-c')?.scrollTo({ top: 0 }); return;
+  }
+  if(submit){
+    _prRv = null; _prMe = null; _prList = null; _prRvY = 0; pmNotify('success', '평가를 제출했습니다.'); render(); return;
+  }
+  _prRv.d.review.status = data.status; _prRv.d.review.items = JSON.parse(JSON.stringify(_prRv.items)); _prRv.d.review.comps = JSON.parse(JSON.stringify(_prRv.comps)); _prRv.d.review.overall = _prRv.overall;
+  _prRv.sig0 = prRvSig(); _prRv.notice = { type: 'success', text: '임시저장했습니다.' }; prRerender();
+}
+
 function renderUserPage(user){
   const p = state.page;
   if(p==='survey') return renderSurveyPage(user, state.sub);
   if(p==='goals' && pmAllowed()) return renderGoals(user);
+  if(p==='reviews' && pmAllowed()) return renderReviews(user);
   if(_pageContent[p]) return _pageContent[p].content_html;
   if(p==='firstday')    return renderFirstDay(user);
   if(p==='mission')     return renderMission(user);
