@@ -1558,7 +1558,7 @@ async function pmCall(body){
     return { ok: false, status: 0, data: { error: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.' } };
   }
 }
-function pmReset(){ _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; _pmOpen = {}; _pmCk = null; _pmChange = null; _pmCm = {}; }
+function pmReset(){ _pmTeam = null; _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; _pmOpen = {}; _pmCk = null; _pmChange = null; _pmCm = {}; }
 let _pmOpen = {};     // 펼친 목표(기록·코멘트) {goalId:true}
 let _pmCk = null;     // 작성 중인 체크인 {goalId, value, progress, state, note}
 let _pmChange = null; // 작성 중인 변경 요청 {reason}
@@ -1865,8 +1865,8 @@ function pmChart(g, cks, cycle){
 // ── 목표 상세 패널(레몬베이스 오른쪽 패널) ──
 let _pmPanel = null;  // { goalId, mode:'view'|'checkin', tab:'checkin'|'comment'|'history' }
 let _pmDrY = 0;       // 패널 스크롤 위치(다시 그려도 유지)
-function pmOpenPanel(id, mode){
-  _pmPanel = { goalId:id, mode: mode || 'view', tab: (_pmPanel?.goalId === id && _pmPanel.tab) || 'checkin' };
+function pmOpenPanel(id, mode, email){
+  _pmPanel = { goalId:id, mode: mode || 'view', tab: (_pmPanel?.goalId === id && _pmPanel.tab) || 'checkin', email: email || null };
   _pmDrY = 0;
   if(mode === 'checkin') pmInitCheckin(id); else _pmCk = null;
   render();
@@ -1907,7 +1907,7 @@ async function pmSaveCheckin(){
   _pmCk = null; _pmPanel = { goalId: g.id, mode:'view', tab:'checkin' }; _pmMe = null;
   await pmRefresh();
 }
-async function pmRefresh(){ const y = window.scrollY; await loadPmSheet(); window.scrollTo(0, y); }
+async function pmRefresh(){ const y = window.scrollY; await loadPmSheet(); if(_pmPanel?.email && _pmTeam) await pmLoadMember(_pmPanel.email); window.scrollTo(0, y); }
 function pmCmSet(id, key, val){ _pmCm[id] = { body:'', private:false, ...(_pmCm[id]||{}), [key]: val }; }
 async function pmAddComment(id){
   const c = _pmCm[id] || {};
@@ -2037,6 +2037,52 @@ function pmApprovedCard(g, i, d){
 // 내 목표 = 내 KPI·핵심 과제 / 내 팀 목표 = 우리 팀 목표와 거기 연결된 내 KPI / 전체 목표 = 전사→실→팀 목표 트리에 내 KPI를 연결 위치에
 let _pmTree = { tab:'mine', q:'', st:'', closed:{} };
 const PM_TREE_TABS = { mine:'내 목표', team:'내 팀 목표', all:'전체 목표' };
+// 리더(팀원이 있는 사람)에게만 '내 팀원 목표' 탭이 '내 팀 목표' 다음에 보인다
+function pmTreeTabs(){
+  const lead = ((_pmMe?.teamCount || 0) + (_pmMe?.dirCount || 0)) > 0, out = {};
+  Object.entries(PM_TREE_TABS).forEach(([k,l])=>{ out[k] = l; if(k === 'team' && lead) out.tm = '내 팀원 목표'; });
+  return out;
+}
+let _pmTeam = null; // 내 팀원 목표 탭: { members, sheets:{email:data|'loading'}, open:{email:true}, error }
+async function pmLoadTeam(cid){
+  if(_pmTeam) return;
+  _pmTeam = { loading:true, members:[], sheets:{}, open:{} };
+  const { ok, data } = await pmCall({ action:'team', cycleId: cid });
+  _pmTeam = { members: ok ? (data.members||[]) : [], sheets:{}, open:{}, error: ok ? null : (data.error || '팀원 목록을 불러오지 못했습니다.') };
+  render();
+}
+async function pmLoadMember(email){
+  if(!_pmTeam || !_pmSheet?.cycle) return;
+  _pmTeam.sheets[email] = _pmTeam.sheets[email] && _pmTeam.sheets[email] !== 'loading' ? _pmTeam.sheets[email] : 'loading';
+  const { ok, data } = await pmCall({ action:'sheet', cycleId: _pmSheet.cycle.id, email });
+  if(!_pmTeam) return;
+  _pmTeam.sheets[email] = ok ? { ...data, _email: email } : { error: data.error || '목표를 불러오지 못했습니다.' };
+  render();
+}
+function pmTeamToggle(email){
+  if(!_pmTeam) return;
+  _pmTeam.open[email] = !_pmTeam.open[email];
+  if(_pmTeam.open[email] && !_pmTeam.sheets[email]) pmLoadMember(email); else render();
+}
+function pmTeamBody(d){
+  if(!_pmTeam){ pmLoadTeam(d.cycle.id); return `<div class="pm-tbl-empty">불러오는 중…</div>`; }
+  if(_pmTeam.loading) return `<div class="pm-tbl-empty">불러오는 중…</div>`;
+  if(_pmTeam.error) return `<div class="pm-tbl-empty">${escapeHtml(_pmTeam.error)}</div>`;
+  const q = String(_pmTree.q || '').trim().toLowerCase();
+  const ms = _pmTeam.members.filter(m => m.eligible || m.status !== 'none').filter(m => !q || String(m.name||'').toLowerCase().includes(q));
+  if(!ms.length) return `<div class="pm-tbl-empty">${q ? '조건에 맞는 팀원이 없습니다.' : '담당하는 팀원이 없습니다.'}</div>`;
+  return ms.map(m=>{
+    const open = !!_pmTeam.open[m.email], sd = _pmTeam.sheets[m.email];
+    const head = `<div class="pm-tr pm-tr-grp" onclick="pmTeamToggle('${escapeHtml(m.email)}')"><button class="pm-tw" aria-label="${open?'접기':'펼치기'}">${open ? '▼' : '▶'}</button>
+      <span class="pm-av">${escapeHtml(String(m.name||'').replace(/[A-Za-z0-9]+$/, '').slice(-2) || String(m.name||'').slice(0,2))}</span><b>${escapeHtml(m.name||'')}</b><span class="pm-meta">${escapeHtml([m.position, m.dept].filter(Boolean).join(' · '))}</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:8px"><span class="pm-badge pm-badge-${m.status}">${PM_STATUS[m.status] || m.status}</span>${m.status === 'approved' && m.progress != null ? `<b>${m.progress}%</b>` : ''}${m.canDecide && m.status === 'submitted' ? `<a href="https://hr.hectoqnm.co.kr" target="_blank" rel="noopener" class="pm-meta" style="color:var(--primary);font-weight:700" onclick="event.stopPropagation()">HR 허브에서 승인</a>` : ''}</span></div>`;
+    if(!open) return head;
+    if(!sd || sd === 'loading') return head + `<div class="pm-tbl-empty">불러오는 중…</div>`;
+    if(sd.error) return head + `<div class="pm-tbl-empty">${escapeHtml(sd.error)}</div>`;
+    const kids = (sd.goals||[]).length ? pmTreeNodes(sd, 'mine')[0].children.map(n=>pmTreeRow(n, 1, sd, false)).join('') : `<div class="pm-tbl-empty">${m.status === 'none' ? '아직 목표를 제출하지 않았습니다.' : '목표가 없습니다.'}</div>`;
+    return head + kids;
+  }).join('');
+}
 function pmTreeSet(k, v){ _pmTree[k] = v; if(k === 'q'){ const el = document.getElementById('pm-tree-body'); if(el){ el.innerHTML = pmTreeBody(_pmSheet); return; } } render(); }
 function pmTreeToggle(key){ _pmTree.closed[key] = !_pmTree.closed[key]; const el = document.getElementById('pm-tree-body'); if(el) el.innerHTML = pmTreeBody(_pmSheet); else render(); }
 function pmSBar(p, state){
@@ -2085,7 +2131,7 @@ function pmTreeRow(n, depth, d, filtering){
   const ap = d.change?.status === 'pending' ? ['변경 승인 대기', '#F59E0B'] : st === 'approved' ? ['승인 완료', '#10B981'] : st === 'submitted' ? ['승인 대기 중', '#F59E0B'] : ['승인 요청 전', '#9CA3AF'];
   const icon = n.kind === 'task' ? '<span class="pm-ic" title="핵심 과제">⚑</span>' : `<span class="pm-kind pm-kind-${g.kind||'business'}" style="margin:0">${g.kind==='ai'?'AI':'KPI'}</span>`;
   const canCk = d.canCheckin && (n.kind === 'task' || mode !== 'children');
-  return `<div class="pm-tr pm-tr-click ${_pmPanel?.goalId===g.id?'pm-tr-sel':''}" onclick="pmOpenPanel(${g.id})">
+  return `<div class="pm-tr pm-tr-click ${_pmPanel?.goalId===g.id?'pm-tr-sel':''}" onclick="pmOpenPanel(${g.id}${d._email ? `,null,'${escapeHtml(d._email)}'` : ''})">
     <div class="pm-tt" ${pad}>${tog}${icon}<b class="t" title="${escapeHtml(g.title)}">${escapeHtml(g.title)}</b>${n.kind === 'kpi' && g.weight ? `<span class="w">${g.weight}%</span>` : ''}</div>
     <div class="c-ap pm-ap"><i style="background:${ap[1]}"></i>${ap[0]}</div><div class="c-dept">${escapeHtml(n.dept || '-')}</div>
     <div class="c-own"><span class="pm-av" title="${escapeHtml(n.owner)}">${escapeHtml(String(n.owner || '').replace(/[A-Za-z0-9]+$/, '').slice(-2))}</span></div>
@@ -2093,6 +2139,8 @@ function pmTreeRow(n, depth, d, filtering){
     <div class="c-act">${canCk ? `<button class="btn btn-sm pm-btn-ghost" onclick="event.stopPropagation();pmStartCheckin(${g.id})">체크인</button>` : ''}</div></div>${sub}`;
 }
 function pmTreeBody(d){
+  if(_pmTree.tab === 'tm' && pmTreeTabs().tm) return pmTeamBody(d);
+  if(_pmTree.tab === 'tm') _pmTree.tab = 'mine';
   const q = String(_pmTree.q || '').trim().toLowerCase(), st = _pmTree.st;
   const nodes = pmTreeFilter(pmTreeNodes(d, _pmTree.tab), q, st);
   if(!nodes.length) return `<div class="pm-tbl-empty">${q || st ? '조건에 맞는 목표가 없습니다.' : _pmTree.tab === 'team' ? '우리 팀 목표가 아직 없습니다. 팀장이 팀 목표를 올리면 여기에 보입니다.' : '목표가 없습니다.'}</div>`;
@@ -2101,9 +2149,9 @@ function pmTreeBody(d){
 function pmTreeHtml(d){
   return `
 <div class="content-block">
-  <div class="pm-ttabs" role="tablist">${Object.entries(PM_TREE_TABS).map(([k,l])=>`<button type="button" role="tab" class="${_pmTree.tab===k?'on':''}" onclick="pmTreeSet('tab','${k}')">${l}</button>`).join('')}</div>
+  <div class="pm-ttabs" role="tablist">${Object.entries(pmTreeTabs()).map(([k,l])=>`<button type="button" role="tab" class="${_pmTree.tab===k?'on':''}" onclick="pmTreeSet('tab','${k}')">${l}</button>`).join('')}</div>
   <div class="pm-filters">
-    <select onchange="pmTreeSet('st',this.value)" aria-label="진행 상황"><option value="">진행 상황 전체</option>${PM_STATE_ORDER.map(s=>`<option value="${s}" ${_pmTree.st===s?'selected':''}>${PM_STATE[s][0]}</option>`).join('')}</select>
+    <select onchange="pmTreeSet('st',this.value)" aria-label="진행 상황" ${_pmTree.tab==='tm' ? 'disabled title="팀원 목표 탭에서는 검색만 쓸 수 있습니다"' : ''}><option value="">진행 상황 전체</option>${PM_STATE_ORDER.map(s=>`<option value="${s}" ${_pmTree.st===s?'selected':''}>${PM_STATE[s][0]}</option>`).join('')}</select>
     <input type="search" placeholder="🔍 목표 검색" value="${escapeHtml(_pmTree.q)}" oninput="pmTreeSet('q',this.value)">
     <span style="flex:1"></span>
     <span class="pm-meta" style="display:flex;align-items:center;gap:8px;min-width:200px">내 전체 진척도 <span style="flex:1;min-width:80px">${pmBar(d.progress)}</span><b style="color:var(--dark)">${d.progress == null ? '-' : d.progress + '%'}</b></span>
@@ -2416,7 +2464,7 @@ ${notice}
     const ckb = goals.filter(g=>g.parent_goal_id || g.progress_mode !== 'children'); // 체크인 대상(과제 + 하위 과제로 계산이 아닌 KPI)
     const doneN = op ? ckb.filter(g=>(d.checkins||[]).some(k=>k.goal_id===g.id && k.period_id===op.id && !k.auto)).length : 0;
     const periodBox = op ? `<div class="pm-period"><div><b>📌 ${escapeHtml(op.name)}</b>${op.ends_on ? ` · ${fmtGoalDate(op.ends_on)}까지` : ''}<div class="pm-meta" style="margin-top:2px">이 기간 안에 KPI마다 한 번 이상 체크인해 주세요. 체크인은 기간과 상관없이 언제든 할 수 있습니다.</div></div><span class="pm-badge ${doneN===ckb.length?'pm-badge-approved':'pm-badge-draft'}">${ckb.length}개 중 ${doneN}개 완료</span></div>` : '';
-    return head + weightBox + pmChangeBox(d) + periodBox + pmTreeHtml(d) + pmPanelHtml(d);
+    return head + weightBox + pmChangeBox(d) + periodBox + pmTreeHtml(d) + pmPanelHtml((_pmPanel?.email && _pmTeam?.sheets?.[_pmPanel.email] && _pmTeam.sheets[_pmPanel.email] !== 'loading' && !_pmTeam.sheets[_pmPanel.email].error) ? _pmTeam.sheets[_pmPanel.email] : d);
   }
 
   // 읽기 전용(제출·기간 종료)
