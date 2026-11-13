@@ -415,6 +415,64 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .pm-info ul{margin:6px 0 0;padding-left:18px;line-height:1.7;font-size:13px}
 .pm-period{background:#FFF8F4;border:1px solid #FED7C3;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13.5px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
 @media(max-width:768px){.pm-ck-row{grid-template-columns:1fr}}
+/* 목표 상세 패널(레몬베이스 오른쪽 패널) */
+.pm-goal-click{cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.pm-goal-click:hover{border-color:#FDBA8C}.pm-goal-sel{border-color:var(--primary);box-shadow:0 0 0 2px #FFE4D5}
+.pm-ov{position:fixed;inset:0;background:rgba(17,24,39,.18);z-index:9100}
+.pm-drawer{position:fixed;top:0;right:0;bottom:0;width:min(600px,100vw);background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,.08);display:flex;flex-direction:column;z-index:9101}
+.pm-dr-top{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)}
+.pm-dr-x{border:none;background:none;font-size:20px;color:var(--gray);cursor:pointer;padding:2px 8px;border-radius:6px}.pm-dr-x:hover{background:#F3F4F6}
+.pm-dr-body{flex:1;overflow-y:auto;padding:18px 22px 28px}
+.pm-dr-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 22px;border-top:1px solid var(--border);background:#fff}
+.pm-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.pm-tag{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:#F3F4F6;color:#4B5563}
+.pm-tag-biz{background:#F5F3FF;color:#6D28D9}.pm-tag-ai{background:#FDF2F8;color:#BE185D}
+.pm-dr-title{font-size:18px;font-weight:800;margin:0 0 12px;line-height:1.45;color:var(--dark)}
+.pm-dr-prog{display:flex;align-items:center;gap:10px;margin-bottom:14px}.pm-dr-prog b{font-size:14px;min-width:44px}
+.pm-bar-lg{height:10px}.pm-bar-lg>div{background:linear-gradient(90deg,#6EE7B7,#22D3EE)}
+.pm-info-i{color:var(--gray);cursor:help;font-size:13px}
+.pm-chartbox{border:1px solid var(--border);border-radius:10px;padding:8px 6px 2px;margin-bottom:16px}
+.pm-chart{width:100%;height:auto;display:block}.pm-ax{font-size:11px;fill:#9CA3AF;font-family:inherit}
+.pm-sec-lbl{font-size:13px;font-weight:700;color:#374151;margin:4px 0 6px}
+.pm-mcard{display:flex;justify-content:space-between;align-items:center;gap:14px;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:13.5px}
+.pm-mcard-r{display:flex;align-items:center;gap:10px;min-width:170px}.pm-mcard-r .pm-bar{min-width:100px}
+.pm-mcard-in{display:flex;align-items:center;gap:6px}.pm-mcard-in input{width:120px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:14px;text-align:right}
+.pm-mcard-in input:focus{outline:none;border-color:var(--primary)}.pm-mcard-in span{color:var(--gray);font-size:13px;min-width:12px}
+.pm-dr-btns{display:flex;gap:8px;margin:12px 0 18px}
+.pm-props{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:12px 0;margin-bottom:16px}
+.pm-props>div{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:7px 0;font-size:13.5px}
+.pm-props span{color:var(--gray)}.pm-props b{font-weight:500;color:var(--dark)}
+.pm-pre{white-space:pre-wrap}
+.pm-tabs{display:flex;gap:8px;margin-bottom:12px}
+.pm-tabs button{border:none;background:#fff;color:var(--gray);font-weight:700;font-size:13.5px;padding:8px 16px;border-radius:999px;cursor:pointer;font-family:inherit}
+.pm-tabs button.on{background:#F3F4F6;color:var(--dark)}
+.pm-feed{border-bottom:1px solid #F3F4F6;padding:12px 0;font-size:13.5px}
+.pm-feed-h{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.pm-av{width:26px;height:26px;border-radius:50%;background:#FFE4D5;color:#C2410C;font-size:10.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.pm-feed-s{margin-bottom:4px;line-height:1.6}
+.pm-feed-b{line-height:1.65;color:#374151}.pm-feed-b ul,.pm-feed-b ol,.pm-tip ul,.pm-tip ol{margin:4px 0;padding-left:20px}.pm-feed-b p{margin:0}
+.pm-hist-ul{margin:2px 0 4px;padding-left:18px;font-size:12.5px;line-height:1.7;color:#374151}
+.pm-empty{color:var(--gray);font-size:13px;padding:14px 0}
+.pm-cm-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:-2px 0 8px}
+.pm-in-date{max-width:200px}
+.pm-ck-row2{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.pm-st-dd{position:relative;display:inline-block;margin-bottom:10px}
+.pm-st-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:14px;cursor:pointer;min-width:150px}
+.pm-st-btn span{margin-left:auto;color:var(--gray)}
+.pm-st-btn i,.pm-st-opt i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.pm-st-menu{position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.08);padding:4px;z-index:5;min-width:150px}
+.pm-st-opt{display:flex;align-items:center;gap:8px;width:100%;border:none;background:none;padding:8px 10px;border-radius:6px;font-family:inherit;font-size:14px;cursor:pointer;text-align:left}
+.pm-st-opt:hover,.pm-st-opt.on{background:#F3F4F6}
+.pm-ovr-link{margin-bottom:14px;text-decoration:none;color:#4B5563}
+.pm-tip{background:#F9FAFB;border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.7;color:#4B5563;margin:4px 0 12px}
+.pm-rte-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.pm-rte-bar{display:flex;gap:2px;padding:6px 8px;border-bottom:1px solid var(--border);background:#fff}
+.pm-rte-bar button{border:none;background:none;width:28px;height:26px;border-radius:5px;cursor:pointer;font-size:13px;color:#4B5563;font-family:inherit}
+.pm-rte-bar button:hover{background:#F3F4F6}.pm-rte-bar span{width:1px;background:var(--border);margin:3px 4px}
+.pm-rte{min-height:120px;padding:12px 14px;font-size:14px;line-height:1.65;outline:none;-webkit-user-select:text;user-select:text}
+.pm-rte:empty:before{content:attr(data-ph);color:#9CA3AF}
+.pm-rte ul,.pm-rte ol{margin:4px 0;padding-left:22px}
+@media(max-width:600px){.pm-props>div{grid-template-columns:96px 1fr}.pm-mcard{flex-direction:column;align-items:stretch}.pm-mcard-r{min-width:0}}
 @media(max-width:768px){.pm-metric{grid-template-columns:1fr 1fr}.pm-metric .pm-in:first-child{grid-column:1/-1}.pm-row2{grid-template-columns:1fr}}
 </style>
 </head>
@@ -1602,46 +1660,104 @@ async function pmSave(submit){
 }
 
 // ── 2단계: 체크인·진척·코멘트·승인 후 변경 요청 ──
-const PM_STATE = { not_started:['진행 전','#6B7280','#F3F4F6'], in_progress:['진행 중','#1D4ED8','#EFF6FF'], done:['완료','#047857','#ECFDF5'], stopped:['중단','#B91C1C','#FEF2F2'] };
+// 목표 상태 5가지(레몬베이스와 같음) [이름, 글자색, 배경, 점 색]
+const PM_STATE = {
+  not_started:['준비','#6B7280','#F3F4F6','#9CA3AF'], in_progress:['진행 중','#047857','#ECFDF5','#10B981'],
+  delayed:['지연','#B91C1C','#FEF2F2','#EF4444'], stopped:['중단','#B45309','#FFFBEB','#F59E0B'], done:['완료','#1D4ED8','#EFF6FF','#3B82F6'] };
+const PM_STATE_ORDER = ['not_started','in_progress','delayed','stopped','done'];
 function pmStateChip(s){ const [l,c,b] = PM_STATE[s] || PM_STATE.not_started; return `<span class="pm-state" style="color:${c};background:${b}">● ${l}</span>`; }
-function pmBar(p){ return `<div class="pm-bar"><div style="width:${Math.min(Math.max(p||0,0),100)}%"></div></div>`; }
+function pmBar(p, state){ const col = state ? (PM_STATE[state]||PM_STATE.not_started)[3] : ''; return `<div class="pm-bar"><div style="width:${Math.min(Math.max(p||0,0),100)}%${col ? `;background:${col}` : ''}"></div></div>`; }
 function pmWhen(iso){ if(!iso) return ''; const d = new Date(iso); return `${d.getMonth()+1}월 ${d.getDate()}일`; }
+function pmDay(s){ return s ? String(s).slice(0,10) : ''; }
 function pmNum(v){ return v == null || v === '' ? '-' : Number(v).toLocaleString('ko-KR', { maximumFractionDigits: 4 }); }
-// 진척 그래프(체크인마다 한 점)
-function pmChart(list){
-  if(list.length < 2) return '';
-  const W = 320, H = 90, pad = 14, top = Math.max(100, ...list.map(k=>k.progress||0));
-  const x = i => pad + (W - pad*2) * i / (list.length - 1), y = p => H - pad - (H - pad*2) * Math.min(p||0, top) / top;
-  const pts = list.map((k,i)=>`${x(i).toFixed(1)},${y(k.progress).toFixed(1)}`).join(' ');
-  return `<svg class="pm-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="진척 추이">
-    <line x1="${pad}" x2="${W-pad}" y1="${y(100).toFixed(1)}" y2="${y(100).toFixed(1)}" stroke="#E5E7EB" stroke-dasharray="4 4"/>
-    <polyline points="${pts}" fill="none" stroke="var(--primary)" stroke-width="2"/>
-    ${list.map((k,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(k.progress).toFixed(1)}" r="3.5" fill="#fff" stroke="var(--primary)" stroke-width="2"><title>${pmWhen(k.created_at)} ${k.progress ?? '-'}%</title></circle>`).join('')}
-  </svg>`;
+function pmKstToday(){ return new Date(Date.now() + 9*3600e3).toISOString().slice(0,10); }
+// 서식 있는 진행 상황·체크인 가이드를 안전하게 보여주기(허용 태그만, 링크는 http(s)만)
+function pmSafeHtml(html){
+  if(!html) return '';
+  if(!/<[a-z!\/]/i.test(html)) return escapeHtml(html).replace(/\n/g,'<br>');
+  const root = new DOMParser().parseFromString(String(html),'text/html').body;
+  const ALLOW = new Set(['B','STRONG','I','EM','U','S','STRIKE','OL','UL','LI','BR','P','DIV']);
+  const out = n => {
+    if(n.nodeType === 3) return escapeHtml(n.nodeValue);
+    if(n.nodeType !== 1) return '';
+    const inner = [...n.childNodes].map(out).join('');
+    const t = n.tagName;
+    if(t === 'A'){ const h = n.getAttribute('href') || ''; return /^https?:\/\//i.test(h) ? `<a href="${escapeHtml(h)}" target="_blank" rel="noopener">${inner}</a>` : inner; }
+    if(t === 'BR') return '<br>';
+    if(!ALLOW.has(t)) return inner;
+    return `<${t.toLowerCase()}>${inner}</${t.toLowerCase()}>`;
+  };
+  return [...root.childNodes].map(out).join('');
 }
-function pmToggle(id){ _pmOpen[id] = !_pmOpen[id]; render(); }
-function pmStartCheckin(id){
-  const g = (_pmSheet?.goals||[]).find(x=>x.id===id); if(!g) return;
-  _pmCk = { goalId: id, value: g.current_value ?? '', progress: g.progress ?? '', state: g.state && g.state !== 'not_started' ? g.state : 'in_progress', note: '' };
+const PM_DEFAULT_GUIDE = '💡 효과적인 목표 체크인을 위한 TIP\n• 현재 진행 상태: 목표 대비 어느 지점까지 왔는지\n• 주요 활동 및 변화: 지난 체크인 이후 새롭게 완료된 작업\n• 향후 계획 및 필요한 도움(선택 작성): 리더의 지원 또는 의사결정이 필요한 부분\n* 작성하신 내용은 이후 중간점검 및 성과 리뷰의 근거로 활용됩니다.';
+
+// 진척 그래프(레몬베이스와 같은 모양): 가로축 = 목표 기간(월), 0→100% 이상 진척 점선, 체크인 날짜마다 점
+function pmChart(g, cks, cycle){
+  const y0 = cycle?.year || new Date().getFullYear();
+  const s = g.starts_on || `${y0}-01-01`, e = g.ends_on || `${y0}-12-31`;
+  const t0 = Date.parse(s), t1 = Math.max(Date.parse(e), t0 + 864e5);
+  const pts = cks.map(k=>({ t: Date.parse(k.checkin_date || pmDay(k.created_at)), p: k.progress ?? 0, k })).sort((a,b)=>a.t-b.t || String(a.k.created_at).localeCompare(String(b.k.created_at)));
+  const top = Math.ceil(Math.max(100, ...pts.map(p=>p.p)) / 20) * 20;
+  const W = 520, H = 190, L = 36, R = 14, T = 12, B = 26;
+  const x = t => L + (W - L - R) * Math.min(Math.max((t - t0) / (t1 - t0), 0), 1);
+  const y = p => H - B - (H - T - B) * Math.min(Math.max(p, 0), top) / top;
+  let grid = '';
+  for(let v = 0; v <= top; v += 20) grid += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#F1F2F4"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" class="pm-ax">${v}</text>`;
+  const sd = new Date(t0), months = [];
+  for(let d = new Date(sd.getFullYear(), sd.getMonth(), 1); d.getTime() <= t1; d.setMonth(d.getMonth()+1)) months.push(new Date(d));
+  const step = months.length > 8 ? 2 : 1;
+  const xl = months.filter((m,i)=>i % step === 0).map((m,i)=>`<text x="${x(Math.max(m.getTime(), t0))}" y="${H-6}" text-anchor="middle" class="pm-ax">${i===0 ? m.getFullYear() : (m.getMonth()+1)+'월'}</text>`).join('');
+  const line = pts.length > 1 ? `<polyline points="${pts.map(p=>`${x(p.t).toFixed(1)},${y(p.p).toFixed(1)}`).join(' ')}" fill="none" stroke="#3B82F6" stroke-width="2"/>` : '';
+  const dots = pts.map(p=>`<circle cx="${x(p.t).toFixed(1)}" cy="${y(p.p).toFixed(1)}" r="4" fill="#fff" stroke="#3B82F6" stroke-width="2"><title>${p.k.checkin_date || ''} · ${p.p}%</title></circle>`).join('');
+  return `<div class="pm-chartbox"><svg viewBox="0 0 ${W} ${H}" class="pm-chart" role="img" aria-label="진척도 추이">${grid}
+    <line x1="${x(t0)}" y1="${y(0)}" x2="${x(t1)}" y2="${y(100)}" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="5 5"/>
+    <circle cx="${x(t1)}" cy="${y(100)}" r="3" fill="#fff" stroke="#D1D5DB"/>${line}${dots}${xl}</svg></div>`;
+}
+
+// ── 목표 상세 패널(레몬베이스 오른쪽 패널) ──
+let _pmPanel = null;  // { goalId, mode:'view'|'checkin', tab:'checkin'|'comment'|'history' }
+let _pmDrY = 0;       // 패널 스크롤 위치(다시 그려도 유지)
+function pmOpenPanel(id, mode){
+  _pmPanel = { goalId:id, mode: mode || 'view', tab: (_pmPanel?.goalId === id && _pmPanel.tab) || 'checkin' };
+  _pmDrY = 0;
+  if(mode === 'checkin') pmInitCheckin(id); else _pmCk = null;
   render();
-  setTimeout(()=>document.getElementById('pm-ck-first')?.focus(), 0);
 }
-function pmCancelCheckin(){ _pmCk = null; render(); }
+function pmClosePanel(){ _pmPanel = null; _pmCk = null; render(); }
+function pmPanelTab(t){ if(_pmPanel){ _pmPanel.tab = t; render(); } }
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && _pmPanel && state.page === 'goals') pmClosePanel(); });
+function pmInitCheckin(id){
+  const g = (_pmSheet?.goals||[]).find(x=>x.id===id); if(!g) return;
+  _pmCk = { goalId:id, date: pmKstToday(), state: g.state && g.state !== 'not_started' ? g.state : 'in_progress', stateOpen:false,
+    value: g.current_value ?? '', progress: g.progress ?? '', override: g.progress_override ?? '', showOverride: g.progress_override != null, note:'' };
+}
+function pmStartCheckin(id){ pmOpenPanel(id, 'checkin'); setTimeout(()=>document.getElementById('pm-ck-first')?.focus(), 0); }
+function pmCancelCheckin(){ if(_pmPanel) _pmPanel.mode = 'view'; _pmCk = null; render(); }
+function pmCkState(s){ if(_pmCk){ _pmCk.state = s; _pmCk.stateOpen = false; render(); } }
+function pmRte(cmd){
+  const ed = document.getElementById('pm-rte'); if(!ed) return;
+  ed.focus();
+  if(cmd === 'link'){ const u = prompt('링크 주소(https://...)'); if(u && /^https?:\/\//i.test(u)) document.execCommand('createLink', false, u); }
+  else document.execCommand(cmd, false, null);
+  if(_pmCk) _pmCk.note = ed.innerHTML;
+}
 async function pmSaveCheckin(){
   if(_pmBusy || !_pmCk) return;
+  const ed = document.getElementById('pm-rte'); if(ed) _pmCk.note = ed.innerHTML;
   const g = (_pmSheet?.goals||[]).find(x=>x.id===_pmCk.goalId); if(!g) return;
-  if(!String(_pmCk.note||'').trim()){ pmNotify('error', '진행 상황을 적어 주세요.'); render(); return; }
+  const plain = (ed?.innerText || '').trim();
+  if(plain.length < 2){ pmNotify('error', '진행 상황을 적어 주세요.'); render(); return; }
   _pmBusy = true;
-  const body = { action:'checkin', goalId: g.id, state: _pmCk.state, note: _pmCk.note };
-  if(g.progress_mode === 'manual') body.progress = _pmCk.progress === '' ? '' : Number(_pmCk.progress); else body.value = _pmCk.value;
+  const body = { action:'checkin', goalId: g.id, checkin_date: _pmCk.date, state: _pmCk.state, note: _pmCk.note };
+  if(g.progress_mode === 'manual') body.progress = _pmCk.progress === '' ? '' : Number(_pmCk.progress);
+  else { body.value = _pmCk.value; if(_pmCk.showOverride && _pmCk.override !== '') body.progress_override = Number(_pmCk.override); }
   const { ok, data } = await pmCall(body);
   _pmBusy = false;
   if(!ok){ pmNotify('error', data.error || '체크인을 저장하지 못했습니다.'); render(); return; }
   pmNotify('success', `체크인했습니다. 진척도 ${data.goal?.progress_pct ?? '-'}%`);
-  _pmCk = null; _pmOpen[g.id] = true; _pmMe = null;
+  _pmCk = null; _pmPanel = { goalId: g.id, mode:'view', tab:'checkin' }; _pmMe = null;
   await pmRefresh();
 }
-// 저장 뒤 보던 위치 그대로 다시 불러오기(빈 화면을 거치면 맨 위로 튐)
 async function pmRefresh(){ const y = window.scrollY; await loadPmSheet(); window.scrollTo(0, y); }
 function pmCmSet(id, key, val){ _pmCm[id] = { body:'', private:false, ...(_pmCm[id]||{}), [key]: val }; }
 async function pmAddComment(id){
@@ -1651,7 +1767,7 @@ async function pmAddComment(id){
   const { ok, data } = await pmCall({ action:'comment_add', goalId:id, body:c.body, private: !!c.private });
   _pmBusy = false;
   if(!ok){ pmNotify('error', data.error || '코멘트를 남기지 못했습니다.'); render(); return; }
-  delete _pmCm[id]; _pmOpen[id] = true;
+  delete _pmCm[id];
   await pmRefresh();
 }
 async function pmDelComment(cid){
@@ -1721,61 +1837,128 @@ function pmChangeBox(d){
     return `<div class="pm-info"><b>목표 변경이 승인됐습니다 (${pmWhen(ch.decided_at)})</b>${ch.decision_note ? `<div>리더 의견: ${escapeHtml(ch.decision_note)}</div>` : ''}</div>`;
   return '';
 }
-function pmCheckinForm(g, d){
-  const ck = _pmCk, manual = g.progress_mode === 'manual', u = g.metric_unit ? escapeHtml(g.metric_unit) : '';
-  return `<div class="pm-ck">
-  <div class="pm-ck-title">📌 ${escapeHtml(d.openPeriod?.name || '체크인')}</div>
-  <div class="pm-ck-row">
-    ${manual
-      ? `<div><label class="pm-lbl">진척도 (%) <span>평가 기준 대비</span></label><input id="pm-ck-first" class="pm-in" type="number" min="0" max="200" step="1" value="${pmv(ck.progress)}" oninput="_pmCk.progress=this.value"></div>`
-      : `<div><label class="pm-lbl">현재 값${u ? ` (${u})` : ''} <span>시작 ${pmNum(g.start_value ?? 0)} → 목표 ${pmNum(g.target_value)}</span></label><input id="pm-ck-first" class="pm-in" type="number" step="any" value="${pmv(ck.value)}" oninput="_pmCk.value=this.value"></div>`}
-    <div><label class="pm-lbl">목표 상태</label><select class="pm-in" onchange="_pmCk.state=this.value">${Object.entries(PM_STATE).map(([k,[l]])=>`<option value="${k}" ${ck.state===k?'selected':''}>${l}</option>`).join('')}</select></div>
-  </div>
-  <label class="pm-lbl">진행 상황 <span>(리더가 읽습니다)</span></label>
-  <textarea class="pm-ta" rows="4" maxlength="2000" placeholder="• 이번 분기 진척: 예) 5건 중 3건 완료&#10;• 성과 요약: 예) 계획 대비 +10% 앞서는 중&#10;• 예상 이슈·도움 필요한 점: 예) 6월 시스템 이관으로 지연 가능" oninput="_pmCk.note=this.value">${escapeHtml(ck.note)}</textarea>
-  <div class="pm-actions"><button class="btn btn-sm pm-btn-ghost" onclick="pmCancelCheckin()">취소</button><button class="btn btn-primary btn-sm" onclick="pmSaveCheckin()">체크인 저장</button></div>
-</div>`;
+// 변경 내역(목표 한 건): 제출·승인·반려·변경 승인 기록에서 이 목표가 어떻게 바뀌었는지
+const PM_ACT = { goal_submit:'승인 요청', goal_recall:'승인 요청 취소', goal_approve:'승인', goal_reject:'반려', goal_unapprove:'승인 취소', admin_set_status:'관리자 상태 변경', change_request:'목표 변경 요청', change_cancel:'변경 요청 취소', goal_change:'목표 변경 승인', change_reject:'변경 요청 반려' };
+function pmGoalHistory(g, d){
+  const hist = [...(d.history||[])].sort((a,b)=>String(a.at).localeCompare(String(b.at)));
+  const fmt = (k, v) => k === 'kind' ? (v === 'ai' ? 'AI KPI' : '사업 KPI') : k === 'progress_mode' ? (v === 'manual' ? '정성' : '지표') : k === 'parent_org_goal_id' ? (pmOrgTitle(v) || '(없음)') : (v == null || v === '' ? '(없음)' : String(v));
+  let prev = null; const rows = [];
+  for(const h of hist){
+    const mine = (h.after?.goals||[]).find(x=>x.id===g.id);
+    const lines = [];
+    if(mine && prev) Object.keys(PM_FIELDS).forEach(k=>{ if(String(prev[k] ?? '') !== String(mine[k] ?? '')) lines.push(`${PM_FIELDS[k]} ${fmt(k, prev[k])} → ${fmt(k, mine[k])}`); });
+    if(mine && h.action !== 'change_request' && h.action !== 'change_reject') prev = mine;
+    if(!mine && !['goal_approve','goal_reject','goal_unapprove','admin_set_status','change_cancel'].includes(h.action)) continue;
+    const who = String(h.actor_email||'').toLowerCase() === String(d.employee?.email||'').toLowerCase() ? (d.employee?.name || '본인') : (h.actor_email === d.approver?.email ? (d.approver?.name || '리더') : String(h.actor_email||'').split('@')[0]);
+    rows.push({ at:h.at, who, act: PM_ACT[h.action] || h.action, note:h.note, lines });
+  }
+  return rows.reverse();
 }
-function pmGoalDetail(g, d){
-  const cks = (d.checkins||[]).filter(k=>k.goal_id===g.id);
-  const cms = (d.comments||[]).filter(m=>m.goal_id===g.id);
-  const pname = id => (d.periods||[]).find(p=>p.id===id)?.name || '';
-  const u = g.metric_unit ? ' ' + escapeHtml(g.metric_unit) : '';
-  const cm = _pmCm[g.id] || {};
-  return `<div class="pm-detail">
-  ${pmChart(cks)}
-  <div class="pm-sub">체크인 기록 ${cks.length ? `(${cks.length})` : ''}</div>
-  ${cks.length ? [...cks].reverse().map(k=>`<div class="pm-hist"><div><b>${pmWhen(k.created_at)}</b> · ${escapeHtml(pname(k.period_id))} · ${g.progress_mode==='manual' ? '' : `${pmNum(k.value)}${u} · `}${k.progress ?? '-'}% ${pmStateChip(k.state)}</div><div class="pm-hist-note">${escapeHtml(k.note)}</div></div>`).join('') : `<div class="pm-meta">아직 체크인 기록이 없습니다.</div>`}
-  <div class="pm-sub">코멘트 ${cms.length ? `(${cms.length})` : ''}</div>
-  ${cms.map(m=>`<div class="pm-cm"><div class="pm-cm-head"><b style="color:#374151">${escapeHtml(m.author_name || m.author_email)}</b><span>${pmWhen(m.created_at)}</span>${m.private ? '<span class="pm-lock">🔒 담당자·리더만</span>' : ''}${m.mine ? `<button class="pm-link" style="margin-left:auto" onclick="pmDelComment(${m.id})">삭제</button>` : ''}</div><div class="pm-cm-body">${escapeHtml(m.body)}</div></div>`).join('')}
-  <textarea class="pm-ta" rows="2" maxlength="2000" placeholder="리더에게 남길 말, 도움이 필요한 점" oninput="pmCmSet(${g.id},'body',this.value)">${escapeHtml(cm.body||'')}</textarea>
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-    <label class="pm-meta" style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" ${cm.private?'checked':''} onchange="pmCmSet(${g.id},'private',this.checked)"> 담당자·리더만 보기</label>
-    <button class="btn btn-sm pm-btn-ghost" onclick="pmAddComment(${g.id})">코멘트 남기기</button>
-  </div>
-</div>`;
-}
+
+// 목표 카드(목록) — 누르면 오른쪽 패널
 function pmApprovedCard(g, i, d){
   const p = g.progress_pct, u = g.metric_unit ? ' ' + escapeHtml(g.metric_unit) : '';
-  const nCk = (d.checkins||[]).filter(k=>k.goal_id===g.id).length, nCm = (d.comments||[]).filter(m=>m.goal_id===g.id).length;
-  const doneNow = d.openPeriod && (d.checkins||[]).some(k=>k.goal_id===g.id && k.period_id===d.openPeriod.id);
   return `
-<div class="pm-goal pm-goal-ro">
-  <div class="pm-goal-head"><b><span class="pm-kind pm-kind-${g.kind||'business'}">${g.kind==='ai'?'AI':'KPI'}</span> ${i+1}. ${escapeHtml(g.title)}</b><span class="pm-wt">${g.weight}%</span></div>
+<div class="pm-goal pm-goal-ro pm-goal-click ${_pmPanel?.goalId===g.id?'pm-goal-sel':''}" onclick="pmOpenPanel(${g.id})">
+  <div class="pm-goal-head"><b><span class="pm-kind pm-kind-${g.kind||'business'}">${g.kind==='ai'?'AI KPI':'사업 KPI'}</span> ${i+1}. ${escapeHtml(g.title)}</b><span class="pm-wt">${g.weight}%</span></div>
   ${g.parent_org_goal_id ? `<div class="pm-parent">↳ ${escapeHtml(pmOrgTitle(g.parent_org_goal_id))}</div>` : ''}
-  <div class="pm-crit">${escapeHtml(pmMetricText(g))}${g.starts_on ? ` · ${fmtGoalDate(g.starts_on)} ~ ${fmtGoalDate(g.ends_on)}` : ''}</div>
-  <div class="pm-prog">${pmBar(p)}<span class="pm-pct">${p == null ? '-' : p + '%'}</span>${pmStateChip(g.state)}
+  <div class="pm-prog">${pmBar(p, g.state)}<span class="pm-pct">${p == null ? '-' : p + '%'}</span>${pmStateChip(g.state)}
     ${g.progress_mode !== 'manual' && g.current_value != null ? `<span>현재 ${pmNum(g.current_value)}${u}</span>` : ''}
-    ${g.last_checkin_at ? `<span>최근 체크인 ${pmWhen(g.last_checkin_at)}</span>` : ''}</div>
-  ${g.criteria ? `<div class="pm-crit">${escapeHtml(g.criteria).replace(/\n/g,'<br>')}</div>` : ''}
-  ${g.description ? `<div class="pm-crit" style="color:var(--gray)">${escapeHtml(g.description).replace(/\n/g,'<br>')}</div>` : ''}
+    ${g.last_checkin_at ? `<span>최근 체크인 ${pmWhen(g.last_checkin_at)}</span>` : '<span>체크인 전</span>'}</div>
   <div class="pm-goal-acts">
-    ${d.canCheckin && _pmCk?.goalId !== g.id ? `<button class="btn btn-sm ${doneNow ? 'pm-btn-ghost' : 'btn-primary'}" onclick="pmStartCheckin(${g.id})">${doneNow ? '체크인 다시 하기' : '체크인'}</button>` : ''}
-    <button class="btn btn-sm pm-btn-ghost" onclick="pmToggle(${g.id})">${_pmOpen[g.id] ? '접기' : `기록·코멘트${nCk + nCm ? ` (${nCk + nCm})` : ''}`}</button>
+    ${d.canCheckin ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();pmStartCheckin(${g.id})">체크인</button>` : ''}
+    <button class="btn btn-sm pm-btn-ghost" onclick="event.stopPropagation();pmOpenPanel(${g.id})">자세히</button>
   </div>
-  ${_pmCk?.goalId === g.id ? pmCheckinForm(g, d) : ''}
-  ${_pmOpen[g.id] ? pmGoalDetail(g, d) : ''}
 </div>`;
+}
+
+function pmPanelHtml(d){
+  if(!_pmPanel) return '';
+  const g = (d.goals||[]).find(x=>x.id===_pmPanel.goalId);
+  if(!g){ _pmPanel = null; return ''; }
+  const c = d.cycle || {}, p = g.progress_pct, manual = g.progress_mode === 'manual';
+  const u = g.metric_unit ? escapeHtml(g.metric_unit) : '';
+  const cks = (d.checkins||[]).filter(k=>k.goal_id===g.id);
+  const cms = (d.comments||[]).filter(m=>m.goal_id===g.id);
+  const ck = _pmPanel.mode === 'checkin' && _pmCk?.goalId === g.id ? _pmCk : null;
+  const st = PM_STATE[g.state] || PM_STATE.not_started;
+  const parent = (d.linkable||[]).find(o=>String(o.id)===String(g.parent_org_goal_id));
+  const tags = `<div class="pm-tags"><span class="pm-tag">목표</span><span class="pm-tag" style="color:${st[1]};background:${st[2]}">${g.state==='in_progress'?'↗ ':''}${st[0]}</span><span class="pm-tag" style="color:#047857;background:#ECFDF5">승인 완료</span><span class="pm-tag ${g.kind==='ai'?'pm-tag-ai':'pm-tag-biz'}">${g.kind==='ai'?'AI KPI':'사업 KPI'}</span></div>`;
+  const metricCard = manual
+    ? `<div class="pm-mcard"><div><b>진척도</b><div class="pm-meta">정성 목표 · 평가 기준에 대한 진척 %</div></div><div class="pm-mcard-r">${pmBar(p, g.state)}<b>${p == null ? '-' : p + '%'}</b></div></div>`
+    : `<div class="pm-mcard"><div><b>${escapeHtml(g.metric_name || '지표')}</b><div class="pm-meta">시작: ${pmNum(g.start_value ?? 0)}${u} | 목표: ${pmNum(g.target_value)}${u} | 현재: ${g.current_value == null ? '-' : pmNum(g.current_value) + u}${g.progress_override != null ? ' · 진척도 직접 수정' : ''}</div></div><div class="pm-mcard-r">${pmBar(p, g.state)}<b>${p == null ? '-' : p + '%'}</b></div></div>`;
+  const view = `
+    <div class="pm-sec-lbl">지표</div>${metricCard}
+    <div class="pm-dr-btns">${d.canCheckin ? `<button class="btn btn-primary btn-sm" onclick="pmStartCheckin(${g.id})">체크인 하기</button>` : ''}<button class="btn btn-sm pm-btn-ghost" onclick="_pmPanel.tab='comment';render();setTimeout(()=>document.getElementById('pm-cm-in')?.focus(),0)">코멘트 달기</button></div>
+    <div class="pm-props">
+      <div><span>👤 담당자</span><b>${escapeHtml(d.employee?.name || '')}</b></div>
+      <div><span>🏢 담당 조직</span><b>${escapeHtml(d.employee?.dept || d.sheet?.dept || '-')}</b></div>
+      <div><span>👁 공개 범위</span><b>리더 공개 <em class="pm-meta">(본인·팀장·실장·관리자)</em></b></div>
+      <div><span>🎯 상위 목표</span><b>${parent ? `${escapeHtml(pmOrgTitle(parent.id))}${parent.progress != null ? `<div class="pm-meta">진척도 ${parent.progress}%</div>` : ''}` : '-'}</b></div>
+      <div><span>📅 기간</span><b>${g.starts_on ? `${escapeHtml(g.starts_on)} ~ ${escapeHtml(g.ends_on || '')}` : '-'}</b></div>
+      <div><span>⚖️ 가중치</span><b>${g.weight}%</b></div>
+      ${g.criteria ? `<div><span>📏 평가 기준</span><b class="pm-pre">${escapeHtml(g.criteria)}</b></div>` : ''}
+      ${g.description ? `<div><span>📝 상세 설명</span><b class="pm-pre">${escapeHtml(g.description)}</b></div>` : ''}
+    </div>`;
+  const stateOpts = PM_STATE_ORDER.map(k=>`<button type="button" class="pm-st-opt ${ck?.state===k?'on':''}" onclick="pmCkState('${k}')"><i style="background:${PM_STATE[k][3]}"></i>${PM_STATE[k][0]}</button>`).join('');
+  const form = ck ? `
+    <label class="pm-lbl">체크인 날짜</label>
+    <input class="pm-in pm-in-date" type="date" max="${pmKstToday()}" value="${escapeHtml(ck.date)}" onchange="_pmCk.date=this.value">
+    <div class="pm-ck-row2">
+      <div><label class="pm-lbl">목표 상태</label>
+        <div class="pm-st-dd"><button type="button" class="pm-st-btn" onclick="_pmCk.stateOpen=!_pmCk.stateOpen;render()"><i style="background:${(PM_STATE[ck.state]||PM_STATE.in_progress)[3]}"></i>${(PM_STATE[ck.state]||PM_STATE.in_progress)[0]}<span>⌄</span></button>
+        ${ck.stateOpen ? `<div class="pm-st-menu">${stateOpts}</div>` : ''}</div></div>
+      ${!manual ? `<button type="button" class="pm-link pm-ovr-link" onclick="_pmCk.showOverride=!_pmCk.showOverride;render()">✎ 진척도 수정</button>` : ''}
+    </div>
+    <label class="pm-lbl">${manual ? '진척도' : '지표'}</label>
+    <div class="pm-mcard">
+      ${manual
+        ? `<div><b>진척도 (%)</b><div class="pm-meta">평가 기준 대비 지금 어디까지 왔는지</div></div><div class="pm-mcard-in"><input id="pm-ck-first" type="number" min="0" max="300" step="1" value="${pmv(ck.progress)}" oninput="_pmCk.progress=this.value"><span>%</span></div>`
+        : `<div><b>${escapeHtml(g.metric_name || '지표')}</b><div class="pm-meta">시작: ${pmNum(g.start_value ?? 0)}${u} | 목표: ${pmNum(g.target_value)}${u}</div></div><div class="pm-mcard-in"><input id="pm-ck-first" type="number" step="any" value="${pmv(ck.value)}" oninput="_pmCk.value=this.value"><span>${u}</span></div>`}
+    </div>
+    ${!manual && ck.showOverride ? `<div class="pm-mcard"><div><b>진척도 직접 수정 (%)</b><div class="pm-meta">지표로 계산한 값 대신 이 %로 표시합니다. 비우면 지표대로.</div></div><div class="pm-mcard-in"><input type="number" min="0" max="300" step="1" value="${pmv(ck.override)}" oninput="_pmCk.override=this.value"><span>%</span></div></div>` : ''}
+    <div class="pm-tip">${pmSafeHtml(c.checkin_guide || PM_DEFAULT_GUIDE)}</div>
+    <div class="pm-rte-wrap">
+      <div class="pm-rte-bar">
+        <button type="button" onmousedown="event.preventDefault();pmRte('bold')"><b>B</b></button><button type="button" onmousedown="event.preventDefault();pmRte('italic')"><i>I</i></button><button type="button" onmousedown="event.preventDefault();pmRte('underline')"><u>U</u></button><button type="button" onmousedown="event.preventDefault();pmRte('strikeThrough')"><s>S</s></button>
+        <span></span><button type="button" title="번호 목록" onmousedown="event.preventDefault();pmRte('insertOrderedList')">1.</button><button type="button" title="글머리 목록" onmousedown="event.preventDefault();pmRte('insertUnorderedList')">•</button><button type="button" title="링크" onmousedown="event.preventDefault();pmRte('link')">🔗</button>
+      </div>
+      <div id="pm-rte" class="pm-rte" contenteditable="true" data-ph="어떤 성과를 이뤄내고 있는지 공유하세요" oninput="_pmCk.note=this.innerHTML">${pmSafeHtml(ck.note)}</div>
+    </div>
+    <div class="pm-meta" style="margin-top:6px">파일 첨부는 아직 지원하지 않습니다. 자료는 링크로 남겨 주세요.</div>` : '';
+  // 활동 탭
+  const tab = _pmPanel.tab || 'checkin';
+  const ordered = [...cks].sort((a,b)=>String(a.checkin_date).localeCompare(String(b.checkin_date)) || String(a.created_at).localeCompare(String(b.created_at)));
+  const name = d.employee?.name || '';
+  const ckFeed = ordered.map((k,i)=>{ const pv = ordered[i-1];
+    const sentence = pv ? `진척도가 <b>${pv.progress ?? 0}%</b>에서 <b>${k.progress ?? 0}%</b>로 업데이트되었습니다.` : `진척도를 <b>${k.progress ?? 0}%</b>로 기록했습니다.`;
+    return `<div class="pm-feed"><div class="pm-feed-h"><span class="pm-av">${escapeHtml(name.slice(-2))}</span><b>${escapeHtml(name)}</b><span class="pm-meta">${escapeHtml(k.checkin_date || pmDay(k.created_at))}</span>${pmStateChip(k.state)}</div>
+      <div class="pm-feed-s">${sentence}${!manual && k.value != null ? ` <span class="pm-meta">(현재 값 ${pmNum(k.value)}${u}${k.progress_override != null ? ' · 진척도 직접 수정' : ''})</span>` : ''}${pv && pv.state !== k.state ? ` <span class="pm-meta">상태 ${PM_STATE[pv.state]?.[0]||''} → ${PM_STATE[k.state]?.[0]||''}</span>` : ''}</div>
+      <div class="pm-feed-b">${pmSafeHtml(k.note)}</div></div>`; }).reverse().join('') || `<div class="pm-empty">아직 체크인 기록이 없습니다.${d.canCheckin ? ' [체크인 하기]로 첫 진행 상황을 남겨 보세요.' : ''}</div>`;
+  const cm = _pmCm[g.id] || {};
+  const cmFeed = `
+    <textarea id="pm-cm-in" class="pm-ta" rows="2" maxlength="2000" placeholder="리더에게 남길 말, 도움이 필요한 점" oninput="pmCmSet(${g.id},'body',this.value)">${escapeHtml(cm.body||'')}</textarea>
+    <div class="pm-cm-foot"><label class="pm-meta"><input type="checkbox" ${cm.private?'checked':''} onchange="pmCmSet(${g.id},'private',this.checked)"> 담당자·리더만 보기</label><button class="btn btn-sm btn-primary" onclick="pmAddComment(${g.id})">코멘트 남기기</button></div>
+    ${[...cms].reverse().map(m=>`<div class="pm-feed"><div class="pm-feed-h"><span class="pm-av">${escapeHtml(String(m.author_name||'').slice(-2))}</span><b>${escapeHtml(m.author_name || m.author_email)}</b><span class="pm-meta">${pmDay(m.created_at)}</span>${m.private ? '<span class="pm-lock">🔒 담당자·리더만</span>' : ''}${m.mine ? `<button class="pm-link" style="margin-left:auto" onclick="pmDelComment(${m.id})">삭제</button>` : ''}</div><div class="pm-feed-b pm-pre">${escapeHtml(m.body)}</div></div>`).join('') || '<div class="pm-empty">코멘트가 없습니다.</div>'}`;
+  const hist = pmGoalHistory(g, d);
+  const histFeed = hist.map(h=>`<div class="pm-feed"><div class="pm-feed-h"><span class="pm-av">${escapeHtml(String(h.who).slice(-2))}</span><b>${escapeHtml(h.who)}</b><span class="pm-meta">${pmDay(h.at)}</span><span class="pm-tag">${escapeHtml(h.act)}</span></div>
+      ${h.lines.length ? `<ul class="pm-hist-ul">${h.lines.map(l=>`<li>${escapeHtml(l)}</li>`).join('')}</ul>` : ''}${h.note ? `<div class="pm-feed-b pm-pre">${escapeHtml(h.note)}</div>` : ''}</div>`).join('') || '<div class="pm-empty">변경 내역이 없습니다.</div>';
+  const tabs = `<div class="pm-tabs">${[['checkin','체크인',cks.length],['comment','코멘트',cms.length],['history','변경 내역',0]].map(([k,l,n])=>`<button class="${tab===k?'on':''}" onclick="pmPanelTab('${k}')">${l}${n ? ` ${n}` : ''}</button>`).join('')}</div>
+    ${tab==='checkin' ? ckFeed : tab==='comment' ? cmFeed : histFeed}`;
+  requestAnimationFrame(()=>{ const b = document.querySelector('.pm-dr-body'); if(b && _pmDrY) b.scrollTop = _pmDrY; });
+  return `
+<div class="pm-ov" onclick="pmClosePanel()"></div>
+<aside class="pm-drawer" role="dialog" aria-label="목표 상세">
+  <div class="pm-dr-top"><button class="pm-dr-x" onclick="pmClosePanel()" title="닫기 (Esc)">»</button></div>
+  <div class="pm-dr-body" onscroll="_pmDrY=this.scrollTop">
+    ${tags}
+    <h2 class="pm-dr-title">${escapeHtml(g.title)}</h2>
+    <div class="pm-dr-prog"><div class="pm-bar pm-bar-lg"><div style="width:${Math.min(Math.max(p||0,0),100)}%"></div></div><b>${p == null ? '-' : p + '%'}</b><span class="pm-info-i" title="${manual ? '정성 목표: 체크인 때 입력한 진척 %' : '지표: (현재 값 − 시작값) ÷ (목표값 − 시작값). 진척도를 직접 수정하면 그 값'}">ⓘ</span></div>
+    ${pmChart(g, cks, c)}
+    ${ck ? form : view + tabs}
+  </div>
+  ${ck ? `<div class="pm-dr-foot"><button class="btn btn-sm pm-btn-ghost" onclick="pmCancelCheckin()">취소</button><button class="btn btn-primary btn-sm" onclick="pmSaveCheckin()">저장</button></div>` : ''}
+</aside>`;
 }
 
 async function pmRecall(){
@@ -1929,17 +2112,17 @@ ${notice}
     const goals = d.goals || [];
     const op = d.openPeriod;
     const doneN = op ? goals.filter(g=>(d.checkins||[]).some(k=>k.goal_id===g.id && k.period_id===op.id)).length : 0;
-    const periodBox = op ? `<div class="pm-period"><div><b>📌 ${escapeHtml(op.name)}</b>${op.ends_on ? ` · ${fmtGoalDate(op.ends_on)}까지` : ''}<div class="pm-meta" style="margin-top:2px">KPI마다 현재 값(또는 진척 %)·상태·진행 상황을 적습니다. 기간 안에는 몇 번이든 다시 할 수 있습니다.</div></div><span class="pm-badge ${doneN===goals.length?'pm-badge-approved':'pm-badge-draft'}">${goals.length}개 중 ${doneN}개 완료</span></div>` : '';
+    const periodBox = op ? `<div class="pm-period"><div><b>📌 ${escapeHtml(op.name)}</b>${op.ends_on ? ` · ${fmtGoalDate(op.ends_on)}까지` : ''}<div class="pm-meta" style="margin-top:2px">이 기간 안에 KPI마다 한 번 이상 체크인해 주세요. 체크인은 기간과 상관없이 언제든 할 수 있습니다.</div></div><span class="pm-badge ${doneN===goals.length?'pm-badge-approved':'pm-badge-draft'}">${goals.length}개 중 ${doneN}개 완료</span></div>` : '';
     return head + weightBox + pmChangeBox(d) + periodBox + pmOrgTreeHtml() + `
 <div class="content-block">
   <div class="sec-title" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">내 KPI
     <span style="flex:1;min-width:160px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:400;color:var(--gray)">전체 진척도 ${pmBar(d.progress)}<b style="color:var(--dark)">${d.progress == null ? '-' : d.progress + '%'}</b></span></div>
   ${goals.map((g,i)=>pmApprovedCard(g,i,d)).join('') || `<div style="color:var(--gray)">작성한 목표가 없습니다.</div>`}
   <div class="pm-actions" style="justify-content:space-between;align-items:center;margin-top:6px">
-    <span class="pm-meta">${op ? '' : '체크인 기간이 열리면 여기서 진행 상황을 기록합니다. '}전체 진척도는 가중치 반영(목표별 100% 상한).</span>
+    <span class="pm-meta">KPI를 누르면 진척 그래프·체크인·코멘트·변경 내역을 볼 수 있습니다. 체크인은 한 달에 한 번 이상 권장. 전체 진척도는 가중치 반영(목표별 100% 상한).</span>
     ${d.canChange ? `<button class="btn btn-sm pm-btn-ghost" onclick="pmStartChange()">목표 변경 요청</button>` : ''}
   </div>
-</div>`;
+</div>` + pmPanelHtml(d);
   }
 
   // 읽기 전용(제출·기간 종료)
@@ -3844,7 +4027,8 @@ function formatDate(iso){
 
   // ── 드래그 선택 금지 ──
   document.addEventListener('selectstart', e => {
-    if(!['INPUT','TEXTAREA'].includes(e.target.tagName)) e.preventDefault();
+    const t = e.target && e.target.nodeType === 1 ? e.target : e.target?.parentElement; // 글 입력 칸(서식 편집기 포함)은 예외
+    if(!['INPUT','TEXTAREA'].includes(t?.tagName) && !t?.closest?.('[contenteditable="true"]')) e.preventDefault();
   });
 
   // ── 키보드 단축키 차단 (저장·인쇄·소스보기·개발자도구) ──
