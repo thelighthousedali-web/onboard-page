@@ -1706,7 +1706,7 @@ function pmChart(g, cks, cycle){
   for(let v = 0; v <= top; v += 20) grid += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#F1F2F4"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" class="pm-ax">${v}</text>`;
   const sd = new Date(t0), months = [];
   for(let d = new Date(sd.getFullYear(), sd.getMonth(), 1); d.getTime() <= t1; d.setMonth(d.getMonth()+1)) months.push(new Date(d));
-  const step = months.length > 8 ? 2 : 1;
+  const step = months.length > 12 ? 2 : 1; // 1년 이내면 매달(레몬베이스와 같음)
   const xl = months.filter((m,i)=>i % step === 0).map((m,i)=>`<text x="${x(Math.max(m.getTime(), t0))}" y="${H-6}" text-anchor="middle" class="pm-ax">${i===0 ? m.getFullYear() : (m.getMonth()+1)+'월'}</text>`).join('');
   const line = pts.length > 1 ? `<polyline points="${pts.map(p=>`${x(p.t).toFixed(1)},${y(p.p).toFixed(1)}`).join(' ')}" fill="none" stroke="#3B82F6" stroke-width="2"/>` : '';
   const dots = pts.map(p=>`<circle cx="${x(p.t).toFixed(1)}" cy="${y(p.p).toFixed(1)}" r="4" fill="#fff" stroke="#3B82F6" stroke-width="2"><title>${p.k.checkin_date || ''} · ${p.p}%</title></circle>`).join('');
