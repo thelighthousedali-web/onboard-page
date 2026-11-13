@@ -451,6 +451,11 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .pr-retbox{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#9A3412}
 .pr-in-bad{border-color:#FCA5A5;background:#FFFBFB}
 .pr-guide{margin-bottom:16px}.pr-dist{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:420px}.pr-dist div{border:1px solid var(--border);border-radius:8px;text-align:center;padding:8px 0}.pr-dist b{display:block;font-size:16px}.pr-dist span{font-size:12.5px;color:var(--gray)}
+.pr-main-res{grid-template-columns:minmax(0,1fr) 240px}
+.pr-bigg{flex:none;width:84px;height:84px;border-radius:50%;background:#1E90FF;color:#fff;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900}.pr-bigg-none{background:#E5E7EB;color:#9CA3AF}
+.pr-toc{display:grid;gap:4px}.pr-toc button{border:0;background:none;text-align:left;padding:9px 10px;border-radius:8px;font-size:14px;font-weight:600;color:#374151;cursor:pointer}.pr-toc button:hover{background:#F3F4F6}
+.pr-resbox{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border:1px solid #BFDBFE;background:#F0F7FF}
+@media(max-width:900px){.pr-main-res{display:block}}
 /* 작성·변경 요청 화면: 목표 목록 + 오른쪽 편집 패널 */
 .pm-dr-row{display:grid;grid-template-columns:minmax(0,1fr) 190px 120px 56px 78px;gap:8px;align-items:center;padding:10px 8px;border-bottom:1px solid #F1F2F4;font-size:13.5px;cursor:pointer;min-height:46px}
 .pm-dr-row:hover{background:#FAFAFB}.pm-dr-row.pm-th{cursor:default;min-height:0}.pm-dr-row.pm-th:hover{background:none}
@@ -2571,7 +2576,7 @@ async function prCall(body){
     return { ok: false, status: 0, data: { error: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.' } };
   }
 }
-function prReset(){ _prMe = null; _prList = null; _prCycleId = null; _prRv = null; _prRvY = 0; }
+function prReset(){ _prMe = null; _prList = null; _prCycleId = null; _prRv = null; _prRes = null; _prRvY = 0; }
 async function prLoadMe(){
   if(_prMeLoading) return;
   _prMeLoading = true;
@@ -2629,11 +2634,13 @@ ${sel}
 ${down.length && d.guide?.dist ? `<div class="content-block pr-guide"><div class="sec-title">등급 배분 가이드 <span class="pm-meta">참고용 · 최종 등급은 전사 캘리브레이션에서 정합니다</span></div>
   <div class="pm-meta" style="margin-bottom:8px">법인평가 ${escapeHtml(d.guide.corp_grade)}등급 기준 개인 등급 배분율(전사)</div>
   <div class="pr-dist">${['S', 'A', 'B', 'C'].map(g => `<div><b>${g}</b><span>${d.guide.dist[g][0]}~${d.guide.dist[g][1]}%</span></div>`).join('')}</div></div>` : ''}
+${d.result?.open && d.result.target ? `<div class="content-block pr-resbox"><div><div class="sec-title" style="margin-bottom:4px">평가 결과가 공개되었습니다</div><div class="pm-meta">최종 등급과 1·2차 평가자 종합 의견을 확인할 수 있습니다.</div></div>
+  <div style="display:flex;align-items:center;gap:16px">${d.result.grade ? `<div class="pr-bigg" style="width:54px;height:54px;font-size:26px">${escapeHtml(d.result.grade)}</div>` : ''}<button class="btn btn-primary btn-sm" onclick="prOpenResult()">결과 확인</button></div></div>` : ''}
 <div class="content-block">
   <div class="sec-title">작성할 리뷰</div>
   ${tasks.length ? mine.map(row).join('') + (down.length ? `<div class="pr-sep">내가 평가할 구성원 (${down.length}명)</div>` + down.map(row).join('') : '') : '<div class="pm-tbl-empty">작성할 리뷰가 없습니다. 평가 대상이 아니거나 아직 대상자 확정 전입니다.</div>'}
 </div>
-${prRvOverlayHtml()}`;
+${prRvOverlayHtml()}${prResOverlayHtml()}`;
 }
 
 // ── 작성 화면 ──
@@ -2651,6 +2658,44 @@ async function prOpenReview(cid, email, kind){
     _prRv.items = Array.from({ length: n }, (_, i) => by[i] || { ref: i, grade: null, comment: '' });
   }
   _prRv.sig0 = prRvSig(); _prRvY = 0; render();
+}
+// ── 결과 확인(결과 공개 후): 확정 등급 + 셀프·1차·2차 내용. 오른쪽 목차로 이동 ──
+let _prRes = null; // { loading } | { self: 내 본인평가, result }
+async function prOpenResult(){
+  if(_prRes) return;
+  _prRes = { loading: true }; render();
+  const { ok, data } = await prCall({ action: 'review_get', cycleId: _prCycleId, kind: 'self' });
+  if(!ok){ _prRes = null; render(); alert(data.error || '결과를 불러오지 못했습니다.'); return; }
+  _prRes = { self: data.review, cycle: data.cycle, result: _prList?.result || {} }; render();
+}
+function prResClose(){ _prRes = null; render(); }
+function prResGo(id){ document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && _prRes && state.page === 'reviews') prResClose(); });
+function prResOverlayHtml(){
+  if(!_prRes) return '';
+  if(_prRes.loading) return `<div class="pr-ov"><div class="pr-top"><button class="pr-back" onclick="prResClose()" aria-label="뒤로">←</button><b>불러오는 중…</b></div><div class="loading" style="margin-top:80px"><div class="spinner"></div></div></div>`;
+  const r = _prRes.result, s = _prRes.self, c = _prRes.cycle, st = c.settings, defs = st.comps || [];
+  const grade = r.grade ? `<div class="pr-bigg">${escapeHtml(r.grade)}</div><div><div style="font-size:15px;font-weight:800">최종 등급</div><div class="pm-meta">캘리브레이션을 거쳐 확정된 등급입니다</div></div>` : `<div class="pr-bigg pr-bigg-none">-</div><div><div style="font-size:15px;font-weight:800">아직 확정되지 않았습니다</div><div class="pm-meta">평가가 모두 끝나면 확정 등급이 표시됩니다</div></div>`;
+  const scores = r.scores ? `<div class="pr-dist" style="margin-top:14px;max-width:420px"><div><b>${r.scores.perf ?? '-'}</b><span>업적</span></div><div><b>${r.scores.comp ?? '-'}</b><span>역량</span></div><div><b>${r.scores.score ?? '-'}</b><span>최종점수</span></div></div>` : '';
+  const text = t => t ? `<div class="pr-rich" style="font-size:14.5px">${escapeHtml(t).replace(/\n/g, '<br>')}</div>` : '<div class="pm-meta">작성된 종합 의견이 없습니다.</div>';
+  const itemsHtml = (s.items || []).map(x => `<div class="pr-item"><div class="pr-item-top"><span class="pr-wchip">가중치 ${x.weight || 0}%</span><span class="pm-kind pm-kind-${x.kind==='ai'?'ai':'business'}" style="margin:0">${x.kind==='ai'?'AI':'KPI'}</span>${prGradeTag(x.grade)}</div><div class="pr-title-ro">${escapeHtml(x.title)}</div>${x.summary ? `<div class="pr-sum-ro">${escapeHtml(x.summary)}</div>` : ''}${x.detail_html ? `<div class="pr-rich">${pmSafeHtml(x.detail_html)}</div>` : ''}</div>`).join('');
+  const compsHtml = (s.comps || []).map(cp => `<div class="pr-item"><div class="pr-q" style="font-size:14.5px">${escapeHtml((defs.find(z => z.key === cp.key) || {}).name || cp.key)} ${prGradeTag(cp.grade)}</div>${cp.comment ? `<div class="pr-rich">${escapeHtml(cp.comment).replace(/\n/g, '<br>')}</div>` : ''}</div>`).join('');
+  return `<div class="pr-ov" role="dialog" aria-label="결과 확인">
+  <div class="pr-top"><button class="pr-back" onclick="prResClose()" aria-label="뒤로 (Esc)">←</button><b>${escapeHtml(c.name)}</b><span class="pm-meta" style="margin-left:8px">결과 확인</span></div>
+  <div class="pr-main pr-main-res">
+    <div class="pr-c"><div class="pr-c-in">
+      <div id="res-final" class="pr-sec-h">최종 결과</div>
+      <div class="pr-item" style="display:flex;align-items:center;gap:18px">${grade}</div>${scores}
+      <div id="res-self" class="pr-sec-h" style="margin-top:34px">셀프 평가 <span class="pm-meta">내가 제출한 내용</span></div>
+      ${itemsHtml}${compsHtml}${s.overall ? `<div class="pr-item"><div class="pr-q" style="font-size:14.5px">종합 의견</div>${text(s.overall)}</div>` : ''}
+      <div id="res-d1" class="pr-sec-h" style="margin-top:34px">1차 평가자 종합 의견</div>
+      <div class="pr-item">${text(r.d1_overall)}</div>
+      <div id="res-d2" class="pr-sec-h" style="margin-top:34px">2차 평가자 종합 의견</div>
+      <div class="pr-item">${r.d2_none ? '<div class="pm-meta">2차 평가자가 없어 1차 평가가 그대로 반영되었습니다.</div>' : text(r.d2_overall)}</div>
+    </div></div>
+    <aside class="pr-r"><div class="pr-r-h">목차</div>
+      <div class="pr-toc"><button onclick="prResGo('res-final')">최종 결과</button><button onclick="prResGo('res-self')">셀프</button><button onclick="prResGo('res-d1')">하향 1차</button><button onclick="prResGo('res-d2')">하향 2차</button></div></aside>
+  </div></div>`;
 }
 function prRvClose(){
   if(_prRv && !_prRv.loading && prRvEditable() && prRvDirty() && !confirm('저장하지 않은 내용이 있습니다. 닫을까요?')) return;
