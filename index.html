@@ -472,6 +472,15 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .pm-rte{min-height:120px;padding:12px 14px;font-size:14px;line-height:1.65;outline:none;-webkit-user-select:text;user-select:text}
 .pm-rte:empty:before{content:attr(data-ph);color:#9CA3AF}
 .pm-rte ul,.pm-rte ol{margin:4px 0;padding-left:22px}
+/* 목표 구조: 지표 여러 개·핵심 과제 */
+.pm-seg-4{flex-wrap:wrap}.pm-sub-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 8px}
+.pm-metric{grid-template-columns:2fr 1fr 1fr 1fr auto}.pm-metric-c{grid-template-columns:2fr 1fr 1fr 1fr 90px auto}.pm-metric-t{grid-template-columns:2fr 1fr 1fr 1fr}
+.pm-task-ed{border:1px dashed #D1D5DB;border-radius:10px;padding:10px 12px 4px;margin-bottom:8px;background:#fff}
+.pm-task-h{display:flex;gap:8px;align-items:center}.pm-task-h .pm-in{flex:1}.pm-task-h .pm-in-c{flex:0 0 90px}
+.pm-flag{color:#6B7280;font-size:15px;margin-bottom:8px}
+.pm-task-row{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 28px;border-top:1px dashed var(--border);font-size:13px;cursor:pointer}.pm-task-row:hover{background:#FFF8F4}
+.pm-task-row .pm-bar{max-width:160px}
+.pm-sublist{border:1px solid var(--border);border-radius:10px;margin-bottom:12px}.pm-subitem{display:flex;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid #F3F4F6;cursor:pointer}.pm-subitem:last-child{border-bottom:none}.pm-subitem:hover{background:#F9FAFB}
 @media(max-width:600px){.pm-props>div{grid-template-columns:96px 1fr}.pm-mcard{flex-direction:column;align-items:stretch}.pm-mcard-r{min-width:0}}
 @media(max-width:768px){.pm-metric{grid-template-columns:1fr 1fr}.pm-metric .pm-in:first-child{grid-column:1/-1}.pm-row2{grid-template-columns:1fr}}
 </style>
@@ -1573,9 +1582,27 @@ function fmtGoalDate(s){ if(!s) return ''; const [y,m,d] = String(s).split('-');
 // 기간, 설명. 회사 규칙(3~5개·합 100·AI KPI 1~2개·합 20·연결 필수)은 서버와 같은 규칙으로 화면에서도 바로 보여준다.
 const pmv = v => (v == null ? '' : escapeHtml(String(v))); // 0도 그대로 보이게(escapeHtml은 0을 빈칸으로 만듦)
 const PM_LEVEL = { company:'전사', division:'실', team:'팀' };
+// 목표 구조(2026-11-13, 레몬베이스 기준): KPI 아래 핵심 과제, 지표 여러 개, 진척도 방식 4가지, 기여도(균등/직접)
+const PM_MODES = { metric:'지표로 계산', children:'하위 과제로 계산', manual:'직접 % (정성)', none:'진척도 없음' };
+const PM_TMODES = { metric:'지표', manual:'직접 %', none:'진척도 없음' };
+const pmBlankMetric = () => ({ name:'', start:'', target:'', unit:'', contrib:'' });
+function pmBlankTask(){ return { title:'', progress_mode:'metric', metrics:[pmBlankMetric()], criteria:'', contrib:'' }; }
 function pmBlankGoal(c){
   const y = c?.year || (new Date().getFullYear() + 1);
-  return { kind:'business', parent_org_goal_id:'', title:'', progress_mode:'metric', metric_name:'', start_value:'', target_value:'', metric_unit:'', criteria:'', description:'', starts_on:`${y}-01-01`, ends_on:`${y}-12-31`, weight:'' };
+  return { kind:'business', parent_org_goal_id:'', title:'', progress_mode:'metric', metrics:[pmBlankMetric()], criteria:'', description:'', starts_on:`${y}-01-01`, ends_on:`${y}-12-31`, weight:'', tasks:[] };
+}
+// 서버 행(지표 1개 예전 칸 포함) → 편집용 지표 목록
+function pmMetricsOf(g){
+  const ms = Array.isArray(g.metrics) && g.metrics.length ? g.metrics : (g.metric_name || g.target_value != null ? [{ name:g.metric_name, unit:g.metric_unit, start:g.start_value, target:g.target_value, current:g.current_value, contrib:null }] : []);
+  return ms.map(m=>({ name:m.name ?? '', unit:m.unit ?? '', start:m.start ?? '', target:m.target ?? '', current:m.current ?? null, contrib:m.contrib ?? '' }));
+}
+// 평평한 행 → KPI(각 KPI 안에 tasks) 편집본
+function pmDraftFromRows(rows, cycle){
+  const blank = pmBlankGoal(cycle);
+  const clean = g => Object.fromEntries(Object.entries(g).filter(([,v])=>v!=null));
+  return (rows||[]).filter(r=>!r.parent_goal_id).map(k=>({ ...blank, ...clean(k), parent_org_goal_id: k.parent_org_goal_id || '', weight: k.weight ?? '',
+    metrics: pmMetricsOf(k).length ? pmMetricsOf(k) : [pmBlankMetric()],
+    tasks: rows.filter(t=>t.parent_goal_id===k.id).map(t=>({ ...pmBlankTask(), ...clean(t), contrib: t.contrib ?? '', metrics: pmMetricsOf(t).length ? pmMetricsOf(t) : [pmBlankMetric()] })) }));
 }
 async function loadPmSheet(){
   const { ok, status, data } = await pmCall({ action: 'my_sheet' });
@@ -1583,35 +1610,40 @@ async function loadPmSheet(){
     _pmSheet = { error: status === 401 ? '로그인이 만료되었습니다. 로그아웃 후 다시 로그인해 주세요.' : (data.error || '목표 정보를 불러오지 못했습니다.') };
   } else {
     _pmSheet = data;
-    const blank = pmBlankGoal(data.cycle);
-    const goals = (data.goals||[]).map(g=>({ ...blank, ...Object.fromEntries(Object.entries(g).filter(([,v])=>v!=null)),
-      parent_org_goal_id: g.parent_org_goal_id || '', weight: g.weight ?? '' }));
+    const goals = pmDraftFromRows(data.goals, data.cycle);
     const min = data.cycle?.min_goals || 3;
     while(goals.length < min) goals.push(pmBlankGoal(data.cycle));
     _pmDraft = goals;
   }
   render();
 }
+const pmMetricFilled = m => String(m.name||'').trim() || (m.target !== '' && m.target != null);
+const pmMetricsBad = ms => { const f = (ms||[]).filter(pmMetricFilled); return !f.length || f.some(m => !String(m.name||'').trim() || m.target === '' || m.target == null); };
 // 서버 goalRuleProblems와 같은 규칙 — 화면용(통과/미통과 목록)
 function pmRules(c, goals){
   const min = c.min_goals ?? 3, max = c.max_goals ?? 5, aiW = c.ai_weight ?? 20, aiMin = c.ai_min ?? 1, aiMax = c.ai_max ?? 2;
   const w = g => parseInt(g.weight,10) || 0;
-  const filled = goals.filter(g => g.title || w(g) || g.metric_name || g.criteria);
+  const filled = goals.filter(g => g.title || w(g) || (g.metrics||[]).some(pmMetricFilled) || g.criteria || (g.tasks||[]).length);
   const sum = filled.reduce((a,g)=>a+w(g),0);
   const ai = filled.filter(g=>g.kind==='ai'), aiSum = ai.reduce((a,g)=>a+w(g),0);
   const rows = [
     { ok: filled.length >= min && filled.length <= max, label: `목표 ${min}~${max}개`, now: `${filled.length}개` },
     { ok: sum === 100, label: '가중치 합 100%', now: `${sum}%` },
   ];
-  if(aiW > 0){
-    rows.push({ ok: ai.length >= aiMin && ai.length <= aiMax && aiSum === aiW, label: `AI KPI ${aiMin}~${aiMax}개 · 합 ${aiW}% (사업 KPI ${100-aiW}%)`, now: `AI ${ai.length}개 ${aiSum}% · 사업 ${sum-aiSum}%` });
-  }
+  if(aiW > 0) rows.push({ ok: ai.length >= aiMin && ai.length <= aiMax && aiSum === aiW, label: `AI KPI ${aiMin}~${aiMax}개 · 합 ${aiW}% (사업 KPI ${100-aiW}%)`, now: `AI ${ai.length}개 ${aiSum}% · 사업 ${sum-aiSum}%` });
   if(c.require_link !== false){
     const n = filled.filter(g=>!g.parent_org_goal_id).length;
     rows.push({ ok: filled.length > 0 && n === 0, label: '모든 목표를 상위 목표에 연결', now: !filled.length ? '-' : n ? `${n}개 미연결` : '완료' });
   }
-  const bad = filled.filter(g => !g.title || !(w(g) > 0) || (g.progress_mode==='manual' ? !String(g.criteria||'').trim() : (!String(g.metric_name||'').trim() || g.target_value===''||g.target_value==null))).length;
-  rows.push({ ok: filled.length > 0 && bad === 0, label: '제목·가중치, 지표(이름·목표값) 또는 정성 목표의 평가 기준', now: !filled.length ? '-' : bad ? `${bad}개 빠짐` : '완료' });
+  const bad = filled.filter(g => { const m = g.progress_mode || 'metric';
+    if(!g.title || !(w(g) > 0)) return true;
+    if(m === 'manual' || m === 'none') return !String(g.criteria||'').trim();
+    if(m === 'children') return !(g.tasks||[]).length;
+    return pmMetricsBad(g.metrics); }).length;
+  rows.push({ ok: filled.length > 0 && bad === 0, label: '제목·가중치, 진척도 방식에 맞는 지표·평가 기준·핵심 과제', now: !filled.length ? '-' : bad ? `${bad}개 빠짐` : '완료' });
+  const tBad = filled.reduce((a,g)=>a + (g.tasks||[]).filter(t => !String(t.title||'').trim() || ((t.progress_mode||'metric') === 'metric' && pmMetricsBad(t.metrics))).length, 0);
+  const tAll = filled.reduce((a,g)=>a + (g.tasks||[]).length, 0);
+  if(tAll) rows.push({ ok: tBad === 0, label: '핵심 과제 제목·지표', now: tBad ? `${tBad}개 빠짐` : `${tAll}개 완료` });
   return rows;
 }
 function pmRulesHtml(){
@@ -1619,12 +1651,32 @@ function pmRulesHtml(){
   return pmRules(c, _pmDraft||[]).map(r=>`<div class="pm-rule ${r.ok?'pm-rule-ok':'pm-rule-bad'}"><span>${r.ok?'✓':'!'}</span><b>${escapeHtml(r.label)}</b><em>${escapeHtml(r.now)}</em></div>`).join('');
 }
 function pmRefreshRules(){ const el = document.getElementById('pm-rules'); if(el) el.innerHTML = pmRulesHtml(); }
+// 편집: KPI 칸 / 지표 칸 / 핵심 과제 칸 / 과제 지표 칸. 칸 구성이 바뀌는 것만 다시 그림
 function pmSet(i, key, val){
   if(!_pmDraft?.[i]) return;
   _pmDraft[i][key] = val;
-  if(key === 'kind' || key === 'progress_mode') { render(); return; } // 칸 구성이 바뀜
+  if(key === 'kind' || key === 'progress_mode') { if(key === 'progress_mode' && val === 'children' && !_pmDraft[i].tasks.length) _pmDraft[i].tasks.push(pmBlankTask()); render(); return; }
   pmRefreshRules();
 }
+function pmSetM(i, mi, key, val){ const m = _pmDraft?.[i]?.metrics?.[mi]; if(!m) return; m[key] = val; pmRefreshRules(); }
+function pmAddMetric(i){ const g = _pmDraft?.[i]; if(!g || g.metrics.length >= 5) return; g.metrics.push(pmBlankMetric()); render(); }
+function pmDelMetric(i, mi){ const g = _pmDraft?.[i]; if(!g || g.metrics.length <= 1) return; g.metrics.splice(mi,1); render(); }
+function pmContribMode(i, ti, on){ // ti=null이면 KPI 지표, 아니면 'tasks'
+  const g = _pmDraft?.[i]; if(!g) return;
+  const list = ti === 'tasks' ? g.tasks : g.metrics;
+  const n = list.length || 1, even = Math.floor(100 / n);
+  list.forEach((x,k)=>{ x.contrib = on ? String(k === n-1 ? 100 - even*(n-1) : even) : ''; });
+  g['_c_' + (ti || 'metrics')] = on; render();
+}
+function pmAddTask(i){ const g = _pmDraft?.[i]; if(!g || g.tasks.length >= 10) return; g.tasks.push(pmBlankTask()); render(); }
+function pmDelTask(i, ti){
+  const t = _pmDraft?.[i]?.tasks?.[ti]; if(!t) return;
+  const hasCk = t.id && (_pmSheet?.checkins||[]).some(k=>k.goal_id===t.id);
+  if((t.title || t.criteria) && !confirm(`핵심 과제 '${t.title || ti+1}'를 지울까요?${hasCk ? '\n이 과제의 체크인 기록과 코멘트도 함께 지워집니다.' : ''}`)) return;
+  _pmDraft[i].tasks.splice(ti,1); render();
+}
+function pmSetT(i, ti, key, val){ const t = _pmDraft?.[i]?.tasks?.[ti]; if(!t) return; t[key] = val; if(key === 'progress_mode') { render(); return; } pmRefreshRules(); }
+function pmSetTM(i, ti, key, val){ const t = _pmDraft?.[i]?.tasks?.[ti]; if(!t) return; t.metrics[0] = { ...(t.metrics[0] || pmBlankMetric()), [key]: val }; pmRefreshRules(); }
 function pmAddGoal(){
   const max = _pmSheet?.cycle?.max_goals || 5;
   if((_pmDraft||[]).length >= max) return;
@@ -1635,12 +1687,17 @@ function pmDelGoal(i){
   const g = _pmDraft?.[i];
   if(!g) return;
   const hasCk = g.id && (_pmSheet?.checkins||[]).some(k=>k.goal_id===g.id);
-  if((g.title || g.criteria || g.metric_name) && !confirm(`${i+1}번 목표를 지울까요?${hasCk ? '\n이 목표의 체크인 기록과 코멘트도 함께 지워집니다.' : ''}`)) return;
+  if((g.title || g.criteria || (g.tasks||[]).length) && !confirm(`${i+1}번 목표를 지울까요?${(g.tasks||[]).length ? ' 핵심 과제도 함께 지워집니다.' : ''}${hasCk ? '\n이 목표의 체크인 기록과 코멘트도 함께 지워집니다.' : ''}`)) return;
   _pmDraft.splice(i,1);
   render();
 }
+const pmNumOrNull = v => (v === '' || v == null ? null : Number(v));
+const pmMetricsPayload = ms => (ms||[]).filter(pmMetricFilled).map(m=>({ name: String(m.name||'').trim(), unit: String(m.unit||'').trim(), start: pmNumOrNull(m.start), target: pmNumOrNull(m.target), contrib: pmNumOrNull(m.contrib) }));
 function pmPayload(){
-  return (_pmDraft||[]).map(g=>({ ...g, weight: parseInt(g.weight,10)||0, parent_org_goal_id: g.parent_org_goal_id ? Number(g.parent_org_goal_id) : null }));
+  return (_pmDraft||[]).map(g=>({ ...g, weight: parseInt(g.weight,10)||0, parent_org_goal_id: g.parent_org_goal_id ? Number(g.parent_org_goal_id) : null,
+    metrics: (g.progress_mode||'metric') === 'metric' ? pmMetricsPayload(g.metrics) : [],
+    tasks: (g.tasks||[]).filter(t=>String(t.title||'').trim() || String(t.criteria||'').trim()).map(t=>({ id: t.id, title: t.title, progress_mode: t.progress_mode, criteria: t.criteria || '', contrib: pmNumOrNull(t.contrib),
+      metrics: (t.progress_mode||'metric') === 'metric' ? pmMetricsPayload(t.metrics) : [], starts_on: t.starts_on || g.starts_on, ends_on: t.ends_on || g.ends_on })) }));
 }
 async function pmSave(submit){
   if(_pmBusy) return;
@@ -1648,7 +1705,7 @@ async function pmSave(submit){
   if(!c) return;
   let goals = pmPayload();
   if(submit){
-    goals = goals.filter(g=>g.title||g.weight||g.metric_name||g.criteria);
+    goals = goals.filter(g=>g.title||g.weight||g.metrics.length||g.criteria||g.tasks.length);
     const bad = pmRules(c, _pmDraft||[]).filter(r=>!r.ok);
     if(bad.length){ pmNotify('error', `제출 전에 확인해 주세요: ${bad.map(r=>r.label).join(' · ')}`); render(); return; }
     if(!confirm('제출하면 리더가 승인·반려하기 전까지 고칠 수 없습니다. 제출할까요?')) return;
@@ -1786,8 +1843,7 @@ async function pmDelComment(cid){
 }
 function pmStartChange(){
   const d = _pmSheet; if(!d) return;
-  const blank = pmBlankGoal(d.cycle);
-  _pmDraft = (d.goals||[]).map(g=>({ ...blank, ...Object.fromEntries(Object.entries(g).filter(([,v])=>v!=null)), parent_org_goal_id: g.parent_org_goal_id || '', weight: g.weight ?? '' }));
+  _pmDraft = pmDraftFromRows(d.goals, d.cycle);
   _pmChange = { reason:'' };
   render(); window.scrollTo(0,0);
 }
@@ -1800,7 +1856,7 @@ async function pmSendChange(){
   if(String(_pmChange.reason||'').trim().length < 2){ pmNotify('error', '변경 사유를 적어 주세요.'); render(); return; }
   if(!confirm('변경 요청을 보낼까요? 리더가 승인하면 목표가 바뀌고, 그전까지는 지금 목표가 유지됩니다.')) return;
   _pmBusy = true;
-  const goals = pmPayload().filter(g=>g.title||g.weight||g.metric_name||g.criteria);
+  const goals = pmPayload().filter(g=>g.title||g.weight||g.metrics.length||g.criteria||g.tasks.length);
   const { ok, data } = await pmCall({ action:'change_request', cycleId:c.id, goals, reason:_pmChange.reason });
   _pmBusy = false;
   if(!ok){ pmNotify('error', data.error || '변경 요청을 보내지 못했습니다.'); render(); return; }
@@ -1816,14 +1872,17 @@ async function pmCancelRequest(){
   _pmSheet = null; render();
 }
 // 변경 요청 내용(지금 목표 → 바꿀 목표), 목표 id로 맞춤
-const PM_FIELDS = { title:'목표', kind:'유형', weight:'가중치', parent_org_goal_id:'상위 목표', progress_mode:'진척 방식', metric_name:'지표', start_value:'시작값', target_value:'목표값', metric_unit:'단위', criteria:'평가 기준', description:'설명', starts_on:'시작일', ends_on:'종료일' };
+const PM_FIELDS = { title:'목표', kind:'유형', weight:'가중치', parent_org_goal_id:'상위 목표', progress_mode:'진척 방식', metrics:'지표', contrib:'기여도', criteria:'평가 기준', description:'설명', starts_on:'시작일', ends_on:'종료일' };
+// 비교용 값(지표는 이름·시작·목표·단위·기여도만, 숫자는 숫자로)
+function pmCmpVal(k, v){ if(k === 'metrics') return (v||[]).map(m=>[m.name||null, m.start==null||m.start===''?null:Number(m.start), m.target==null||m.target===''?null:Number(m.target), m.unit||null, m.contrib==null||m.contrib===''?null:Number(m.contrib)]); return v == null || v === '' ? '' : String(v); }
 function pmChangeLines(before, after){
-  const fmt = (k, v) => k === 'kind' ? (v === 'ai' ? 'AI KPI' : '사업 KPI') : k === 'progress_mode' ? (v === 'manual' ? '정성' : '지표') : k === 'parent_org_goal_id' ? (pmOrgTitle(v) || '(없음)') : (v == null || v === '' ? '(없음)' : String(v));
+  after = (after||[]).flatMap(k=>[k, ...((k.tasks||[]).map(t=>({ ...t, _task:true })))]);
+  const fmt = (k, v) => k === 'kind' ? (v === 'ai' ? 'AI KPI' : '사업 KPI') : k === 'progress_mode' ? (PM_MODES[v] || v) : k === 'metrics' ? ((v||[]).map(m=>`${m.name||'지표'}(${m.start ?? 0}→${m.target ?? '-'}${m.unit||''})`).join(', ') || '(없음)') : k === 'parent_org_goal_id' ? (pmOrgTitle(v) || '(없음)') : (v == null || v === '' ? '(없음)' : String(v));
   const out = [];
   (after||[]).forEach(b => {
     const a = b.id ? (before||[]).find(x=>x.id===b.id) : null;
     if(!a){ out.push(`추가: ${b.title} (${b.weight}%)`); return; }
-    const ch = Object.keys(PM_FIELDS).filter(k => String(a[k] ?? '') !== String(b[k] ?? '')).map(k => `${PM_FIELDS[k]} ${fmt(k, a[k])} → ${fmt(k, b[k])}`);
+    const ch = Object.keys(PM_FIELDS).filter(k => JSON.stringify(pmCmpVal(k, a[k])) !== JSON.stringify(pmCmpVal(k, b[k]))).map(k => `${PM_FIELDS[k]} ${fmt(k, a[k])} → ${fmt(k, b[k])}`);
     if(ch.length) out.push(`${a.title}: ${ch.join(' · ')}`);
   });
   (before||[]).filter(a => !(after||[]).some(b=>b.id===a.id)).forEach(a => out.push(`삭제: ${a.title}`));
@@ -1847,12 +1906,12 @@ function pmChangeBox(d){
 const PM_ACT = { goal_submit:'승인 요청', goal_recall:'승인 요청 취소', goal_approve:'승인', goal_reject:'반려', goal_unapprove:'승인 취소', admin_set_status:'관리자 상태 변경', change_request:'목표 변경 요청', change_cancel:'변경 요청 취소', goal_change:'목표 변경 승인', change_reject:'변경 요청 반려' };
 function pmGoalHistory(g, d){
   const hist = [...(d.history||[])].sort((a,b)=>String(a.at).localeCompare(String(b.at)));
-  const fmt = (k, v) => k === 'kind' ? (v === 'ai' ? 'AI KPI' : '사업 KPI') : k === 'progress_mode' ? (v === 'manual' ? '정성' : '지표') : k === 'parent_org_goal_id' ? (pmOrgTitle(v) || '(없음)') : (v == null || v === '' ? '(없음)' : String(v));
+  const fmt = (k, v) => k === 'kind' ? (v === 'ai' ? 'AI KPI' : '사업 KPI') : k === 'progress_mode' ? (PM_MODES[v] || v) : k === 'metrics' ? ((v||[]).map(m=>`${m.name||'지표'}(${m.start ?? 0}→${m.target ?? '-'}${m.unit||''})`).join(', ') || '(없음)') : k === 'parent_org_goal_id' ? (pmOrgTitle(v) || '(없음)') : (v == null || v === '' ? '(없음)' : String(v));
   let prev = null; const rows = [];
   for(const h of hist){
     const mine = (h.after?.goals||[]).find(x=>x.id===g.id);
     const lines = [];
-    if(mine && prev) Object.keys(PM_FIELDS).forEach(k=>{ if(String(prev[k] ?? '') !== String(mine[k] ?? '')) lines.push(`${PM_FIELDS[k]} ${fmt(k, prev[k])} → ${fmt(k, mine[k])}`); });
+    if(mine && prev) Object.keys(PM_FIELDS).forEach(k=>{ if(JSON.stringify(pmCmpVal(k, prev[k])) !== JSON.stringify(pmCmpVal(k, mine[k]))) lines.push(`${PM_FIELDS[k]} ${fmt(k, prev[k])} → ${fmt(k, mine[k])}`); });
     if(mine && h.action !== 'change_request' && h.action !== 'change_reject') prev = mine;
     if(!mine && !['goal_approve','goal_reject','goal_unapprove','admin_set_status','change_cancel'].includes(h.action)) continue;
     const who = String(h.actor_email||'').toLowerCase() === String(d.employee?.email||'').toLowerCase() ? (d.employee?.name || '본인') : (h.actor_email === d.approver?.email ? (d.approver?.name || '리더') : String(h.actor_email||'').split('@')[0]);
@@ -1983,9 +2042,11 @@ function pmOrgTitle(id){
   return o ? `[${PM_LEVEL[o.level]||''}${o.dept?' '+o.dept:''}] ${o.title}` : '';
 }
 function pmMetricText(g){
-  if(g.progress_mode === 'manual') return '정성 목표';
-  const u = g.metric_unit ? ' ' + g.metric_unit : '';
-  return `${g.metric_name || '지표'}: ${g.start_value ?? 0}${u} → ${g.target_value ?? '-'}${u}`;
+  const mode = g.progress_mode || 'metric';
+  if(mode === 'manual') return '직접 % (정성 목표)';
+  if(mode === 'none') return '진척도 없음 (상태만)';
+  if(mode === 'children') return '하위 과제로 계산';
+  return pmMetricsOf(g).map(m=>{ const u = m.unit ? ' ' + m.unit : ''; return `${m.name || '지표'}: ${m.start === '' ? 0 : m.start}${u} → ${m.target === '' ? '-' : m.target}${u}`; }).join(' · ') || '지표';
 }
 function pmOrgTreeHtml(){
   const list = _pmSheet?.linkable || [];
@@ -1998,7 +2059,33 @@ function pmOrgTreeHtml(){
 }
 function pmGoalEditor(g, i, c){
   const opts = (_pmSheet?.linkable||[]).map(o=>`<option value="${o.id}" ${String(g.parent_org_goal_id)===String(o.id)?'selected':''}>[${PM_LEVEL[o.level]}${o.dept?' '+escapeHtml(o.dept):''}] ${escapeHtml(o.title)}</option>`).join('');
-  const isAi = g.kind === 'ai', manual = g.progress_mode === 'manual';
+  const isAi = g.kind === 'ai', mode = g.progress_mode || 'metric';
+  const has = v => v !== '' && v != null;
+  const cM = g._c_metrics ?? (g.metrics||[]).some(m=>has(m.contrib));
+  const cT = g._c_tasks ?? (g.tasks||[]).some(t=>has(t.contrib));
+  const contribSeg = (on, key) => `<div class="pm-seg pm-seg-sm" style="margin:0"><button type="button" class="${!on?'on':''}" onclick="pmContribMode(${i},${key},false)">균등 배분</button><button type="button" class="${on?'on':''}" onclick="pmContribMode(${i},${key},true)">기여도 직접 설정</button></div>`;
+  const metricRows = (g.metrics||[]).map((m,mi)=>`
+    <div class="pm-metric ${cM?'pm-metric-c':''}">
+      <input class="pm-in" maxlength="100" placeholder="지표 ${mi+1} 이름 (예: 채용 수수료 절감률)" value="${escapeHtml(m.name)}" oninput="pmSetM(${i},${mi},'name',this.value)">
+      <input class="pm-in" type="number" step="any" placeholder="시작값" value="${pmv(m.start)}" oninput="pmSetM(${i},${mi},'start',this.value)">
+      <input class="pm-in" type="number" step="any" placeholder="목표값" value="${pmv(m.target)}" oninput="pmSetM(${i},${mi},'target',this.value)">
+      <input class="pm-in" maxlength="20" placeholder="단위 (%, 건, 원)" value="${escapeHtml(m.unit)}" oninput="pmSetM(${i},${mi},'unit',this.value)">
+      ${cM ? `<input class="pm-in" type="number" min="0" max="100" placeholder="기여도%" value="${pmv(m.contrib)}" oninput="pmSetM(${i},${mi},'contrib',this.value)">` : ''}
+      ${(g.metrics||[]).length > 1 ? `<button type="button" class="pm-link" onclick="pmDelMetric(${i},${mi})">삭제</button>` : '<span></span>'}
+    </div>`).join('');
+  const taskRows = (g.tasks||[]).map((t,ti)=>{ const tm = t.progress_mode || 'metric', m0 = (t.metrics||[])[0] || pmBlankMetric();
+    return `<div class="pm-task-ed">
+      <div class="pm-task-h"><span class="pm-flag">⚑</span><input class="pm-in" maxlength="200" placeholder="핵심 과제 ${ti+1} (예: 디지털 온보딩 가이드북 제작)" value="${escapeHtml(t.title)}" oninput="pmSetT(${i},${ti},'title',this.value)">
+        ${cT ? `<input class="pm-in pm-in-c" type="number" min="0" max="100" placeholder="기여도%" value="${pmv(t.contrib)}" oninput="pmSetT(${i},${ti},'contrib',this.value)">` : ''}
+        <button type="button" class="pm-link" onclick="pmDelTask(${i},${ti})">삭제</button></div>
+      <div class="pm-seg pm-seg-sm">${Object.entries(PM_TMODES).map(([k,l])=>`<button type="button" class="${tm===k?'on':''}" onclick="pmSetT(${i},${ti},'progress_mode','${k}')">${l}</button>`).join('')}</div>
+      ${tm === 'metric' ? `<div class="pm-metric pm-metric-t">
+        <input class="pm-in" maxlength="100" placeholder="지표 이름" value="${escapeHtml(m0.name)}" oninput="pmSetTM(${i},${ti},'name',this.value)">
+        <input class="pm-in" type="number" step="any" placeholder="시작값" value="${pmv(m0.start)}" oninput="pmSetTM(${i},${ti},'start',this.value)">
+        <input class="pm-in" type="number" step="any" placeholder="목표값" value="${pmv(m0.target)}" oninput="pmSetTM(${i},${ti},'target',this.value)">
+        <input class="pm-in" maxlength="20" placeholder="단위" value="${escapeHtml(m0.unit)}" oninput="pmSetTM(${i},${ti},'unit',this.value)"></div>`
+        : `<div class="pm-hint" style="color:var(--gray)">${tm === 'manual' ? '체크인 때 진척 %를 직접 적습니다.' : '진척 % 없이 상태(준비·진행 중·지연·중단·완료)만 관리합니다. 완료면 100%로 셉니다.'}</div>`}
+    </div>`; }).join('');
   return `
 <div class="pm-goal">
   <div class="pm-goal-head"><b>목표 ${i+1}</b>${(_pmDraft.length > 1) ? `<button class="pm-link" onclick="pmDelGoal(${i})">삭제</button>` : ''}</div>
@@ -2012,19 +2099,17 @@ function pmGoalEditor(g, i, c){
   <label class="pm-lbl">목표</label>
   <input class="pm-in" maxlength="200" placeholder="${isAi ? '예: AI로 급여 대사 시간을 줄여 확보한 시간을 제도 개선에 재투자' : '예: 2027년 채용 수수료 20% 절감'}" value="${escapeHtml(g.title)}" oninput="pmSet(${i},'title',this.value)">
   <label class="pm-lbl">진척도</label>
-  <div class="pm-seg pm-seg-sm">
-    <button type="button" class="${!manual?'on':''}" onclick="pmSet(${i},'progress_mode','metric')">지표로 측정</button>
-    <button type="button" class="${manual?'on':''}" onclick="pmSet(${i},'progress_mode','manual')">정성 목표</button>
-  </div>
-  ${manual ? `
-  <label class="pm-lbl">평가 기준 <span>(정성 목표는 리더와 합의한 기대 수준을 꼭 적어 주세요)</span></label>
-  <textarea class="pm-ta" maxlength="2000" rows="3" placeholder="예: 연말까지 채용 프로세스 매뉴얼을 완성해 2개 이상 팀에 적용하면 달성" oninput="pmSet(${i},'criteria',this.value)">${escapeHtml(g.criteria)}</textarea>` : `
-  <div class="pm-metric">
-    <input class="pm-in" maxlength="100" placeholder="지표 이름 (예: 채용 수수료 절감률)" value="${escapeHtml(g.metric_name)}" oninput="pmSet(${i},'metric_name',this.value)">
-    <input class="pm-in" type="number" step="any" placeholder="시작값" value="${pmv(g.start_value)}" oninput="pmSet(${i},'start_value',this.value)">
-    <input class="pm-in" type="number" step="any" placeholder="목표값" value="${pmv(g.target_value)}" oninput="pmSet(${i},'target_value',this.value)">
-    <input class="pm-in" maxlength="20" placeholder="단위 (%, 건, 원)" value="${escapeHtml(g.metric_unit)}" oninput="pmSet(${i},'metric_unit',this.value)">
-  </div>`}
+  <div class="pm-seg pm-seg-sm pm-seg-4">${Object.entries(PM_MODES).map(([k,l])=>`<button type="button" class="${mode===k?'on':''}" onclick="pmSet(${i},'progress_mode','${k}')">${l}</button>`).join('')}</div>
+  ${mode === 'metric' ? `
+  <div class="pm-sub-h"><span class="pm-meta">목표 진척도 = 지표 진척도의 ${cM ? '기여도 가중 평균' : '평균(균등 배분)'}</span>${(g.metrics||[]).length > 1 ? contribSeg(cM, 'null') : ''}</div>
+  ${metricRows}
+  ${(g.metrics||[]).length < 5 ? `<button type="button" class="btn btn-sm pm-btn-ghost" style="margin-bottom:10px" onclick="pmAddMetric(${i})">+ 지표 추가</button>` : ''}` : ''}
+  ${mode === 'manual' || mode === 'none' ? `
+  <label class="pm-lbl">평가 기준 <span>(${mode === 'none' ? '진척 % 없이 상태만 관리하는 목표 — ' : ''}리더와 합의한 기대 수준을 꼭 적어 주세요)</span></label>
+  <textarea class="pm-ta" maxlength="2000" rows="3" placeholder="예: 연말까지 채용 프로세스 매뉴얼을 완성해 2개 이상 팀에 적용하면 달성" oninput="pmSet(${i},'criteria',this.value)">${escapeHtml(g.criteria)}</textarea>` : ''}
+  <div class="pm-sub-h" style="margin-top:6px"><b class="pm-lbl" style="margin:0">핵심 과제 <span>${mode === 'children' ? '(목표 진척도 = 핵심 과제 진척도의 ' + (cT ? '기여도 가중 평균)' : '평균, 균등 배분)') : '(선택 — 목표를 이루기 위한 가장 작은 단위의 과제)'}</span></b>${mode === 'children' && (g.tasks||[]).length > 1 ? contribSeg(cT, "'tasks'") : ''}</div>
+  ${taskRows}
+  ${(g.tasks||[]).length < 10 ? `<button type="button" class="btn btn-sm pm-btn-ghost" style="margin-bottom:10px" onclick="pmAddTask(${i})">+ 핵심 과제 추가</button>` : ''}
   <label class="pm-lbl">상세 설명 <span>(선택 — 어떻게 달성할지, 측정 방법)</span></label>
   <textarea class="pm-ta" maxlength="2000" rows="2" oninput="pmSet(${i},'description',this.value)">${escapeHtml(g.description)}</textarea>
   <div class="pm-row2">
