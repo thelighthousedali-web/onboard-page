@@ -369,6 +369,28 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .pm-sum{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px}
 .pm-sum-ok{background:#ECFDF5;color:#047857}.pm-sum-bad{background:#FEF2F2;color:#B91C1C}
 .pm-guide ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.8;color:#374151}
+.pm-seg{display:inline-flex;background:#F3F4F6;border-radius:8px;padding:3px;gap:2px;margin-bottom:10px}
+.pm-seg button{border:none;background:transparent;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:700;color:var(--gray);cursor:pointer;font-family:inherit}
+.pm-seg button.on{background:#fff;color:var(--dark);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.pm-seg-sm button{padding:5px 12px;font-size:12.5px}
+.pm-lbl{display:block;font-size:12.5px;font-weight:700;color:#374151;margin:4px 0 4px}
+.pm-lbl span{font-weight:400;color:var(--gray)}
+.pm-hint{font-size:12px;color:#B45309;margin:-4px 0 8px}
+.pm-metric{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px}
+.pm-row2{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:end}
+.pm-dates{display:flex;align-items:center;gap:6px}.pm-dates .pm-in{margin-bottom:0}
+.pm-rules{display:grid;gap:6px;margin-bottom:16px}
+.pm-rule{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 12px;border-radius:8px}
+.pm-rule span{font-weight:800;width:16px;text-align:center}.pm-rule b{font-weight:600;flex:1}.pm-rule em{font-style:normal;font-size:12px;white-space:nowrap}
+.pm-rule-ok{background:#ECFDF5;color:#047857}.pm-rule-bad{background:#FFF7ED;color:#B45309}
+.pm-kind{display:inline-block;font-size:11px;font-weight:800;padding:1px 7px;border-radius:999px;margin-right:4px;vertical-align:1px}
+.pm-kind-business{background:#EFF6FF;color:#1D4ED8}.pm-kind-ai{background:#F5F3FF;color:#6D28D9}
+.pm-parent{font-size:12.5px;color:var(--gray);margin:-4px 0 6px}
+.pm-org{font-size:13.5px;padding:6px 0;border-bottom:1px dashed var(--border)}
+.pm-org-desc{font-size:12px;color:var(--gray);margin-top:2px}
+.pm-lv{display:inline-block;font-size:11px;font-weight:800;padding:1px 7px;border-radius:999px;margin-right:6px;background:#F3F4F6;color:#374151}
+.pm-lv-company{background:#FFF0EB;color:#C2410C}.pm-lv-division{background:#EFF6FF;color:#1D4ED8}.pm-lv-team{background:#ECFDF5;color:#047857}
+@media(max-width:768px){.pm-metric{grid-template-columns:1fr 1fr}.pm-metric .pm-in:first-child{grid-column:1/-1}.pm-row2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -1444,62 +1466,93 @@ function renderGoalBanner(){
 }
 function fmtGoalDate(s){ if(!s) return ''; const [y,m,d] = String(s).split('-'); return `${Number(m)}월 ${Number(d)}일`; }
 
+// 목표 1단계(2026-11-13, 레몬베이스 기준): 사업 KPI / AI KPI, 상위 목표(전사·실·팀) 연결, 지표(시작·목표·단위) 또는 정성(평가 기준),
+// 기간, 설명. 회사 규칙(3~5개·합 100·AI KPI 1~2개·합 20·연결 필수)은 서버와 같은 규칙으로 화면에서도 바로 보여준다.
+const pmv = v => (v == null ? '' : escapeHtml(String(v))); // 0도 그대로 보이게(escapeHtml은 0을 빈칸으로 만듦)
+const PM_LEVEL = { company:'전사', division:'실', team:'팀' };
+function pmBlankGoal(c){
+  const y = c?.year || (new Date().getFullYear() + 1);
+  return { kind:'business', parent_org_goal_id:'', title:'', progress_mode:'metric', metric_name:'', start_value:'', target_value:'', metric_unit:'', criteria:'', description:'', starts_on:`${y}-01-01`, ends_on:`${y}-12-31`, weight:'' };
+}
 async function loadPmSheet(){
   const { ok, status, data } = await pmCall({ action: 'my_sheet' });
   if(!ok){
     _pmSheet = { error: status === 401 ? '로그인이 만료되었습니다. 로그아웃 후 다시 로그인해 주세요.' : (data.error || '목표 정보를 불러오지 못했습니다.') };
   } else {
     _pmSheet = data;
-    const goals = (data.goals||[]).map(g=>({ title:g.title||'', criteria:g.criteria||'', weight: g.weight ?? '' }));
+    const blank = pmBlankGoal(data.cycle);
+    const goals = (data.goals||[]).map(g=>({ ...blank, ...Object.fromEntries(Object.entries(g).filter(([,v])=>v!=null)),
+      parent_org_goal_id: g.parent_org_goal_id || '', weight: g.weight ?? '' }));
     const min = data.cycle?.min_goals || 3;
-    while(goals.length < min) goals.push({ title:'', criteria:'', weight:'' });
+    while(goals.length < min) goals.push(pmBlankGoal(data.cycle));
     _pmDraft = goals;
   }
   render();
 }
-
-function pmSum(){ return (_pmDraft||[]).reduce((a,g)=>a + (parseInt(g.weight,10)||0), 0); }
-function pmRefreshSum(){
-  const el = document.getElementById('pm-sum');
-  if(!el) return;
-  const sum = pmSum();
-  el.textContent = `가중치 합 ${sum} / 100`;
-  el.className = 'pm-sum ' + (sum === 100 ? 'pm-sum-ok' : 'pm-sum-bad');
+// 서버 goalRuleProblems와 같은 규칙 — 화면용(통과/미통과 목록)
+function pmRules(c, goals){
+  const min = c.min_goals ?? 3, max = c.max_goals ?? 5, aiW = c.ai_weight ?? 20, aiMin = c.ai_min ?? 1, aiMax = c.ai_max ?? 2;
+  const w = g => parseInt(g.weight,10) || 0;
+  const filled = goals.filter(g => g.title || w(g) || g.metric_name || g.criteria);
+  const sum = filled.reduce((a,g)=>a+w(g),0);
+  const ai = filled.filter(g=>g.kind==='ai'), aiSum = ai.reduce((a,g)=>a+w(g),0);
+  const rows = [
+    { ok: filled.length >= min && filled.length <= max, label: `목표 ${min}~${max}개`, now: `${filled.length}개` },
+    { ok: sum === 100, label: '가중치 합 100%', now: `${sum}%` },
+  ];
+  if(aiW > 0){
+    rows.push({ ok: ai.length >= aiMin && ai.length <= aiMax && aiSum === aiW, label: `AI KPI ${aiMin}~${aiMax}개 · 합 ${aiW}% (사업 KPI ${100-aiW}%)`, now: `AI ${ai.length}개 ${aiSum}% · 사업 ${sum-aiSum}%` });
+  }
+  if(c.require_link !== false){
+    const n = filled.filter(g=>!g.parent_org_goal_id).length;
+    rows.push({ ok: filled.length > 0 && n === 0, label: '모든 목표를 상위 목표에 연결', now: !filled.length ? '-' : n ? `${n}개 미연결` : '완료' });
+  }
+  const bad = filled.filter(g => !g.title || !(w(g) > 0) || (g.progress_mode==='manual' ? !String(g.criteria||'').trim() : (!String(g.metric_name||'').trim() || g.target_value===''||g.target_value==null))).length;
+  rows.push({ ok: filled.length > 0 && bad === 0, label: '제목·가중치, 지표(이름·목표값) 또는 정성 목표의 평가 기준', now: !filled.length ? '-' : bad ? `${bad}개 빠짐` : '완료' });
+  return rows;
 }
+function pmRulesHtml(){
+  const c = _pmSheet?.cycle; if(!c) return '';
+  return pmRules(c, _pmDraft||[]).map(r=>`<div class="pm-rule ${r.ok?'pm-rule-ok':'pm-rule-bad'}"><span>${r.ok?'✓':'!'}</span><b>${escapeHtml(r.label)}</b><em>${escapeHtml(r.now)}</em></div>`).join('');
+}
+function pmRefreshRules(){ const el = document.getElementById('pm-rules'); if(el) el.innerHTML = pmRulesHtml(); }
 function pmSet(i, key, val){
   if(!_pmDraft?.[i]) return;
-  _pmDraft[i][key] = key === 'weight' ? (val === '' ? '' : parseInt(val,10)) : val;
-  if(key === 'weight') pmRefreshSum();
+  _pmDraft[i][key] = val;
+  if(key === 'kind' || key === 'progress_mode') { render(); return; } // 칸 구성이 바뀜
+  pmRefreshRules();
 }
 function pmAddGoal(){
   const max = _pmSheet?.cycle?.max_goals || 5;
   if((_pmDraft||[]).length >= max) return;
-  _pmDraft.push({ title:'', criteria:'', weight:'' });
+  _pmDraft.push(pmBlankGoal(_pmSheet?.cycle));
   render();
 }
 function pmDelGoal(i){
   const g = _pmDraft?.[i];
   if(!g) return;
-  if((g.title || g.criteria) && !confirm(`${i+1}번 목표를 지울까요?`)) return;
+  if((g.title || g.criteria || g.metric_name) && !confirm(`${i+1}번 목표를 지울까요?`)) return;
   _pmDraft.splice(i,1);
   render();
+}
+function pmPayload(){
+  return (_pmDraft||[]).map(g=>({ ...g, weight: parseInt(g.weight,10)||0, parent_org_goal_id: g.parent_org_goal_id ? Number(g.parent_org_goal_id) : null }));
 }
 async function pmSave(submit){
   if(_pmBusy) return;
   const c = _pmSheet?.cycle;
   if(!c) return;
-  const goals = (_pmDraft||[]).map(g=>({ title:String(g.title||'').trim(), criteria:String(g.criteria||'').trim(), weight: parseInt(g.weight,10)||0 }));
+  let goals = pmPayload();
   if(submit){
-    const filled = goals.filter(g=>g.title||g.criteria||g.weight);
-    if(filled.length < c.min_goals || filled.length > c.max_goals){ pmNotify('error', `목표는 ${c.min_goals}~${c.max_goals}개여야 합니다.`); render(); return; }
-    if(pmSum() !== 100){ pmNotify('error', `가중치 합이 100이어야 합니다(지금 ${pmSum()}).`); render(); return; }
-    if(!confirm('제출하면 팀장이 승인·반려하기 전까지 고칠 수 없습니다. 제출할까요?')) return;
+    goals = goals.filter(g=>g.title||g.weight||g.metric_name||g.criteria);
+    const bad = pmRules(c, _pmDraft||[]).filter(r=>!r.ok);
+    if(bad.length){ pmNotify('error', `제출 전에 확인해 주세요: ${bad.map(r=>r.label).join(' · ')}`); render(); return; }
+    if(!confirm('제출하면 리더가 승인·반려하기 전까지 고칠 수 없습니다. 제출할까요?')) return;
   }
   _pmBusy = true;
-  const payloadGoals = submit ? goals.filter(g=>g.title||g.criteria||g.weight) : goals;
-  const { ok, data } = await pmCall({ action: submit ? 'submit' : 'save_draft', cycleId: c.id, goals: payloadGoals });
+  const { ok, data } = await pmCall({ action: submit ? 'submit' : 'save_draft', cycleId: c.id, goals });
   _pmBusy = false;
-  if(!ok){ pmNotify('error',  data.error || '저장하지 못했습니다.'); render(); return; }
+  if(!ok){ pmNotify('error', data.error || '저장하지 못했습니다.'); render(); return; }
   pmNotify('success', submit
     ? `제출했습니다. ${data.approver?.name ? data.approver.name + '님에게' : '경영지원팀에'} 승인 요청이 전달됩니다.`
     : '임시저장했습니다. 제출 전까지 언제든 고칠 수 있습니다.');
@@ -1508,7 +1561,7 @@ async function pmSave(submit){
 }
 async function pmRecall(){
   if(_pmBusy || !_pmSheet?.cycle) return;
-  if(!confirm('제출을 취소하고 다시 고칠까요? 팀장 승인 요청도 함께 취소됩니다.')) return;
+  if(!confirm('제출을 취소하고 다시 고칠까요? 리더 승인 요청도 함께 취소됩니다.')) return;
   _pmBusy = true;
   const { ok, data } = await pmCall({ action: 'recall', cycleId: _pmSheet.cycle.id });
   _pmBusy = false;
@@ -1516,6 +1569,61 @@ async function pmRecall(){
   else pmNotify('error', data.error || '제출 취소에 실패했습니다.');
   _pmSheet = null; _pmMe = null;
   render();
+}
+function pmOrgTitle(id){
+  const o = (_pmSheet?.linkable||[]).find(x=>String(x.id)===String(id));
+  return o ? `[${PM_LEVEL[o.level]||''}${o.dept?' '+o.dept:''}] ${o.title}` : '';
+}
+function pmMetricText(g){
+  if(g.progress_mode === 'manual') return '정성 목표';
+  const u = g.metric_unit ? ' ' + g.metric_unit : '';
+  return `${g.metric_name || '지표'}: ${g.start_value ?? 0}${u} → ${g.target_value ?? '-'}${u}`;
+}
+function pmOrgTreeHtml(){
+  const list = _pmSheet?.linkable || [];
+  if(!list.length) return '';
+  const byParent = {}; list.forEach(o => { (byParent[o.parent_id||0] = byParent[o.parent_id||0] || []).push(o); });
+  const ids = new Set(list.map(o=>o.id));
+  const roots = list.filter(o => !o.parent_id || !ids.has(o.parent_id));
+  const node = (o, d) => `<div class="pm-org" style="margin-left:${d*18}px"><span class="pm-lv pm-lv-${o.level}">${PM_LEVEL[o.level]}${o.dept?' · '+escapeHtml(o.dept):''}</span>${escapeHtml(o.title)}${o.description?`<div class="pm-org-desc">${escapeHtml(o.description)}</div>`:''}</div>` + (byParent[o.id]||[]).map(ch=>node(ch, d+1)).join('');
+  return `<div class="content-block"><div class="sec-title">우리 조직 목표 <span style="font-weight:400;font-size:13px;color:var(--gray)">내 KPI는 이 중 하나에 연결합니다</span></div>${roots.map(o=>node(o,0)).join('')}</div>`;
+}
+function pmGoalEditor(g, i, c){
+  const opts = (_pmSheet?.linkable||[]).map(o=>`<option value="${o.id}" ${String(g.parent_org_goal_id)===String(o.id)?'selected':''}>[${PM_LEVEL[o.level]}${o.dept?' '+escapeHtml(o.dept):''}] ${escapeHtml(o.title)}</option>`).join('');
+  const isAi = g.kind === 'ai', manual = g.progress_mode === 'manual';
+  return `
+<div class="pm-goal">
+  <div class="pm-goal-head"><b>목표 ${i+1}</b>${(_pmDraft.length > 1) ? `<button class="pm-link" onclick="pmDelGoal(${i})">삭제</button>` : ''}</div>
+  <div class="pm-seg">
+    <button type="button" class="${!isAi?'on':''}" onclick="pmSet(${i},'kind','business')">사업 KPI</button>
+    <button type="button" class="${isAi?'on':''}" onclick="pmSet(${i},'kind','ai')">AI KPI</button>
+  </div>
+  <label class="pm-lbl">상위 목표 <span>(팀·실·전사 목표 중 하나)</span></label>
+  <select class="pm-in" onchange="pmSet(${i},'parent_org_goal_id',this.value)"><option value="">선택하세요</option>${opts}</select>
+  ${!(_pmSheet?.linkable||[]).length ? `<div class="pm-hint">아직 등록된 팀·실·전사 목표가 없습니다. 리더가 팀 목표를 올리면 고를 수 있습니다.</div>` : ''}
+  <label class="pm-lbl">목표</label>
+  <input class="pm-in" maxlength="200" placeholder="${isAi ? '예: AI로 급여 대사 시간을 줄여 확보한 시간을 제도 개선에 재투자' : '예: 2027년 채용 수수료 20% 절감'}" value="${escapeHtml(g.title)}" oninput="pmSet(${i},'title',this.value)">
+  <label class="pm-lbl">진척도</label>
+  <div class="pm-seg pm-seg-sm">
+    <button type="button" class="${!manual?'on':''}" onclick="pmSet(${i},'progress_mode','metric')">지표로 측정</button>
+    <button type="button" class="${manual?'on':''}" onclick="pmSet(${i},'progress_mode','manual')">정성 목표</button>
+  </div>
+  ${manual ? `
+  <label class="pm-lbl">평가 기준 <span>(정성 목표는 리더와 합의한 기대 수준을 꼭 적어 주세요)</span></label>
+  <textarea class="pm-ta" maxlength="2000" rows="3" placeholder="예: 연말까지 채용 프로세스 매뉴얼을 완성해 2개 이상 팀에 적용하면 달성" oninput="pmSet(${i},'criteria',this.value)">${escapeHtml(g.criteria)}</textarea>` : `
+  <div class="pm-metric">
+    <input class="pm-in" maxlength="100" placeholder="지표 이름 (예: 채용 수수료 절감률)" value="${escapeHtml(g.metric_name)}" oninput="pmSet(${i},'metric_name',this.value)">
+    <input class="pm-in" type="number" step="any" placeholder="시작값" value="${pmv(g.start_value)}" oninput="pmSet(${i},'start_value',this.value)">
+    <input class="pm-in" type="number" step="any" placeholder="목표값" value="${pmv(g.target_value)}" oninput="pmSet(${i},'target_value',this.value)">
+    <input class="pm-in" maxlength="20" placeholder="단위 (%, 건, 원)" value="${escapeHtml(g.metric_unit)}" oninput="pmSet(${i},'metric_unit',this.value)">
+  </div>`}
+  <label class="pm-lbl">상세 설명 <span>(선택 — 어떻게 달성할지, 측정 방법)</span></label>
+  <textarea class="pm-ta" maxlength="2000" rows="2" oninput="pmSet(${i},'description',this.value)">${escapeHtml(g.description)}</textarea>
+  <div class="pm-row2">
+    <div><label class="pm-lbl">기간</label><div class="pm-dates"><input class="pm-in" type="date" value="${escapeHtml(g.starts_on)}" onchange="pmSet(${i},'starts_on',this.value)"><span>~</span><input class="pm-in" type="date" value="${escapeHtml(g.ends_on)}" onchange="pmSet(${i},'ends_on',this.value)"></div></div>
+    <div><label class="pm-lbl">가중치</label><div class="pm-w"><input type="number" min="0" max="100" step="5" value="${g.weight===''?'':Number(g.weight)}" oninput="pmSet(${i},'weight',this.value)"> %</div></div>
+  </div>
+</div>`;
 }
 
 function renderGoals(user){
@@ -1534,7 +1642,7 @@ function renderGoals(user){
   const head = `
 <div class="page-head">
   <div class="page-title">🎯 ${escapeHtml(c.name)}</div>
-  <div class="page-sub">${period ? `작성 기간 ${period} · ` : ''}${c.status==='closed' ? '작성 기간이 끝났습니다 · ' : ''}승인자 ${approverName}</div>
+  <div class="page-sub">${period ? `작성 기간 ${period} · ` : ''}${c.status==='closed' ? '작성 기간이 끝났습니다 · ' : ''}${c.status==='pilot' ? '시범 운영 · ' : ''}승인자 ${approverName}</div>
 </div>
 ${notice}
 <div class="pm-status-row"><span class="pm-badge pm-badge-${st}">${PM_STATUS[st]}</span>
@@ -1549,24 +1657,18 @@ ${notice}
     ? `<div class="pm-reject"><b>반려 사유</b><div>${escapeHtml(d.sheet.reject_reason)}</div></div>` : '';
   const reopenBox = st === 'draft' && d.sheet?.decided_at && d.sheet?.reject_reason
     ? `<div class="pm-reject" style="background:#FFFBEB;border-color:#FDE68A"><b>승인 취소 사유</b><div>${escapeHtml(d.sheet.reject_reason)}</div></div>` : '';
+  const weightBox = st === 'approved' && d.sheet?.weight_note
+    ? `<div class="pm-reject" style="background:#EFF6FF;border-color:#BFDBFE"><b>리더가 가중치를 조정했습니다</b><div>${escapeHtml(d.sheet.weight_note)}</div></div>` : '';
 
   if(d.canEdit){
     const max = c.max_goals || 5;
-    const rows = (_pmDraft||[]).map((g,i)=>`
-<div class="pm-goal">
-  <div class="pm-goal-head"><b>목표 ${i+1}</b>${(_pmDraft.length > 1) ? `<button class="pm-link" onclick="pmDelGoal(${i})">삭제</button>` : ''}</div>
-  <input class="pm-in" maxlength="200" placeholder="목표 제목 (예: 급여 마감 자동화)" value="${escapeHtml(g.title)}" oninput="pmSet(${i},'title',this.value)">
-  <textarea class="pm-ta" maxlength="2000" rows="3" placeholder="달성 기준 — 무엇을, 얼마나, 언제까지 (예: 2027년 6월까지 급여 대사 수작업 0건)" oninput="pmSet(${i},'criteria',this.value)">${escapeHtml(g.criteria)}</textarea>
-  <div class="pm-w">가중치 <input type="number" min="0" max="100" step="5" value="${g.weight===''?'':Number(g.weight)}" oninput="pmSet(${i},'weight',this.value)"> %</div>
-</div>`).join('');
-    const sum = pmSum();
-    return head + rejectBox + reopenBox + `
+    return head + rejectBox + reopenBox + pmOrgTreeHtml() + `
 <div class="content-block">
-  <div class="sec-title">목표 작성 <span style="font-weight:400;font-size:13px;color:var(--gray)">${c.min_goals}~${max}개 · 가중치 합 100</span></div>
-  ${rows}
+  <div class="sec-title">KPI 작성 <span style="font-weight:400;font-size:13px;color:var(--gray)">${c.min_goals}~${max}개${(c.ai_weight ?? 20) > 0 ? ` · AI KPI ${c.ai_min ?? 1}~${c.ai_max ?? 2}개 합 ${c.ai_weight ?? 20}%` : ''} · 가중치 합 100</span></div>
+  <div class="pm-rules" id="pm-rules">${pmRulesHtml()}</div>
+  ${(_pmDraft||[]).map((g,i)=>pmGoalEditor(g,i,c)).join('')}
   <div class="pm-actions-top">
-    ${(_pmDraft||[]).length < max ? `<button class="btn pm-btn-ghost btn-sm" onclick="pmAddGoal()">+ 목표 추가</button>` : `<span class="pm-meta">최대 ${max}개</span>`}
-    <span id="pm-sum" class="pm-sum ${sum===100?'pm-sum-ok':'pm-sum-bad'}">가중치 합 ${sum} / 100</span>
+    ${(_pmDraft||[]).length < max ? `<button class="btn btn-sm pm-btn-ghost" onclick="pmAddGoal()">+ 목표 추가</button>` : `<span class="pm-meta">최대 ${max}개</span>`}
   </div>
   <div class="pm-actions">
     <button class="btn btn-sm pm-btn-ghost" onclick="pmSave(false)">임시저장</button>
@@ -1574,12 +1676,12 @@ ${notice}
   </div>
 </div>
 <div class="content-block pm-guide">
-  <div class="sec-title">작성 안내</div>
+  <div class="sec-title">작성 안내 <span style="font-weight:400;font-size:13px;color:var(--gray)">26년 성과관리 제도 안내 기준</span></div>
   <ul>
-    <li>올해 꼭 해내야 할 일을 ${c.min_goals}~${max}개로 추립니다. 승인된 목표는 연말 본인평가의 업적 항목이 됩니다.</li>
-    <li>달성 기준은 다른 사람이 읽어도 달성 여부를 판단할 수 있게 숫자·기한으로 적습니다.</li>
-    <li>가중치는 중요한 목표에 더 크게, 합계 100으로 맞춥니다.</li>
-    <li>제출하면 ${approverName}에게 승인 요청이 갑니다. 승인 후 바꾸려면 승인자에게 "승인 취소"를 요청합니다.</li>
+    <li>회사·실·팀 목표 중 내가 기여할 목표를 골라 연결하고, 그 목표를 이루는 데 가장 임팩트 있는 활동을 KPI로 씁니다.</li>
+    <li>가급적 숫자로 잴 수 있게(지표·시작값·목표값) 씁니다. 정성 목표라면 리더와 합의한 평가 기준을 꼭 적습니다.</li>
+    <li>AI KPI는 AI를 쓰는 것 자체가 아니라, AI로 아낀 시간·높인 품질·팀에 퍼뜨린 노하우가 어떤 성과로 이어졌는지를 씁니다.</li>
+    <li>제출하면 ${approverName}에게 승인 요청이 갑니다. 리더는 승인하며 가중치를 조정할 수 있고, 승인 후 바꾸려면 리더에게 승인 취소를 요청합니다.</li>
   </ul>
 </div>`;
   }
@@ -1588,13 +1690,16 @@ ${notice}
   const goals = d.goals || [];
   const list = goals.length ? goals.map((g,i)=>`
 <div class="pm-goal pm-goal-ro">
-  <div class="pm-goal-head"><b>${i+1}. ${escapeHtml(g.title)}</b><span class="pm-wt">${g.weight}%</span></div>
-  <div class="pm-crit">${escapeHtml(g.criteria).replace(/\n/g,'<br>')}</div>
+  <div class="pm-goal-head"><b><span class="pm-kind pm-kind-${g.kind||'business'}">${g.kind==='ai'?'AI':'KPI'}</span> ${i+1}. ${escapeHtml(g.title)}</b><span class="pm-wt">${g.weight}%</span></div>
+  ${g.parent_org_goal_id ? `<div class="pm-parent">↳ ${escapeHtml(pmOrgTitle(g.parent_org_goal_id))}</div>` : ''}
+  <div class="pm-crit">${escapeHtml(pmMetricText(g))}${g.starts_on ? ` · ${fmtGoalDate(g.starts_on)} ~ ${fmtGoalDate(g.ends_on)}` : ''}</div>
+  ${g.criteria ? `<div class="pm-crit">${escapeHtml(g.criteria).replace(/\n/g,'<br>')}</div>` : ''}
+  ${g.description ? `<div class="pm-crit" style="color:var(--gray)">${escapeHtml(g.description).replace(/\n/g,'<br>')}</div>` : ''}
 </div>`).join('') : `<div style="color:var(--gray)">작성한 목표가 없습니다.</div>`;
-  const canRecall = st === 'submitted' && c.status === 'open';
-  return head + rejectBox + `
+  const canRecall = st === 'submitted' && (c.status === 'open' || c.status === 'pilot');
+  return head + rejectBox + weightBox + pmOrgTreeHtml() + `
 <div class="content-block">
-  <div class="sec-title">내 목표</div>
+  <div class="sec-title">내 KPI</div>
   ${list}
   ${canRecall ? `<div class="pm-actions"><button class="btn btn-sm pm-btn-ghost" onclick="pmRecall()">제출 취소하고 고치기</button></div>` : ''}
   ${st === 'approved' ? `<div class="pm-meta" style="margin-top:10px">목표를 바꿔야 하면 ${approverName}에게 승인 취소를 요청해 주세요.</div>` : ''}
