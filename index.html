@@ -1315,7 +1315,7 @@ function bindAuth(){
     await DB.loadUsers();
     logActivity('login', user);
     nav(user.role==='admin' ? 'admin-users' : 'dashboard', null, true);
-    if(pendingSurvey) nav('survey', pendingSurvey);
+    if(pendingSurvey) nav('survey', pendingSurvey); else ntDeepLink();
   });
   document.getElementById('l-pw')?.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-btn').click(); });
   document.getElementById('nw-login-btn')?.addEventListener('click', startNaverWorksLogin);
@@ -3033,6 +3033,31 @@ const NT_ACTION_KINDS = new Set(['goal_submitted', 'goal_rejected', 'change_requ
 const ntActionKind = k => NT_ACTION_KINDS.has(k) || k.startsWith('remind_') || k.startsWith('due_');
 function ntReset(){ _nt = { items: null, unread: 0, open: false, at: 0, loading: false, more: true }; }
 function ntEnabled(){ return pmAllowed(); }
+// 메일 속 버튼(?go=reviews&cycle=1&email=..&kind=d1): 첫 로드 때 sessionStorage에 보관하고 주소창에서 지움
+// → 로그인(네이버웍스 이동 포함)이 끝난 뒤 ntDeepLink()가 해당 화면으로 이동
+(function ntCaptureDeepLink(){
+  try {
+    const p = new URLSearchParams(location.search), go = p.get('go');
+    if(!go) return;
+    const link = { page: go };
+    if(p.get('cycle')) link.cycleId = Number(p.get('cycle')) || null;
+    if(p.get('email')) link.email = p.get('email').toLowerCase();
+    if(p.get('kind')) link.kind = p.get('kind');
+    sessionStorage.setItem('hq_go', JSON.stringify(link));
+    ['go', 'cycle', 'email', 'kind', 'id', 'pair'].forEach(k => p.delete(k));
+    const rest = p.toString();
+    history.replaceState({}, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
+  } catch(e){}
+})();
+function ntDeepLink(){
+  let link = null;
+  try { link = JSON.parse(sessionStorage.getItem('hq_go') || 'null'); sessionStorage.removeItem('hq_go'); } catch(e){}
+  if(!link || !link.page || !ntEnabled()) return false;
+  if(!['reviews', 'team', 'goals'].includes(link.page)) return false;
+  // 평가 화면인데 대상자·단계가 없으면 '결과 공개' 안내 메일 → 내 결과 열기
+  ntGo({ kind: link.page === 'reviews' && !link.email ? 'result_open' : 'deep', link });
+  return true;
+}
 async function ntLoad(force){
   if(!ntEnabled() || _nt.loading) return;
   if(!force && _nt.items !== null && Date.now() - _nt.at < 60000) return;
@@ -4959,7 +4984,7 @@ function formatDate(iso){
     }
     // 뒤로가기 시 앱 밖으로 나가지 않도록 기본 홈 히스토리부터 확보
     nav(initUser.role==='admin' ? 'admin-users' : 'dashboard', null, true);
-    if(pendingSurvey) nav('survey', pendingSurvey);
+    if(pendingSurvey) nav('survey', pendingSurvey); else ntDeepLink();
   }
 })();
 
