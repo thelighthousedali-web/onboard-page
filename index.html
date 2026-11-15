@@ -79,7 +79,25 @@ body.impersonating .layout{margin-top:38px}
 .sb-logo-wrap{display:block;padding:2px 0;margin-left:-19px}
 .sb-logo-wrap img{height:36px;width:auto;display:block}
 .sb-tagline{font-size:10px;color:rgba(255,255,255,.35);margin-top:8px;letter-spacing:.3px}
-.sb-user{padding:14px 18px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-user{padding:14px 18px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08);position:relative}
+.nt-bell{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:0;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;line-height:1}
+.nt-bell:hover{background:rgba(255,255,255,.2)}
+.nt-bell-m{background:none;border:0;color:#fff;font-size:20px;cursor:pointer;position:relative;padding:4px 6px;line-height:1;flex-shrink:0}
+.nt-badge{position:absolute;top:-4px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#EF4444;color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
+.nt-back{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:290}
+.nt-panel{position:fixed;top:0;right:0;bottom:0;width:360px;max-width:100%;background:#fff;z-index:300;box-shadow:-6px 0 24px rgba(0,0,0,.15);display:flex;flex-direction:column}
+.nt-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);font-size:16px}
+.nt-head-r{display:flex;align-items:center;gap:8px}
+.nt-x{border:0;background:none;font-size:18px;cursor:pointer;color:#6B7280;padding:4px 6px}
+.nt-list{flex:1;overflow-y:auto}
+.nt-item{display:flex;gap:10px;padding:14px 18px;border-bottom:1px solid #F3F4F6;cursor:pointer}
+.nt-item:hover{background:#F9FAFB}
+.nt-dot{flex:none;width:8px;height:8px;border-radius:50%;margin-top:6px;background:transparent}
+.nt-unread .nt-dot{background:#2563EB}.nt-unread .nt-title{font-weight:700}
+.nt-title{font-size:14px;color:#111827}.nt-body{font-size:13px;color:#6B7280;margin-top:2px;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.nt-time{font-size:12px;color:#9CA3AF;margin-top:4px}
+.nt-empty{padding:48px 18px;text-align:center;color:#9CA3AF;font-size:14px}.nt-more{display:block;margin:12px auto}
+.nt-todo{border:1px solid #BFDBFE;background:#F0F7FF;margin-bottom:20px}
+.nt-todo-row{display:flex;justify-content:space-between;gap:12px;padding:9px 2px;border-top:1px solid #DBEAFE;cursor:pointer;font-size:14px}.nt-todo-row:hover{background:#E8F1FF}
 .sb-user-name{font-size:14px;font-weight:600}
 .sb-user-type{font-size:11px;color:var(--primary);margin-top:2px;font-weight:500}
 .sb-nav{padding:12px 0;flex:1}
@@ -1443,6 +1461,7 @@ ${impersonating ? `
   <button class="mob-hamburger" id="mob-menu-btn">☰</button>
   <img class="mob-logo" src="logo-wide.png" alt="Hecto Q&M">
   <span class="mob-title">온보딩 허브</span>
+  ${ntBellHtml('nt-bell-m')}
 </div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="layout">
@@ -1456,6 +1475,7 @@ ${impersonating ? `
     <div class="sb-user">
       <div class="sb-user-name">${user.name}</div>
       <div class="sb-user-type">${typeLabel}</div>
+      ${ntBellHtml('nt-bell')}
     </div>
     <nav class="sb-nav">${navHtml}</nav>
     <div class="sb-foot">
@@ -1465,7 +1485,7 @@ ${impersonating ? `
     </div>
   </aside>
   <main class="main">${renderModeSwitch()}${content}</main>
-</div>`;
+</div>${ntPanelHtml()}`;
 }
 
 function bindNav(){
@@ -1625,7 +1645,7 @@ async function pmCall(body){
     return { ok: false, status: 0, data: { error: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.' } };
   }
 }
-function pmReset(){ prReset(); _pmTeam = null; _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; _pmOpen = {}; _pmCk = null; _pmChange = null; _pmCm = {}; }
+function pmReset(){ prReset(); ntReset(); _pmTeam = null; _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; _pmOpen = {}; _pmCk = null; _pmChange = null; _pmCm = {}; }
 let _pmOpen = {};     // 펼친 목표(기록·코멘트) {goalId:true}
 let _pmCk = null;     // 작성 중인 체크인 {goalId, value, progress, state, note}
 let _pmChange = null; // 작성 중인 변경 요청 {reason}
@@ -3007,6 +3027,93 @@ async function prRvSave(submit){
   _prRv.sig0 = prRvSig(); _prRv.notice = { type: 'success', text: '임시저장했습니다.' }; prRerender();
 }
 
+// ── 🔔 알림함(목표·평가·1:1): 폴링 없이 로그인 직후·화면 전환 때 60초가 지났으면 다시 읽음 ──
+let _nt = { items: null, unread: 0, open: false, at: 0, loading: false, more: true };
+const NT_ACTION_KINDS = new Set(['goal_submitted', 'goal_rejected', 'change_requested', 'change_rejected', 'review_returned', 'review_ready_d1', 'review_ready_d2', 'result_open', 'oo_ping']);
+const ntActionKind = k => NT_ACTION_KINDS.has(k) || k.startsWith('remind_') || k.startsWith('due_');
+function ntReset(){ _nt = { items: null, unread: 0, open: false, at: 0, loading: false, more: true }; }
+function ntEnabled(){ return pmAllowed(); }
+async function ntLoad(force){
+  if(!ntEnabled() || _nt.loading) return;
+  if(!force && _nt.items !== null && Date.now() - _nt.at < 60000) return;
+  _nt.loading = true;
+  const { ok, data } = await pmCall({ action: 'notif_list', limit: 30 });
+  _nt.loading = false; _nt.at = Date.now();
+  if(ok){ _nt.items = data.items || []; _nt.unread = data.unread || 0; _nt.more = (data.items || []).length >= 30; }
+  else if(_nt.items === null){ _nt.items = []; _nt.unread = 0; _nt.more = false; } // 서버가 아직 없어도 화면은 정상
+  render();
+}
+function ntEnsure(){ if(ntEnabled() && (_nt.items === null || Date.now() - _nt.at >= 60000) && !_nt.loading) ntLoad(false); }
+async function ntMore(){
+  const last = _nt.items?.[_nt.items.length - 1]; if(!last || _nt.loading) return;
+  _nt.loading = true;
+  const { ok, data } = await pmCall({ action: 'notif_list', limit: 30, before: last.id });
+  _nt.loading = false;
+  if(ok){ _nt.items = _nt.items.concat(data.items || []); _nt.more = (data.items || []).length >= 30; }
+  render();
+}
+function ntToggle(){ if(!ntEnabled()) return; _nt.open = !_nt.open; if(_nt.open) ntLoad(true); else render(); }
+function ntClose(){ if(_nt.open){ _nt.open = false; render(); } }
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && _nt.open) ntClose(); });
+async function ntReadAll(){
+  if(!_nt.unread) return;
+  (_nt.items || []).forEach(x => { if(!x.read_at) x.read_at = new Date().toISOString(); }); _nt.unread = 0; render();
+  await pmCall({ action: 'notif_read', all: true });
+}
+function ntAgo(iso){
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if(s < 60) return '방금'; if(s < 3600) return `${Math.floor(s / 60)}분 전`; if(s < 86400) return `${Math.floor(s / 3600)}시간 전`;
+  if(s < 86400 * 7) return `${Math.floor(s / 86400)}일 전`; const d = new Date(iso); return `${d.getMonth() + 1}.${d.getDate()}`;
+}
+function ntWhen(cond, fn, tries = 25){ if(cond()) return fn(); if(tries > 0) setTimeout(() => ntWhen(cond, fn, tries - 1), 300); }
+function ntGo(item){
+  const l = item.link || {};
+  if(l.page === 'reviews'){
+    _nt.open = false; nav('reviews');
+    if(item.kind === 'result_open') ntWhen(() => _prList && _prList.result, () => { if(_prList.result.open && _prList.result.target) prOpenResult(); });
+    else if(l.email && l.kind && l.cycleId) ntWhen(() => _prList && !_prList.error && _prList.cycle, () => prOpenReview(l.cycleId, l.email, l.kind));
+    return;
+  }
+  if(l.page === 'team'){
+    _nt.open = false; _pmTree.tab = 'tm'; nav('goals');
+    if(l.email) ntWhen(() => _pmTeam && !_pmTeam.loading, () => { if(!_pmTeam.open[l.email]) pmTeamToggle(l.email); });
+    return;
+  }
+  if(l.page === 'goals'){ _nt.open = false; _pmTree.tab = 'mine'; nav('goals'); return; }
+  _nt.open = false; render();
+}
+function ntOpenItem(id){
+  const it = (_nt.items || []).find(x => x.id === id); if(!it) return;
+  if(!it.read_at){ it.read_at = new Date().toISOString(); _nt.unread = Math.max(0, _nt.unread - 1); pmCall({ action: 'notif_read', ids: [id] }); }
+  ntGo(it);
+}
+function ntBellHtml(cls){
+  if(!ntEnabled()) return '';
+  ntEnsure();
+  return `<button class="${cls}" onclick="ntToggle()" aria-label="알림">🔔${_nt.unread ? `<span class="nt-badge">${_nt.unread > 99 ? '99+' : _nt.unread}</span>` : ''}</button>`;
+}
+function ntPanelHtml(){
+  if(!ntEnabled() || !_nt.open) return '';
+  const items = _nt.items || [];
+  const rows = items.map(x => `<div class="nt-item ${x.read_at ? '' : 'nt-unread'}" onclick="ntOpenItem(${x.id})">
+    <div class="nt-dot"></div><div class="nt-main"><div class="nt-title">${escapeHtml(x.title)}</div>${x.body ? `<div class="nt-body">${escapeHtml(x.body)}</div>` : ''}<div class="nt-time">${ntAgo(x.created_at)}</div></div></div>`).join('');
+  return `<div class="nt-back" onclick="ntClose()"></div>
+<aside class="nt-panel" role="dialog" aria-label="알림">
+  <div class="nt-head"><b>알림</b><span class="nt-head-r"><button class="btn btn-sm pm-btn-ghost" onclick="ntReadAll()" ${_nt.unread ? '' : 'disabled'}>모두 읽음</button><button class="nt-x" onclick="ntClose()" aria-label="닫기 (Esc)">✕</button></span></div>
+  <div class="nt-list">${_nt.items === null || (_nt.loading && !items.length) ? '<div class="nt-empty">불러오는 중…</div>' : rows || '<div class="nt-empty">새 알림이 없습니다.</div>'}
+    ${_nt.more && items.length ? `<button class="btn btn-sm pm-btn-ghost nt-more" onclick="ntMore()">더 보기</button>` : ''}</div>
+</aside>`;
+}
+// 대시보드 '확인할 일': 안 읽은 알림 중 행동이 필요한 것만 최대 5개
+function renderNtCard(){
+  if(!ntEnabled()) return '';
+  ntEnsure();
+  const todo = (_nt.items || []).filter(x => !x.read_at && ntActionKind(x.kind)).slice(0, 5);
+  if(!todo.length) return '';
+  return `<div class="content-block nt-todo"><div class="sec-title">📬 확인할 일 <span class="pm-meta">${todo.length}건</span></div>
+${todo.map(x => `<div class="nt-todo-row" onclick="ntOpenItem(${x.id})"><div><b>${escapeHtml(x.title)}</b>${x.body ? `<span class="pm-meta"> · ${escapeHtml(x.body)}</span>` : ''}</div><span class="pm-meta">${ntAgo(x.created_at)}</span></div>`).join('')}</div>`;
+}
+
 function renderUserPage(user){
   const p = state.page;
   if(p==='survey') return renderSurveyPage(user, state.sub);
@@ -3081,6 +3188,7 @@ ${(() => {
     if (!surveyHtml)  return missionHtml;               // 서베이 일정이 아직 없음 → 미션만 단독 노출
     return `<div class="dash-two-col">${missionHtml}${surveyHtml}</div>`;
   })()}
+${renderNtCard()}
 ${renderGoalBanner()}
 <div class="page-head">
   <div class="page-title">빠른 메뉴</div>
