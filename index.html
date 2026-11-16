@@ -98,6 +98,41 @@ body.impersonating .layout{margin-top:38px}
 .nt-empty{padding:48px 18px;text-align:center;color:#9CA3AF;font-size:14px}.nt-more{display:block;margin:12px auto}
 .nt-todo{border:1px solid #BFDBFE;background:#F0F7FF;margin-bottom:20px}
 .nt-todo-row{display:flex;justify-content:space-between;gap:12px;padding:9px 2px;border-top:1px solid #DBEAFE;cursor:pointer;font-size:14px}.nt-todo-row:hover{background:#E8F1FF}
+.oo-wrap{display:grid;grid-template-columns:280px minmax(0,1fr) 320px;gap:16px;align-items:start}
+.oo-l,.oo-c,.oo-r{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px}
+.oo-l{position:sticky;top:12px}.oo-r{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto}
+.oo-mtabs{display:none}
+.oo-pair{display:flex;gap:10px;padding:10px;border-radius:10px;cursor:pointer;align-items:center}.oo-pair:hover{background:#F9FAFB}.oo-pair.on{background:var(--primary-light,#FFF1E8)}
+.oo-av{flex:none;width:34px;height:34px;border-radius:50%;background:#E5E7EB;color:#374151;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.oo-pair-b{min-width:0}.oo-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#F97316;margin-left:4px;vertical-align:middle}
+.oo-bh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.oo-bh-t{display:flex;gap:10px;align-items:center}.oo-bh-r{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.oo-msel{width:auto;min-width:200px;padding:7px 30px 7px 10px;font-size:13px}
+.oo-back-m{display:none;border:0;background:none;font-size:20px;cursor:pointer}
+.oo-menu{position:absolute;right:0;top:36px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:50;min-width:150px;padding:4px}.oo-menu button{display:block;width:100%;text-align:left;border:0;background:none;padding:9px 12px;border-radius:7px;cursor:pointer;font-size:13.5px}.oo-menu button:hover{background:#F3F4F6}
+.oo-empty{padding:48px 12px;text-align:center;color:var(--gray);font-size:14px}.oo-note{background:#F3F4F6;color:#4B5563;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13px}
+.oo-sec{margin-bottom:18px}.oo-sec-h{font-weight:700;font-size:15px;margin-bottom:8px}
+.oo-ag{display:flex;gap:8px;padding:10px 4px;border-bottom:1px solid #F3F4F6}.oo-ag-b{flex:1;min-width:0}.oo-ag-t{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}.oo-ag-text{word-break:break-word}.oo-done .oo-ag-text,.oo-done .oo-act-b>div:first-child{text-decoration:line-through;color:#9CA3AF}
+.oo-chk{padding-top:2px}.oo-chk input{width:16px;height:16px;cursor:pointer}
+.oo-who{font-size:11.5px;border-radius:99px;padding:1px 8px;background:#E5E7EB;color:#374151;font-weight:600;white-space:nowrap}.oo-who.oo-me{background:#DBEAFE;color:#1D4ED8}
+.oo-tag{font-size:11px;border-radius:99px;padding:1px 7px;background:#F3F4F6;color:#6B7280}
+.oo-ag-a{display:flex;gap:10px;margin-top:2px}.oo-lnk{border:0;background:none;color:#6B7280;font-size:12px;cursor:pointer;padding:2px 0}.oo-lnk:hover{color:var(--primary)}
+.oo-cms{margin:6px 0 2px;padding:8px 10px;background:#F9FAFB;border-radius:8px}.oo-cm{font-size:13px;margin-bottom:6px;word-break:break-word}
+.oo-add{display:flex;gap:8px;margin-top:10px}.oo-add .finput{padding:10px 14px}
+.oo-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.oo-chip{border:1px solid var(--border);background:#fff;border-radius:99px;padding:5px 11px;font-size:12.5px;cursor:pointer;color:#374151}.oo-chip:hover{border-color:var(--primary);color:var(--primary)}
+.oo-memo{margin-bottom:16px}.oo-memo-h{display:flex;gap:10px;align-items:center;margin-bottom:6px;flex-wrap:wrap}.oo-tools button{border:1px solid var(--border);background:#fff;border-radius:6px;padding:2px 8px;font-size:12px;cursor:pointer;margin-right:4px}.oo-sv{margin-left:auto}
+.oo-rte{min-height:110px;border:1.5px solid var(--border);border-radius:9px;padding:12px 14px;font-size:14px;line-height:1.6;outline:none;background:#fff}.oo-rte:focus{border-color:var(--primary)}.oo-rte:empty:before{content:attr(data-ph);color:#9CA3AF}
+.oo-act{display:flex;gap:8px;padding:9px 2px;border-bottom:1px solid #F3F4F6;align-items:flex-start}.oo-act-b{flex:1;min-width:0;font-size:13.5px;word-break:break-word}.oo-actadd{margin-top:12px}
+.oo-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.oo-lab{display:block;font-size:12.5px;font-weight:600;color:#4B5563;margin:12px 0 5px}
+.oo-back{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:9300}.oo-modal{position:fixed;z-index:9301;left:50%;top:50%;transform:translate(-50%,-50%);width:min(460px,calc(100vw - 24px));max-height:calc(100vh - 40px);background:#fff;border-radius:14px;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.oo-mh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);font-size:16px}.oo-mb{padding:6px 20px 16px;overflow-y:auto}.oo-mf{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border)}
+.oo-res{max-height:210px;overflow-y:auto;margin-top:6px}.oo-opt{padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13.5px}.oo-opt:hover{background:#F3F4F6}.oo-opt.on{background:var(--primary-light,#FFF1E8)}
+.oo-card{border:1px solid #FDE68A;background:#FFFBEB;margin-bottom:20px}.oo-card .sec-title{border-bottom-color:#FDE68A}.oo-sub{font-size:12.5px;font-weight:700;color:#92400E;margin:2px 0 2px}
+@media(max-width:900px){
+  .oo-wrap{display:block}.oo-l,.oo-r{position:static;max-height:none}
+  .oo-mtabs{display:flex;gap:6px;margin-bottom:12px}.oo-mtabs button{flex:1;padding:9px;border:1px solid var(--border);background:#fff;border-radius:9px;font-size:13.5px;cursor:pointer}.oo-mtabs button.on{background:var(--primary);color:#fff;border-color:var(--primary)}.oo-mtabs button:disabled{opacity:.4}
+  .oo-v-list .oo-c,.oo-v-list .oo-r,.oo-v-board .oo-l,.oo-v-board .oo-r,.oo-v-side .oo-l,.oo-v-side .oo-c{display:none}
+  .oo-back-m{display:inline-block}.oo-msel{min-width:0;width:100%}.oo-bh-r{width:100%}
+}
 .sb-user-name{font-size:14px;font-weight:600}
 .sb-user-type{font-size:11px;color:var(--primary);margin-top:2px;font-weight:500}
 .sb-nav{padding:12px 0;flex:1}
@@ -1384,6 +1419,7 @@ function renderLayout(user, content){
       </div>
       ${renderGoalNavItem()}
       ${renderReviewNavItem()}
+      ${renderOoNavItem()}
       <div class="nav-sec">회사 소개</div>
       <div class="nav-item ${state.page==='company'?'active':''}" data-nav="company">
         <span class="ni">🏢</span>헥토큐앤엠 소개
@@ -1645,7 +1681,7 @@ async function pmCall(body){
     return { ok: false, status: 0, data: { error: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.' } };
   }
 }
-function pmReset(){ prReset(); ntReset(); _pmTeam = null; _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; _pmOpen = {}; _pmCk = null; _pmChange = null; _pmCm = {}; }
+function pmReset(){ prReset(); ntReset(); ooReset(); _pmTeam = null; _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; _pmOpen = {}; _pmCk = null; _pmChange = null; _pmCm = {}; }
 let _pmOpen = {};     // 펼친 목표(기록·코멘트) {goalId:true}
 let _pmCk = null;     // 작성 중인 체크인 {goalId, value, progress, state, note}
 let _pmChange = null; // 작성 중인 변경 요청 {reason}
@@ -2955,7 +2991,12 @@ function prCenterHtml(){
 // 오른쪽 참고 정보
 function prRefHtml(){
   const d = _prRv.d, ref = d.ref, tab = _prRv.refTab;
-  const tabs = `<div class="pr-rtabs"><button class="${tab==='goals'?'on':''}" onclick="prRvRef('goals')">목표</button>${_prRv.kind !== 'self' ? `<button class="${tab==='self'?'on':''}" onclick="prRvRef('self')">본인평가</button>` : ''}<button class="${tab==='archive'?'on':''}" onclick="prRvRef('archive')">지난 리뷰</button></div>`;
+  const tabs = `<div class="pr-rtabs"><button class="${tab==='goals'?'on':''}" onclick="prRvRef('goals')">목표</button>${_prRv.kind !== 'self' ? `<button class="${tab==='self'?'on':''}" onclick="prRvRef('self')">본인평가</button>` : ''}<button class="${tab==='archive'?'on':''}" onclick="prRvRef('archive')">지난 리뷰</button>${_prRv.kind !== 'self' ? `<button class="${tab==='oo'?'on':''}" onclick="prRvRef('oo')">1:1</button>` : ''}</div>`;
+  if(tab === 'oo' && _prRv.kind !== 'self'){
+    const list = ref.oneonones || [];
+    if(!list.length) return tabs + '<div class="pm-tbl-empty">이 구성원과 기록된 1:1이 없습니다.</div>';
+    return tabs + `<div class="pm-meta" style="margin:6px 0 10px">두 사람이 함께 볼 수 있게 남긴 내용만 보입니다(비공개 메모 제외).</div>` + list.map(x => `<div class="pr-refcard"><div class="pr-refcard-h">${ooDayFull(x.meet_on)}${x.meet_at ? ' ' + escapeHtml(x.meet_at) : ''} <span class="pm-meta">${OO_ST[x.status] || ''}</span></div>${(x.agenda || []).map(a => `<div class="pm-meta" style="margin:2px 0">${a.done ? '☑' : '☐'} ${escapeHtml(a.text)}</div>`).join('')}${x.memo ? `<div class="pr-rich" style="margin-top:6px">${pmSafeHtml(x.memo)}</div>` : ''}</div>`).join('');
+  }
   if(tab === 'self' && _prRv.kind !== 'self'){
     const s = ref.self; if(!s) return tabs + '<div class="pm-tbl-empty">본인평가가 없습니다.</div>';
     return tabs + (s.items || []).map(x => `<div class="pr-refcard"><div class="pr-refcard-h">${escapeHtml(x.title)} <span class="pm-meta">${x.weight}%</span> ${prGradeTag(x.grade)}</div>${x.summary ? `<div class="pr-rich">${escapeHtml(x.summary)}</div>` : ''}</div>`).join('')
@@ -3027,6 +3068,312 @@ async function prRvSave(submit){
   _prRv.sig0 = prRvSig(); _prRv.notice = { type: 'success', text: '임시저장했습니다.' }; prRerender();
 }
 
+// ════════════════════════════════════════
+// 🤝 1:1 미팅 — 두 사람만 보는 어젠다·메모·액션 아이템 (서버: oo 함수)
+// ════════════════════════════════════════
+const OO_URL = `${SUPA_CFG.url}/functions/v1/oo`;
+const OO_DOW = ['일','월','화','수','목','금','토'];
+const OO_ST = { scheduled:'예정', done:'완료', canceled:'취소' };
+const OO_RECUR = { none:'반복 없음', weekly:'매주', biweekly:'격주', monthly:'매월' };
+const OO_SUGGEST = ['이번 주 업무에서 막힌 점', '목표 진행 상황 점검', '필요한 지원·자원', '커리어·성장 고민', '서로에게 주는 피드백', '컨디션·업무량'];
+function ooFresh(){ return { me:null, at:0, loading:false, pairId:null, meetingId:null, board:null, bkey:'', bLoading:false, tab:'act', modal:null, menu:false, view:'list', msg:null, open:{}, memo:{ s:null, p:null }, saving:{ s:'', p:'' }, timers:{}, draft:{ ag:'', act:'', due:'' }, emps:null, busy:false }; }
+let _oo = ooFresh();
+_oo.memoKey = null;
+function ooReset(){ Object.values(_oo.timers || {}).forEach(clearTimeout); _oo = ooFresh(); }
+async function ooCall(body){
+  try {
+    const res = await fetch(OO_URL, { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${SUPA_CFG.key}` }, body: JSON.stringify({ portalToken: DB.getToken(), ...body }) });
+    const data = await res.json().catch(()=>({}));
+    if(res.status === 404 && !data.error) data.error = '1:1 서버가 아직 준비되지 않았습니다.';
+    return { ok: res.ok, status: res.status, data };
+  } catch(e){ return { ok:false, status:0, data:{ error:'서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.' } }; }
+}
+const ooMyEmail = () => String(DB.getCurrent()?.email || '').toLowerCase();
+const ooDay = s => { if(!s) return ''; const d = new Date(String(s).slice(0,10) + 'T00:00:00Z'); return `${d.getUTCMonth()+1}.${d.getUTCDate()}(${OO_DOW[d.getUTCDay()]})`; };
+const ooDayFull = s => { const d = new Date(String(s).slice(0,10) + 'T00:00:00Z'); return `${d.getUTCFullYear()}.${String(d.getUTCMonth()+1).padStart(2,'0')}.${String(d.getUTCDate()).padStart(2,'0')}(${OO_DOW[d.getUTCDay()]})`; };
+function ooMsg(type, text){ _oo.msg = { type, text, until: Date.now() + 6000 }; }
+async function ooLoadMe(){
+  if(_oo.loading) return;
+  _oo.loading = true;
+  const { ok, data } = await ooCall({ action:'me' });
+  _oo.loading = false; _oo.at = Date.now();
+  _oo.me = ok ? data : { pairs:[], soon:[], actions:[], error: data.error || '1:1 정보를 불러오지 못했습니다.' };
+  render();
+}
+function renderOoNavItem(){
+  if(!pmAllowed()) return '';
+  if(_oo.me === null){ ooLoadMe(); }
+  const n = (_oo.me?.soon || []).length;
+  return `<div class="nav-item ${state.page==='oneonone'?'active':''}" data-nav="oneonone"><span class="ni">🤝</span>1:1 미팅${n ? ` <span class="pr-dot">${n}</span>` : ''}</div>`;
+}
+// 대시보드: 5일 안 1:1 + 내 액션 아이템(미완료, 기한 순 5개)
+function renderOoCard(){
+  if(!pmAllowed()) return '';
+  if(_oo.me === null){ ooLoadMe(); return ''; }
+  const soon = (_oo.me.soon || []).slice(0, 5), acts = (_oo.me.actions || []).slice(0, 5);
+  if(!soon.length && !acts.length) return '';
+  const today = pmKstToday();
+  return `<div class="content-block oo-card"><div class="sec-title">🤝 1:1 미팅</div>
+${soon.length ? `<div class="oo-sub">5일 안에 있는 1:1</div>${soon.map(s => `<div class="nt-todo-row" onclick="ooGo(${s.pair_id},${s.meeting_id})"><div><b>${escapeHtml(s.other.name)}</b>님과 1:1<span class="pm-meta"> · ${ooDay(s.meet_on)}${s.meet_at ? ' ' + escapeHtml(s.meet_at) : ''}</span></div><span class="pm-meta">${s.meet_on === today ? '오늘' : ''}</span></div>`).join('')}` : ''}
+${acts.length ? `<div class="oo-sub" style="margin-top:10px">내 액션 아이템</div>${acts.map(a => `<div class="nt-todo-row" onclick="ooGo(${a.pair_id},${a.meeting_id || 'null'})"><div>${escapeHtml(a.text)}<span class="pm-meta"> · ${a.other ? escapeHtml(a.other.name) + '님과' : ''}</span></div><span class="pm-meta" style="${a.due && a.due < today ? 'color:#B91C1C' : ''}">${a.due ? ooDay(a.due) : ''}</span></div>`).join('')}` : ''}</div>`;
+}
+function ooGo(pairId, meetingId){
+  ooFlush();
+  _oo.pairId = pairId; _oo.meetingId = meetingId || null; _oo.board = null; _oo.bkey = ''; _oo.view = 'board'; _oo.memo = { s:null, p:null };
+  nav('oneonone');
+}
+function ooSelectPair(id){ ooFlush(); _oo.pairId = id; _oo.meetingId = null; _oo.board = null; _oo.bkey = ''; _oo.view = 'board'; _oo.memo = { s:null, p:null }; _oo.menu = false; render(); }
+function ooPickMeeting(id){ ooFlush(); _oo.meetingId = Number(id); _oo.board = null; _oo.bkey = ''; _oo.memo = { s:null, p:null }; _oo.menu = false; render(); }
+function ooView(v){ _oo.view = v; render(); }
+async function ooLoadBoard(){
+  const key = `${_oo.pairId}:${_oo.meetingId || ''}`;
+  _oo.bLoading = true; _oo.bkey = key;
+  const { ok, data } = await ooCall({ action:'board', pairId:_oo.pairId, ...(_oo.meetingId ? { meetingId:_oo.meetingId } : {}) });
+  _oo.bLoading = false;
+  if(_oo.bkey !== key) return; // 불러오는 사이 다른 1:1·미팅을 골랐음
+  if(!ok){ _oo.board = { error: data.error || '1:1을 불러오지 못했습니다.' }; }
+  else {
+    _oo.board = data;
+    if(!_oo.meetingId && data.meeting) _oo.meetingId = data.meeting.id;
+    _oo.bkey = `${_oo.pairId}:${_oo.meetingId || ''}`;
+  }
+  const mk = _oo.board?.meeting?.id ?? null; if(_oo.memoKey !== mk){ _oo.memo = { s:null, p:null }; _oo.memoKey = mk; }
+  render();
+}
+async function ooRefresh(){ ooFlush(); _oo.bkey = ''; await ooLoadBoard(); ooLoadMe(); }
+async function ooDo(body, okMsg){
+  if(_oo.busy) return null;
+  ooFlush();
+  _oo.busy = true;
+  const { ok, data } = await ooCall(body);
+  _oo.busy = false;
+  if(!ok){ ooMsg('error', data.error || '저장하지 못했습니다.'); render(); return null; }
+  if(okMsg) ooMsg('success', okMsg);
+  return data;
+}
+// ── 어젠다·코멘트 ──
+function ooDraft(key, v){ _oo.draft[key] = v; }
+async function ooAddAg(text){
+  const t = String(text ?? _oo.draft.ag ?? '').trim(); if(!t || !_oo.meetingId) return;
+  const d = await ooDo({ action:'agenda_add', meetingId:_oo.meetingId, text:t }); if(!d) return;
+  _oo.draft.ag = ''; await ooLoadBoard();
+}
+async function ooToggleAg(id, done){ const d = await ooDo({ action:'agenda_update', id, done }); await ooLoadBoard(); }
+async function ooEditAg(id){
+  const a = (_oo.board?.meeting?.agenda || []).find(x => x.id === id); if(!a) return;
+  const t = prompt('어젠다를 수정합니다', a.text); if(t == null || !t.trim() || t.trim() === a.text) return;
+  const d = await ooDo({ action:'agenda_update', id, text:t.trim() }); if(d) await ooLoadBoard();
+}
+async function ooDelAg(id){ if(!confirm('이 어젠다를 삭제할까요? 코멘트도 함께 삭제됩니다.')) return; const d = await ooDo({ action:'agenda_delete', id }); if(d) await ooLoadBoard(); }
+function ooToggleCm(id){ _oo.open[id] = !_oo.open[id]; render(); if(_oo.open[id]) setTimeout(() => document.getElementById('oo-cm-' + id)?.focus(), 0); }
+async function ooAddCm(id){
+  const el = document.getElementById('oo-cm-' + id), t = (el?.value || '').trim(); if(!t) return;
+  const d = await ooDo({ action:'comment_add', agendaId:id, text:t }); if(d){ await ooLoadBoard(); setTimeout(() => document.getElementById('oo-cm-' + id)?.focus(), 0); }
+}
+async function ooDelCm(id){ const d = await ooDo({ action:'comment_delete', id }); if(d) await ooLoadBoard(); }
+// ── 메모(1초 뒤 자동 저장). 다시 그려도 쓰던 내용이 남도록 입력할 때마다 상태에 보관 ──
+function ooRte(which, cmd){
+  const ed = document.getElementById('oo-memo-' + which); if(!ed) return;
+  ed.focus(); document.execCommand(cmd, false, null); ooMemoInput(which);
+}
+function ooPaste(e){ e.preventDefault(); const t = (e.clipboardData || window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, t); }
+function ooMemoInput(which){
+  const el = document.getElementById('oo-memo-' + which); if(!el) return;
+  _oo.memo[which] = el.innerHTML; _oo.saving[which] = '저장 중…'; ooSaveLabel(which);
+  clearTimeout(_oo.timers[which]); _oo.timers[which] = setTimeout(() => ooMemoSave(which), 1000);
+}
+function ooSaveLabel(which){ const el = document.getElementById('oo-sv-' + which); if(el) el.textContent = _oo.saving[which]; }
+async function ooMemoSave(which){
+  clearTimeout(_oo.timers[which]); _oo.timers[which] = null;
+  const html = _oo.memo[which]; if(html == null || !_oo.meetingId) return;
+  const { ok, data } = await ooCall({ action:'memo_save', meetingId:_oo.meetingId, ...(which === 's' ? { shared: html } : { private: html }) });
+  _oo.saving[which] = ok ? '저장됨' : (data.error || '저장하지 못했습니다'); ooSaveLabel(which);
+  if(ok && _oo.board?.meeting){ if(which === 's') _oo.board.meeting.shared_memo = html; else _oo.board.meeting.private_memo = html; }
+}
+function ooFlush(){ ['s', 'p'].forEach(w => { if(_oo.timers[w]) ooMemoSave(w); }); }
+// ── 미팅 ──
+async function ooPing(){ const d = await ooDo({ action:'ping', meetingId:_oo.meetingId }); if(d){ ooMsg('success', d.sent ? '상대에게 확인을 요청했습니다.' : '오늘은 이미 확인을 요청했습니다.'); render(); } }
+async function ooSetStatus(status){
+  _oo.menu = false;
+  if(status === 'canceled' && !confirm('이 미팅을 취소할까요? 어젠다와 메모는 그대로 남습니다.')){ render(); return; }
+  const d = await ooDo({ action:'meeting_update', meetingId:_oo.meetingId, status }); if(d){ await ooLoadBoard(); ooLoadMe(); }
+}
+async function ooArchive(){
+  _oo.menu = false;
+  if(!confirm('이 1:1을 보관할까요? 목록에서 사라지고 반복 일정도 더 만들어지지 않습니다. (같은 상대로 다시 만들면 복원됩니다)')){ render(); return; }
+  const d = await ooDo({ action:'pair_update', pairId:_oo.pairId, archived:true }); if(!d) return;
+  _oo.pairId = null; _oo.board = null; _oo.bkey = ''; _oo.meetingId = null; _oo.view = 'list'; ooLoadMe();
+}
+function ooMenu(){ _oo.menu = !_oo.menu; render(); }
+// ── 액션 아이템 ──
+async function ooAddAction(){
+  const t = (document.getElementById('oo-act-t')?.value || '').trim(); if(!t) return;
+  const who = document.getElementById('oo-act-w')?.value || ooMyEmail(), due = document.getElementById('oo-act-d')?.value || null;
+  const d = await ooDo({ action:'action_add', pairId:_oo.pairId, meetingId:_oo.meetingId, text:t, assignee_email:who, due }); if(d){ _oo.draft.act = ''; await ooLoadBoard(); ooLoadMe(); }
+}
+async function ooToggleAction(id, done){ const d = await ooDo({ action:'action_update', id, done }); await ooLoadBoard(); ooLoadMe(); }
+async function ooDelAction(id){ if(!confirm('이 액션 아이템을 삭제할까요?')) return; const d = await ooDo({ action:'action_delete', id }); if(d){ await ooLoadBoard(); ooLoadMe(); } }
+function ooTab(t){ _oo.tab = t; render(); }
+// ── 모달(1:1 만들기 · 미팅 추가 · 일정 변경 · 반복 설정) ──
+function ooCloseModal(){ _oo.modal = null; render(); }
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && _oo.modal && state.page === 'oneonone') ooCloseModal(); });
+async function ooOpenCreate(){
+  ooFlush(); _oo.modal = { kind:'create', pick:null, q:'' }; render();
+  if(_oo.emps === null){
+    const { data } = await supa.from('employees').select('id,name,dept,email,status,manager_email,director_email,position_title,position_role');
+    _oo.emps = (data || []).filter(e => e.email && e.status !== 'left');
+    if(_oo.modal?.kind === 'create') ooCreateSearch(document.getElementById('oo-c-q')?.value || '');
+  } else ooCreateSearch('');
+}
+function ooCreateSearch(q){
+  const el = document.getElementById('oo-c-res'); if(!el || !_oo.emps) return;
+  const me = ooMyEmail(), self = _oo.emps.find(e => String(e.email).toLowerCase() === me);
+  const taken = new Set((_oo.me?.pairs || []).map(p => p.other.email));
+  const ok = e => String(e.email).toLowerCase() !== me;
+  q = String(q || '').trim().toLowerCase();
+  let list;
+  if(q) list = _oo.emps.filter(e => ok(e) && ((e.name || '').toLowerCase().includes(q) || (e.dept || '').toLowerCase().includes(q))).slice(0, 30);
+  else {
+    const appr = [self?.manager_email, self?.director_email].filter(Boolean).map(s => s.toLowerCase());
+    const reports = _oo.emps.filter(e => ok(e) && [e.manager_email, e.director_email].some(x => String(x || '').toLowerCase() === me));
+    const top = [...appr.map(a => _oo.emps.find(e => String(e.email).toLowerCase() === a)).filter(Boolean), ...reports];
+    list = [...new Map(top.map(e => [e.email, e])).values()];
+  }
+  const sel = _oo.modal?.pick;
+  const lab = document.getElementById('oo-c-pick'); if(lab){ const pe = _oo.emps.find(x => x.email === _oo.modal?.pick); lab.textContent = pe ? `${pe.name}님` : ''; }
+  el.innerHTML = (q ? '' : `<div class="pm-meta" style="margin:4px 0">${list.length ? '내 승인권자·팀원 추천' : '이름이나 조직으로 검색해 주세요'}</div>`)
+    + list.map(e => `<div class="oo-opt ${sel === e.email ? 'on' : ''}" onclick="ooCreatePick('${escapeHtml(e.email)}')"><b>${escapeHtml(e.name)}</b> <span class="pm-meta">${escapeHtml([e.position_title || e.position_role, e.dept].filter(Boolean).join(' · '))}${taken.has(String(e.email).toLowerCase()) ? ' · 이미 1:1 있음' : ''}</span></div>`).join('')
+    + (q && !list.length ? '<div class="pm-tbl-empty">검색 결과가 없습니다.</div>' : '');
+}
+function ooCreatePick(email){
+  if(!_oo.modal) return; _oo.modal.pick = email;
+  const e = (_oo.emps || []).find(x => x.email === email);
+  const lab = document.getElementById('oo-c-pick'); if(lab) lab.textContent = e ? `${e.name}님` : '';
+  document.querySelectorAll('#oo-c-res .oo-opt').forEach(n => n.classList.toggle('on', n.getAttribute('onclick').includes(`'${email}'`)));
+}
+async function ooCreateSubmit(){
+  const m = _oo.modal; if(!m?.pick){ ooMsg('error', '1:1 상대를 선택해 주세요.'); render(); return; }
+  const on = document.getElementById('oo-c-on')?.value, at = document.getElementById('oo-c-at')?.value, rec = document.getElementById('oo-c-rec')?.value || 'none';
+  if(!on){ ooMsg('error', '첫 미팅 날짜를 정해 주세요.'); render(); return; }
+  const d = await ooDo({ action:'pair_create', with:m.pick, first_on:on, first_at:at || null, recur:rec, recur_time:at || null }); if(!d) return;
+  _oo.modal = null; ooMsg('success', d.existed ? '이미 있는 1:1입니다. 그 화면을 열었습니다.' : '1:1을 만들었습니다.');
+  await ooLoadMe(); ooSelectPair(d.pair.id);
+}
+function ooOpenMeet(kind){
+  _oo.menu = false; const m = _oo.board?.meeting;
+  _oo.modal = kind === 'new' ? { kind:'new' } : kind === 'edit' ? { kind:'edit', on:m?.meet_on, at:m?.meet_at || '' } : { kind:'recur' }; render();
+}
+async function ooMeetSubmit(){
+  const m = _oo.modal; if(!m) return;
+  if(m.kind === 'recur'){
+    const rec = document.getElementById('oo-m-rec')?.value || 'none', at = document.getElementById('oo-m-at')?.value || null;
+    const d = await ooDo({ action:'pair_update', pairId:_oo.pairId, recur:rec, recur_time:at }, '반복 설정을 저장했습니다.'); if(!d) return;
+    _oo.modal = null; await ooLoadBoard(); ooLoadMe(); return;
+  }
+  const on = document.getElementById('oo-m-on')?.value, at = document.getElementById('oo-m-at')?.value || null;
+  if(!on){ ooMsg('error', '날짜를 정해 주세요.'); render(); return; }
+  const d = m.kind === 'new' ? await ooDo({ action:'meeting_create', pairId:_oo.pairId, meet_on:on, meet_at:at }) : await ooDo({ action:'meeting_update', meetingId:_oo.meetingId, meet_on:on, meet_at:at });
+  if(!d) return;
+  _oo.modal = null; if(m.kind === 'new') _oo.meetingId = d.meeting.id; _oo.board = null; _oo.bkey = ''; render(); ooLoadMe();
+}
+function ooModalHtml(){
+  const m = _oo.modal; if(!m) return '';
+  const today = pmKstToday();
+  let body = '', title = '', go = 'ooMeetSubmit()';
+  if(m.kind === 'create'){
+    title = '1:1 만들기'; go = 'ooCreateSubmit()';
+    body = `<label class="oo-lab">상대 <span id="oo-c-pick" style="font-weight:700;color:var(--primary)"></span></label>
+      <input id="oo-c-q" class="finput" placeholder="이름·조직 검색" oninput="ooCreateSearch(this.value)" autocomplete="off">
+      <div id="oo-c-res" class="oo-res"><div class="loading"><div class="spinner"></div></div></div>
+      <div class="oo-row"><div><label class="oo-lab">첫 미팅 날짜</label><input id="oo-c-on" type="date" class="finput" value="${today}"></div>
+      <div><label class="oo-lab">시간(선택)</label><input id="oo-c-at" type="time" class="finput"></div></div>
+      <label class="oo-lab">반복</label><select id="oo-c-rec" class="fselect">${Object.entries(OO_RECUR).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select>
+      <div class="pm-meta" style="margin-top:6px">반복을 고르면 다음 미팅이 자동으로 만들어지고, 끝내지 못한 어젠다는 다음 미팅으로 넘어옵니다.</div>`;
+  } else if(m.kind === 'recur'){
+    const p = _oo.board?.pair || {};
+    title = '반복 설정';
+    body = `<label class="oo-lab">반복</label><select id="oo-m-rec" class="fselect">${Object.entries(OO_RECUR).map(([k, v]) => `<option value="${k}" ${p.recur === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+      <label class="oo-lab">시간(선택)</label><input id="oo-m-at" type="time" class="finput" value="${escapeHtml(p.recur_time || '')}">
+      <div class="pm-meta" style="margin-top:6px">이미 만들어진 미팅은 바뀌지 않고, 앞으로 만들어질 미팅부터 적용됩니다.</div>`;
+  } else {
+    title = m.kind === 'new' ? '미팅 추가' : '일정 변경';
+    body = `<div class="oo-row"><div><label class="oo-lab">날짜</label><input id="oo-m-on" type="date" class="finput" value="${escapeHtml(m.on || today)}"></div>
+      <div><label class="oo-lab">시간(선택)</label><input id="oo-m-at" type="time" class="finput" value="${escapeHtml(m.at || '')}"></div></div>`;
+  }
+  if(m.kind === 'create') setTimeout(() => { if(_oo.emps && _oo.modal?.kind === 'create') ooCreateSearch(document.getElementById('oo-c-q')?.value || ''); }, 0);
+  return `<div class="oo-back" onclick="ooCloseModal()"></div><div class="oo-modal" role="dialog" aria-label="${title}"><div class="oo-mh"><b>${title}</b><button class="nt-x" onclick="ooCloseModal()" aria-label="닫기 (Esc)">✕</button></div>
+    <div class="oo-mb">${body}</div><div class="oo-mf"><button class="btn btn-sm pm-btn-ghost" onclick="ooCloseModal()">취소</button><button class="btn btn-sm btn-primary" onclick="${go}">${m.kind === 'create' ? '만들기' : '저장'}</button></div></div>`;
+}
+// ── 화면 ──
+function ooBoardHtml(){
+  const b = _oo.board;
+  if(b === null) return `<div class="oo-empty"><div class="loading"><div class="spinner"></div></div></div>`;
+  if(b.error) return `<div class="oo-empty">${escapeHtml(b.error)}<div style="margin-top:10px"><button class="btn btn-sm pm-btn-ghost" onclick="ooRefresh()">다시 시도</button></div></div>`;
+  const m = b.meeting, me = ooMyEmail(), o = b.pair.other;
+  const meetOpts = (b.meetings || []).map(x => `<option value="${x.id}" ${m && x.id === m.id ? 'selected' : ''}>${ooDayFull(x.meet_on)}${x.meet_at ? ' ' + escapeHtml(x.meet_at) : ''} · ${OO_ST[x.status] || x.status}${x.agenda_n ? ` · 어젠다 ${x.agenda_n}` : ''}</option>`).join('');
+  const head = `<div class="oo-bh"><div class="oo-bh-t"><button class="oo-back-m" onclick="ooView('list')" aria-label="목록">←</button><div class="oo-av">${escapeHtml((o.name || '?').slice(0, 1))}</div><div><b style="font-size:16px">${escapeHtml(o.name)}님과의 1:1</b>${o.retired ? ' <span class="oo-tag" style="background:#FEE2E2;color:#B91C1C">퇴직</span>' : ''}<div class="pm-meta">${escapeHtml([o.position, o.dept].filter(Boolean).join(' · '))}${b.pair.recur !== 'none' ? ' · ' + OO_RECUR[b.pair.recur] + (b.pair.recur_time ? ' ' + escapeHtml(b.pair.recur_time) : '') : ''}</div></div></div>
+    <div class="oo-bh-r"><select class="fselect oo-msel" onchange="ooPickMeeting(this.value)" aria-label="미팅 선택">${meetOpts || '<option>미팅 없음</option>'}</select>
+    <button class="btn btn-sm pm-btn-ghost" onclick="ooOpenMeet('new')">+ 미팅 추가</button>
+    ${m ? `<button class="btn btn-sm pm-btn-ghost" onclick="ooPing()" title="상대에게 알림과 메일로 확인을 요청합니다">🔔 확인 요청</button>` : ''}
+    <div style="position:relative"><button class="btn btn-sm pm-btn-ghost" onclick="ooMenu()" aria-label="더보기">⋯</button>${_oo.menu ? `<div class="oo-menu">
+      ${m ? `<button onclick="ooOpenMeet('edit')">일정 변경</button>${m.status === 'done' ? `<button onclick="ooSetStatus('scheduled')">예정으로 되돌리기</button>` : `<button onclick="ooSetStatus('done')">완료로 표시</button>`}${m.status !== 'canceled' ? `<button onclick="ooSetStatus('canceled')">이 미팅 취소</button>` : `<button onclick="ooSetStatus('scheduled')">취소 되돌리기</button>`}` : ''}
+      <button onclick="ooOpenMeet('recur')">반복 설정</button><button onclick="ooRefresh()">새로고침</button><button onclick="ooArchive()" style="color:#B91C1C">1:1 보관</button></div>` : ''}</div></div></div>`;
+  if(!m) return head + `<div class="oo-empty">아직 미팅이 없습니다.<div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="ooOpenMeet('new')">+ 첫 미팅 추가</button></div></div>`;
+  const ag = (m.agenda || []).map(a => `<div class="oo-ag ${a.done ? 'oo-done' : ''}"><label class="oo-chk"><input type="checkbox" ${a.done ? 'checked' : ''} onchange="ooToggleAg(${a.id}, this.checked)"></label>
+    <div class="oo-ag-b"><div class="oo-ag-t"><span class="oo-who ${a.mine ? 'oo-me' : ''}">${escapeHtml(a.author_name)}</span>${a.carried ? '<span class="oo-tag">지난 어젠다</span>' : ''}<span class="oo-ag-text">${escapeHtml(a.text)}</span></div>
+      <div class="oo-ag-a"><button class="oo-lnk" onclick="ooToggleCm(${a.id})">💬 ${a.comments.length}</button>${a.mine ? `<button class="oo-lnk" onclick="ooEditAg(${a.id})">수정</button><button class="oo-lnk" onclick="ooDelAg(${a.id})">삭제</button>` : ''}</div>
+      ${_oo.open[a.id] ? `<div class="oo-cms">${a.comments.map(c => `<div class="oo-cm"><b>${escapeHtml(c.author_name)}</b> ${escapeHtml(c.text)} <span class="pm-meta">${ntAgo(c.created_at)}</span>${c.mine ? ` <button class="oo-lnk" onclick="ooDelCm(${c.id})">삭제</button>` : ''}</div>`).join('')}
+        <input id="oo-cm-${a.id}" class="finput" style="padding:8px 12px;font-size:13px" placeholder="코멘트를 입력하고 Enter" onkeydown="if(event.key==='Enter')ooAddCm(${a.id})"></div>` : ''}</div></div>`).join('');
+  const rte = (w, label, html, hint) => `<div class="oo-memo"><div class="oo-memo-h"><b>${label}</b><span class="pm-meta">${hint}</span><span class="oo-tools"><button onclick="ooRte('${w}','bold')"><b>B</b></button><button onclick="ooRte('${w}','italic')"><i>I</i></button><button onclick="ooRte('${w}','insertUnorderedList')">• 목록</button></span><span id="oo-sv-${w}" class="pm-meta oo-sv">${escapeHtml(_oo.saving[w] || '')}</span></div>
+    <div id="oo-memo-${w}" class="oo-rte" contenteditable="true" oninput="ooMemoInput('${w}')" onpaste="ooPaste(event)" data-ph="내용을 입력하세요. 1초 뒤 자동으로 저장됩니다.">${pmSafeHtml(html)}</div></div>`;
+  return head + `${m.status !== 'scheduled' ? `<div class="oo-note">${m.status === 'done' ? '완료된 미팅입니다.' : '취소된 미팅입니다.'}</div>` : ''}
+  <div class="oo-sec"><div class="oo-sec-h">어젠다 <span class="pm-meta">${(m.agenda || []).filter(a => a.done).length}/${(m.agenda || []).length} 완료</span></div>
+    ${ag || '<div class="pm-tbl-empty">아직 어젠다가 없습니다. 아래에서 추가해 보세요.</div>'}
+    <div class="oo-add"><input id="oo-ag-in" class="finput" placeholder="어젠다를 입력하고 Enter" value="${escapeHtml(_oo.draft.ag)}" oninput="ooDraft('ag', this.value)" onkeydown="if(event.key==='Enter')ooAddAg()" maxlength="500"><button class="btn btn-primary btn-sm" onclick="ooAddAg()">추가</button></div>
+    <div class="oo-chips">${OO_SUGGEST.map(s => `<button class="oo-chip" onclick="ooAddAg('${escapeHtml(s)}')">+ ${escapeHtml(s)}</button>`).join('')}</div></div>
+  ${rte('s', '공유 메모', _oo.memo.s ?? m.shared_memo, '두 사람 모두 보고 고칠 수 있습니다')}
+  ${rte('p', '비공개 메모', _oo.memo.p ?? m.private_memo, '나만 볼 수 있습니다')}`;
+}
+function ooSideHtml(){
+  const b = _oo.board; if(!b || b.error) return '';
+  const me = ooMyEmail(), o = b.pair.other, today = pmKstToday();
+  const tabs = `<div class="pr-rtabs"><button class="${_oo.tab === 'act' ? 'on' : ''}" onclick="ooTab('act')">액션 아이템</button><button class="${_oo.tab === 'ref' ? 'on' : ''}" onclick="ooTab('ref')">참고 정보</button></div>`;
+  if(_oo.tab === 'ref'){
+    const g = b.ref?.goals || [];
+    return tabs + (g.length ? `<div class="pm-meta" style="margin:6px 0 10px">${escapeHtml(o.name)}님의 목표${b.ref.cycle ? ' · ' + escapeHtml(b.ref.cycle.name) : ''}</div>` + g.map(x => `<div class="pr-refcard"><div class="pr-refcard-h">${escapeHtml(x.title)} <span class="pm-meta">${x.weight}%</span></div><div class="pr-prog">${pmBar(x.progress_pct, x.state)}<b>${x.progress_pct == null ? '-' : x.progress_pct + '%'}</b>${pmStateChip(x.state)}</div></div>`).join('')
+      : '<div class="pm-tbl-empty">열람 권한이 있는 목표가 없습니다.<div class="pm-meta" style="margin-top:6px">상대가 내 승인권자이거나 내가 상대의 승인권자일 때만 보입니다.</div></div>');
+  }
+  const acts = b.actions || [], open = acts.filter(a => !a.done), done = acts.filter(a => a.done);
+  const row = a => `<div class="oo-act ${a.done ? 'oo-done' : ''}"><label class="oo-chk"><input type="checkbox" ${a.done ? 'checked' : ''} onchange="ooToggleAction(${a.id}, this.checked)"></label>
+    <div class="oo-act-b"><div>${escapeHtml(a.text)}</div><div class="pm-meta"><span class="oo-who ${a.assignee_email === me ? 'oo-me' : ''}">${a.assignee_email === me ? '나' : escapeHtml(o.name)}</span>${a.due ? ` · <span style="${!a.done && a.due < today ? 'color:#B91C1C;font-weight:700' : ''}">${ooDay(a.due)}까지</span>` : ''}${a.meeting_id ? ` · <a href="#" onclick="ooPickMeeting(${a.meeting_id});return false">${ooDay(a.meet_on)} 미팅</a>` : ''}</div></div>
+    <button class="oo-lnk" onclick="ooDelAction(${a.id})" aria-label="삭제">✕</button></div>`;
+  return tabs + `${open.map(row).join('') || '<div class="pm-tbl-empty">진행할 액션 아이템이 없습니다.</div>'}
+    <div class="oo-actadd"><input id="oo-act-t" class="finput" placeholder="액션 아이템 추가" maxlength="500" onkeydown="if(event.key==='Enter')ooAddAction()">
+    <div class="oo-row" style="margin-top:6px"><select id="oo-act-w" class="fselect"><option value="${escapeHtml(me)}">담당: 나</option><option value="${escapeHtml(o.email)}">담당: ${escapeHtml(o.name)}</option></select><input id="oo-act-d" type="date" class="finput" title="기한(선택)"></div>
+    <button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%" onclick="ooAddAction()">추가</button></div>
+    ${done.length ? `<div class="pr-sep" style="margin-top:14px">완료 (${done.length})</div>${done.map(row).join('')}` : ''}`;
+}
+function renderOneOnOne(){
+  if(_oo.me === null){ ooLoadMe(); return `<div class="content-block"><div class="loading"><div class="spinner"></div></div></div>`; }
+  if(Date.now() - _oo.at > 60000 && !_oo.loading) ooLoadMe();
+  const me = _oo.me;
+  if(_oo.pairId == null && me.pairs.length && (window.innerWidth > 900 || _oo.view !== 'list')) _oo.pairId = me.pairs[0].id;
+  if(_oo.pairId != null && me.pairs.some(p => p.id === _oo.pairId) && _oo.board === null && !_oo.bLoading) ooLoadBoard();
+  const list = me.pairs.map(p => `<div class="oo-pair ${p.id === _oo.pairId ? 'on' : ''}" onclick="ooSelectPair(${p.id})"><div class="oo-av">${escapeHtml((p.other.name || '?').slice(0, 1))}</div>
+    <div class="oo-pair-b"><b>${escapeHtml(p.other.name)}</b>${p.other.retired ? ' <span class="oo-tag" style="background:#FEE2E2;color:#B91C1C">퇴직</span>' : ''}<div class="pm-meta">${escapeHtml(p.other.dept || '')} · ${p.next ? ooDay(p.next.meet_on) + (p.next.meet_at ? ' ' + escapeHtml(p.next.meet_at) : '') : '예정 없음'}${p.soon ? ' <span class="oo-dot"></span>' : ''}</div></div></div>`).join('');
+  const sel = me.pairs.some(p => p.id === _oo.pairId);
+  return `
+<div class="page-head"><div class="page-title">🤝 1:1 미팅</div><div class="page-sub">함께 정한 어젠다와 메모를 두 사람만 볼 수 있게 기록합니다. 관리자도 내용은 볼 수 없습니다.</div></div>
+${(_oo.msg && Date.now() < _oo.msg.until) ? `<div class="pm-notice pm-notice-${_oo.msg.type}">${escapeHtml(_oo.msg.text)}</div>` : ''}
+${me.error ? `<div class="pm-notice pm-notice-error">${escapeHtml(me.error)}</div>` : ''}
+<div class="oo-mtabs"><button class="${_oo.view === 'list' ? 'on' : ''}" onclick="ooView('list')">목록</button><button class="${_oo.view === 'board' ? 'on' : ''}" onclick="ooView('board')" ${sel ? '' : 'disabled'}>1:1</button><button class="${_oo.view === 'side' ? 'on' : ''}" onclick="ooView('side')" ${sel ? '' : 'disabled'}>액션·참고</button></div>
+<div class="oo-wrap oo-v-${_oo.view}">
+  <aside class="oo-l"><button class="btn btn-primary btn-sm" style="width:100%;margin-bottom:10px" onclick="ooOpenCreate()">+ 1:1 만들기</button>${list || '<div class="pm-tbl-empty">아직 1:1이 없습니다.<br>위 버튼으로 승인권자나 팀원과 시작해 보세요.</div>'}</aside>
+  <section class="oo-c">${sel ? ooBoardHtml() : '<div class="oo-empty">왼쪽에서 1:1을 고르거나 새로 만들어 주세요.</div>'}</section>
+  <aside class="oo-r">${sel ? ooSideHtml() : ''}</aside>
+</div>${ooModalHtml()}`;
+}
+
 // ── 🔔 알림함(목표·평가·1:1): 폴링 없이 로그인 직후·화면 전환 때 60초가 지났으면 다시 읽음 ──
 let _nt = { items: null, unread: 0, open: false, at: 0, loading: false, more: true };
 const NT_ACTION_KINDS = new Set(['goal_submitted', 'goal_rejected', 'change_requested', 'change_rejected', 'review_returned', 'review_ready_d1', 'review_ready_d2', 'result_open', 'oo_ping']);
@@ -3043,8 +3390,10 @@ function ntEnabled(){ return pmAllowed(); }
     if(p.get('cycle')) link.cycleId = Number(p.get('cycle')) || null;
     if(p.get('email')) link.email = p.get('email').toLowerCase();
     if(p.get('kind')) link.kind = p.get('kind');
+    if(p.get('pair')) link.pairId = Number(p.get('pair')) || null;
+    if(p.get('meeting')) link.meetingId = Number(p.get('meeting')) || null;
     sessionStorage.setItem('hq_go', JSON.stringify(link));
-    ['go', 'cycle', 'email', 'kind', 'id', 'pair'].forEach(k => p.delete(k));
+    ['go', 'cycle', 'email', 'kind', 'id', 'pair', 'meeting'].forEach(k => p.delete(k));
     const rest = p.toString();
     history.replaceState({}, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
   } catch(e){}
@@ -3053,7 +3402,7 @@ function ntDeepLink(){
   let link = null;
   try { link = JSON.parse(sessionStorage.getItem('hq_go') || 'null'); sessionStorage.removeItem('hq_go'); } catch(e){}
   if(!link || !link.page || !ntEnabled()) return false;
-  if(!['reviews', 'team', 'goals'].includes(link.page)) return false;
+  if(!['reviews', 'team', 'goals', 'oneonone'].includes(link.page)) return false;
   // 평가 화면인데 대상자·단계가 없으면 '결과 공개' 안내 메일 → 내 결과 열기
   ntGo({ kind: link.page === 'reviews' && !link.email ? 'result_open' : 'deep', link });
   return true;
@@ -3104,6 +3453,7 @@ function ntGo(item){
     if(l.email) ntWhen(() => _pmTeam && !_pmTeam.loading, () => { if(!_pmTeam.open[l.email]) pmTeamToggle(l.email); });
     return;
   }
+  if(l.page === 'oneonone'){ _nt.open = false; ooGo(l.pairId, l.meetingId); return; }
   if(l.page === 'goals'){ _nt.open = false; _pmTree.tab = 'mine'; nav('goals'); return; }
   _nt.open = false; render();
 }
@@ -3144,6 +3494,7 @@ function renderUserPage(user){
   if(p==='survey') return renderSurveyPage(user, state.sub);
   if(p==='goals' && pmAllowed()) return renderGoals(user);
   if(p==='reviews' && pmAllowed()) return renderReviews(user);
+  if(p==='oneonone' && pmAllowed()) return renderOneOnOne(user);
   if(_pageContent[p]) return _pageContent[p].content_html;
   if(p==='firstday')    return renderFirstDay(user);
   if(p==='mission')     return renderMission(user);
@@ -3214,6 +3565,7 @@ ${(() => {
     return `<div class="dash-two-col">${missionHtml}${surveyHtml}</div>`;
   })()}
 ${renderNtCard()}
+${renderOoCard()}
 ${renderGoalBanner()}
 <div class="page-head">
   <div class="page-title">빠른 메뉴</div>
