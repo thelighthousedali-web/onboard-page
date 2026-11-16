@@ -117,7 +117,11 @@ body.impersonating .layout{margin-top:38px}
 .oo-tag{font-size:11px;border-radius:99px;padding:1px 7px;background:#F3F4F6;color:#6B7280}
 .oo-ag-a{display:flex;gap:10px;margin-top:2px}.oo-lnk{border:0;background:none;color:#6B7280;font-size:12px;cursor:pointer;padding:2px 0}.oo-lnk:hover{color:var(--primary)}
 .oo-cms{margin:6px 0 2px;padding:8px 10px;background:#F9FAFB;border-radius:8px}.oo-cm{font-size:13px;margin-bottom:6px;word-break:break-word}
-.oo-add{display:flex;gap:8px;margin-top:10px}.oo-add .finput{padding:10px 14px}
+.fa-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 4px}.fa-btn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:5px 11px;font-size:12.5px;cursor:pointer;color:#374151}.fa-btn:hover{border-color:var(--primary);color:var(--primary)}
+.fa-chips{display:contents}.fa-chip{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:3px 6px 3px 10px;border-radius:99px;background:#F3F4F6;font-size:12px;color:#374151}.fa-chip i{font-style:normal;color:#9CA3AF}.fa-chip em{font-style:normal}
+.fa-nm{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fa-uploading{color:#6B7280}.fa-error{background:#FEE2E2;color:#B91C1C}.fa-ready{background:#ECFDF5;color:#047857}.fa-saved{background:#F3F4F6;padding-right:10px}.fa-saved a{color:inherit;text-decoration:none;display:inline-flex;gap:5px;align-items:center}.fa-saved a:hover .fa-nm{text-decoration:underline}
+.fa-x{border:0;background:transparent;cursor:pointer;color:#9CA3AF;font-size:12px;padding:0 4px}.fa-x:hover{color:#B91C1C}.fa-err{flex-basis:100%;color:#B91C1C;font-size:12px}.fa-hint{margin-left:auto}.fa-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.oo-memo-files{margin:-4px 0 12px}
+.oo-add .btn{white-space:nowrap}.oo-add{display:flex;gap:8px;margin-top:10px}.oo-add .finput{padding:10px 14px}
 .oo-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.oo-chip{border:1px solid var(--border);background:#fff;border-radius:99px;padding:5px 11px;font-size:12.5px;cursor:pointer;color:#374151}.oo-chip:hover{border-color:var(--primary);color:var(--primary)}
 .oo-memo{margin-bottom:16px}.oo-memo-h{display:flex;gap:10px;align-items:center;margin-bottom:6px;flex-wrap:wrap}.oo-tools button{border:1px solid var(--border);background:#fff;border-radius:6px;padding:2px 8px;font-size:12px;cursor:pointer;margin-right:4px}.oo-sv{margin-left:auto}
 .oo-rte{min-height:110px;border:1.5px solid var(--border);border-radius:9px;padding:12px 14px;font-size:14px;line-height:1.6;outline:none;background:#fff}.oo-rte:focus{border-color:var(--primary)}.oo-rte:empty:before{content:attr(data-ph);color:#9CA3AF}
@@ -1658,6 +1662,81 @@ function renderAdminAll(users){
    데이터는 pm 함수(hr-hub 저장소 supabase/functions/pm)만 다룬다. pm_* 테이블은 공개 키로 못 읽음.
    메뉴는 열린(또는 지난) 목표 사이클이 있을 때만 보인다 → 사이클을 열기 전에는 직원에게 안 보임.
 ════════════════════════════════════════ */
+/* ── 파일 첨부(18단계): 목표 체크인·코멘트(pm)와 1:1 어젠다·공유 메모(oo)가 함께 씀.
+   파일은 함수가 준 서명 주소로 비공개 버킷(pm-files)에 올리고, 글을 저장할 때 fileIds로 붙인다. 받을 때도 함수가 권한을 확인한 짧은 주소를 준다. ── */
+const FA_MAX = 3, FA_MAX_BYTES = 5 * 1024 * 1024;
+const FA_EXT = ['pdf','png','jpg','jpeg','gif','webp','xlsx','xls','csv','docx','doc','pptx','ppt','txt','zip','hwp','hwpx'];
+const _fa = {};        // 칸(slot)별 올리는 중·올린 파일 {items:[{k,name,size,status:uploading|ready|error,fileId,error}], err}
+const _faReady = {};   // 칸별 "올리기 끝나면 할 일"(1:1 공유 메모는 바로 붙임)
+let _faSeq = 0;
+const faFn = slot => String(slot).startsWith('oo') ? ooCall : pmCall;
+const faSlot = slot => (_fa[slot] ||= { items:[], err:'' });
+const faDomId = slot => 'fa-' + String(slot).replace(/[^A-Za-z0-9_-]/g, '_');
+const faSize = n => n < 1024 ? n + 'B' : n < 1048576 ? Math.round(n / 1024) + 'KB' : (n / 1048576).toFixed(1) + 'MB';
+const faIds = slot => (_fa[slot]?.items || []).filter(i => i.status === 'ready').map(i => i.fileId);
+const faBusy = slot => (_fa[slot]?.items || []).some(i => i.status === 'uploading');
+function faDraw(slot){ const el = document.getElementById(faDomId(slot)); if(el) el.innerHTML = faChipsHtml(slot); }
+function faChipsHtml(slot){
+  const st = _fa[slot]; if(!st) return '';
+  return st.items.map(i => `<span class="fa-chip fa-${i.status}" title="${escapeHtml(i.error || '')}">📎 <span class="fa-nm">${escapeHtml(i.name)}</span> <i>${faSize(i.size)}</i>${i.status === 'uploading' ? ' <em>올리는 중…</em>' : i.status === 'error' ? ` <em>${escapeHtml(i.error || '올리지 못했습니다')}</em>` : ''}${i.status !== 'uploading' ? `<button type="button" class="fa-x" onclick="faRemove('${slot}',${i.k})" aria-label="빼기">✕</button>` : ''}</span>`).join('')
+    + (st.err ? `<span class="fa-err">${escapeHtml(st.err)}</span>` : '');
+}
+function faBarHtml(slot){
+  const id = faDomId(slot);
+  return `<div class="fa-bar"><button type="button" class="fa-btn" onclick="document.getElementById('fa-in-${id}').click()">📎 파일 첨부</button><input type="file" id="fa-in-${id}" multiple hidden accept="${FA_EXT.map(e => '.' + e).join(',')}" onchange="faPicked('${slot}',this)"><span id="${id}" class="fa-chips">${faChipsHtml(slot)}</span><span class="pm-meta fa-hint">최대 ${FA_MAX}개 · 5MB</span></div>`;
+}
+// 글에 이미 붙은 파일(누르면 받기, 내가 올린 건 ✕로 삭제). kind: 'pm'(목표) | 'oo'(1:1)
+function faSavedHtml(files, kind){
+  const list = files || []; if(!list.length) return '';
+  return `<div class="fa-list">${list.map(f => `<span class="fa-chip fa-saved"><a href="#" onclick="faOpen('${kind}',${f.id});return false" title="${escapeHtml(f.name)} 받기">📎 <span class="fa-nm">${escapeHtml(f.name)}</span> <i>${faSize(f.size)}</i></a>${f.mine ? `<button type="button" class="fa-x" onclick="faDelSaved('${kind}',${f.id})" aria-label="삭제">✕</button>` : ''}</span>`).join('')}</div>`;
+}
+async function faPicked(slot, input){
+  const files = [...input.files]; input.value = '';
+  const st = faSlot(slot); st.err = ''; st.ctx = typeof _oo !== 'undefined' ? _oo.meetingId : null;
+  const have = slot === 'oomemo' ? (_oo.board?.meeting?.files || []).length : 0; // 1:1 공유 메모는 이미 붙은 파일과 합쳐 3개
+  for(const f of files){
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    const bad = m => { st.err += (st.err ? ' ' : '') + m; };
+    if(st.items.length + have >= FA_MAX){ bad(`파일은 한 글에 ${FA_MAX}개까지 붙일 수 있습니다.`); break; }
+    if(!FA_EXT.includes(ext)){ bad(`'${f.name}'은(는) 올릴 수 없는 형식입니다. (pdf·이미지·엑셀·워드·파워포인트·txt·csv·zip·hwp)`); continue; }
+    if(!f.size){ bad(`'${f.name}'은(는) 빈 파일입니다.`); continue; }
+    if(f.size > FA_MAX_BYTES){ bad(`'${f.name}'은(는) ${faSize(f.size)}로 5MB를 넘습니다.`); continue; }
+    const it = { k: ++_faSeq, name: f.name, size: f.size, status: 'uploading', fileId: null };
+    st.items.push(it); faDraw(slot);
+    faUpload(slot, it, f);
+  }
+  faDraw(slot);
+}
+async function faUpload(slot, it, file){
+  try {
+    const { ok, data } = await faFn(slot)({ action:'file_upload_url', name:file.name, size:file.size });
+    if(!ok) throw new Error(data.error || '올리지 못했습니다');
+    const blob = new File([file], file.name, { type: data.mime }); // 형식은 서버가 정한 값으로(브라우저가 비워 두는 hwp 등)
+    const up = await supa.storage.from('pm-files').uploadToSignedUrl(data.path, data.token, blob);
+    if(up.error) throw new Error(up.error.message || '올리지 못했습니다');
+    it.fileId = data.fileId; it.status = 'ready';
+  } catch(e){ it.status = 'error'; it.error = String(e?.message || e); }
+  faDraw(slot);
+  if(it.status === 'ready' && _faReady[slot]) _faReady[slot](slot);
+}
+function faRemove(slot, k){
+  const st = _fa[slot]; const it = st?.items.find(i => i.k === k); if(!it) return;
+  st.items = st.items.filter(i => i.k !== k); faDraw(slot);
+  if(it.status === 'ready' && it.fileId) faFn(slot)({ action:'file_delete', fileId: it.fileId }); // 올렸다가 뺀 파일은 바로 지움
+}
+async function faOpen(kind, id){
+  const { ok, data } = await (kind === 'oo' ? ooCall : pmCall)({ action:'file_url', fileId:id });
+  if(!ok){ alert(data.error || '파일을 열지 못했습니다.'); return; }
+  const a = document.createElement('a'); a.href = data.url; a.download = data.name || ''; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+async function faDelSaved(kind, id){
+  if(!confirm('이 파일을 삭제할까요? 삭제하면 되돌릴 수 없습니다.')) return;
+  const { ok, data } = await (kind === 'oo' ? ooCall : pmCall)({ action:'file_delete', fileId:id });
+  if(!ok){ alert(data.error || '삭제하지 못했습니다.'); return; }
+  if(kind === 'oo') await ooLoadBoard(); else await pmRefresh();
+}
+
 const PM_URL = `${SUPA_CFG.url}/functions/v1/pm`;
 let _pmMe = null;      // pm 'me' 결과(메뉴·대시보드 안내용). 실패하면 {cycles:[]}
 let _pmMeLoading = false;
@@ -1999,11 +2078,11 @@ function pmPanelTab(t){ if(_pmPanel){ _pmPanel.tab = t; render(); } }
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && _pmPanel && state.page === 'goals') pmClosePanel(); });
 function pmInitCheckin(id){
   const g = (_pmSheet?.goals||[]).find(x=>x.id===id); if(!g) return;
-  _pmCk = { goalId:id, date: pmKstToday(), state: g.state && g.state !== 'not_started' ? g.state : 'in_progress', stateOpen:false,
+  delete _fa.ck; _pmCk = { goalId:id, date: pmKstToday(), state: g.state && g.state !== 'not_started' ? g.state : 'in_progress', stateOpen:false,
     value: g.current_value ?? '', values: pmMetricsOf(g).map(m=>m.current ?? ''), progress: g.progress ?? '', override: g.progress_override ?? '', showOverride: g.progress_override != null, note:'' };
 }
 function pmStartCheckin(id){ pmOpenPanel(id, 'checkin'); setTimeout(()=>document.getElementById('pm-ck-first')?.focus(), 0); }
-function pmCancelCheckin(){ if(_pmPanel) _pmPanel.mode = 'view'; _pmCk = null; render(); }
+function pmCancelCheckin(){ if(_pmPanel) _pmPanel.mode = 'view'; _pmCk = null; delete _fa.ck; render(); }
 function pmCkState(s){ if(_pmCk){ _pmCk.state = s; _pmCk.stateOpen = false; render(); } }
 function pmRte(cmd){
   const ed = document.getElementById('pm-rte'); if(!ed) return;
@@ -2018,8 +2097,9 @@ async function pmSaveCheckin(){
   const g = (_pmSheet?.goals||[]).find(x=>x.id===_pmCk.goalId); if(!g) return;
   const plain = (ed?.innerText || '').trim(); // 진행 상황은 필수
   if(plain.length < 2){ pmNotify('error', '진행 상황을 적어 주세요.'); render(); return; }
+  if(faBusy('ck')){ pmNotify('error', '파일을 올리는 중입니다. 올리기가 끝난 뒤 저장해 주세요.'); render(); return; }
   _pmBusy = true;
-  const body = { action:'checkin', goalId: g.id, checkin_date: _pmCk.date, state: _pmCk.state, note: _pmCk.note };
+  const body = { action:'checkin', goalId: g.id, checkin_date: _pmCk.date, state: _pmCk.state, note: _pmCk.note, fileIds: faIds('ck') };
   const mode = g.progress_mode || 'metric';
   if(mode === 'manual') body.progress = _pmCk.progress === '' ? '' : Number(_pmCk.progress);
   else if(mode === 'metric'){ body.values = (_pmCk.values||[]).map(v=>v === '' ? '' : Number(v)); if(_pmCk.showOverride && _pmCk.override !== '') body.progress_override = Number(_pmCk.override); }
@@ -2027,19 +2107,21 @@ async function pmSaveCheckin(){
   _pmBusy = false;
   if(!ok){ pmNotify('error', data.error || '체크인을 저장하지 못했습니다.'); render(); return; }
   pmNotify('success', `체크인했습니다. 진척도 ${data.goal?.progress_pct ?? '-'}%`);
-  _pmCk = null; _pmPanel = { goalId: g.id, mode:'view', tab:'checkin' }; _pmMe = null;
+  _pmCk = null; delete _fa.ck; _pmPanel = { goalId: g.id, mode:'view', tab:'checkin' }; _pmMe = null;
   await pmRefresh();
 }
 async function pmRefresh(){ const y = window.scrollY; await loadPmSheet(); if(_pmPanel?.email && _pmTeam) await pmLoadMember(_pmPanel.email); window.scrollTo(0, y); }
 function pmCmSet(id, key, val){ _pmCm[id] = { body:'', private:false, ...(_pmCm[id]||{}), [key]: val }; }
 async function pmAddComment(id){
   const c = _pmCm[id] || {};
-  if(_pmBusy || !String(c.body||'').trim()) return;
+  const slot = 'cm:' + id;
+  if(_pmBusy || (!String(c.body||'').trim() && !faIds(slot).length)) return;
+  if(faBusy(slot)){ pmNotify('error', '파일을 올리는 중입니다. 올리기가 끝난 뒤 남겨 주세요.'); render(); return; }
   _pmBusy = true;
-  const { ok, data } = await pmCall({ action:'comment_add', goalId:id, body:c.body, private: !!c.private });
+  const { ok, data } = await pmCall({ action:'comment_add', goalId:id, body:c.body || '', private: !!c.private, fileIds: faIds(slot) });
   _pmBusy = false;
   if(!ok){ pmNotify('error', data.error || '코멘트를 남기지 못했습니다.'); render(); return; }
-  delete _pmCm[id];
+  delete _pmCm[id]; delete _fa[slot];
   await pmRefresh();
 }
 async function pmDelComment(cid){
@@ -2365,7 +2447,7 @@ function pmPanelHtml(d){
       </div>
       <div id="pm-rte" class="pm-rte" contenteditable="true" data-ph="어떤 성과를 이뤄내고 있는지 공유하세요" oninput="_pmCk.note=this.innerHTML">${pmSafeHtml(ck.note)}</div>
     </div>
-    <div class="pm-meta" style="margin-top:6px">파일 첨부는 아직 지원하지 않습니다. 자료는 링크로 남겨 주세요.</div>` : '';
+    ${faBarHtml('ck')}` : '';
   const tab = _pmPanel.tab || 'checkin';
   const ordered = [...cks].sort((a,b)=>String(a.checkin_date).localeCompare(String(b.checkin_date)) || String(a.created_at).localeCompare(String(b.created_at)));
   const name = d.employee?.name || '';
@@ -2378,12 +2460,13 @@ function pmPanelHtml(d){
     const valTxt = !k.auto && mode === 'metric' && vals.length ? ` <span class="pm-meta">(${vals.map((v,vi)=>`${escapeHtml(ms[vi]?.name || '현재 값')} ${pmNum(v)}${escapeHtml(ms[vi]?.unit || '')}`).join(' · ')}${k.progress_override != null ? ' · 진척도 직접 수정' : ''})</span>` : '';
     return `<div class="pm-feed"><div class="pm-feed-h"><span class="pm-av">${escapeHtml(name.slice(-2))}</span><b>${escapeHtml(name)}</b><span class="pm-meta">${escapeHtml(k.checkin_date || pmDay(k.created_at))}</span>${k.auto ? '<span class="pm-tag">자동</span>' : pmStateChip(k.state)}</div>
       <div class="pm-feed-s">${sentence}${valTxt}${!k.auto && pv && !pv.auto && pv.state !== k.state ? ` <span class="pm-meta">상태 ${PM_STATE[pv.state]?.[0]||''} → ${PM_STATE[k.state]?.[0]||''}</span>` : ''}</div>
-      ${k.note ? `<div class="pm-feed-b">${pmSafeHtml(k.note)}</div>` : ''}</div>`; }).reverse().join('') || `<div class="pm-empty">아직 체크인 기록이 없습니다.${d.canCheckin ? ' [체크인 하기]로 첫 진행 상황을 남겨 보세요.' : ''}</div>`;
+      ${k.note ? `<div class="pm-feed-b">${pmSafeHtml(k.note)}</div>` : ''}${faSavedHtml(k.files, 'pm')}</div>`; }).reverse().join('') || `<div class="pm-empty">아직 체크인 기록이 없습니다.${d.canCheckin ? ' [체크인 하기]로 첫 진행 상황을 남겨 보세요.' : ''}</div>`;
   const cm = _pmCm[g.id] || {};
   const cmFeed = `
     <textarea id="pm-cm-in" class="pm-ta" rows="2" maxlength="2000" placeholder="리더에게 남길 말, 도움이 필요한 점" oninput="pmCmSet(${g.id},'body',this.value)">${escapeHtml(cm.body||'')}</textarea>
+    ${faBarHtml('cm:' + g.id)}
     <div class="pm-cm-foot"><label class="pm-meta"><input type="checkbox" ${cm.private?'checked':''} onchange="pmCmSet(${g.id},'private',this.checked)"> 담당자·리더만 보기</label><button class="btn btn-sm btn-primary" onclick="pmAddComment(${g.id})">코멘트 남기기</button></div>
-    ${[...cms].reverse().map(m=>`<div class="pm-feed"><div class="pm-feed-h"><span class="pm-av">${escapeHtml(String(m.author_name||'').slice(-2))}</span><b>${escapeHtml(m.author_name || m.author_email)}</b><span class="pm-meta">${pmDay(m.created_at)}</span>${m.private ? '<span class="pm-lock">🔒 담당자·리더만</span>' : ''}${m.mine ? `<button class="pm-link" style="margin-left:auto" onclick="pmDelComment(${m.id})">삭제</button>` : ''}</div><div class="pm-feed-b pm-pre">${escapeHtml(m.body)}</div></div>`).join('') || '<div class="pm-empty">코멘트가 없습니다.</div>'}`;
+    ${[...cms].reverse().map(m=>`<div class="pm-feed"><div class="pm-feed-h"><span class="pm-av">${escapeHtml(String(m.author_name||'').slice(-2))}</span><b>${escapeHtml(m.author_name || m.author_email)}</b><span class="pm-meta">${pmDay(m.created_at)}</span>${m.private ? '<span class="pm-lock">🔒 담당자·리더만</span>' : ''}${m.mine ? `<button class="pm-link" style="margin-left:auto" onclick="pmDelComment(${m.id})">삭제</button>` : ''}</div><div class="pm-feed-b pm-pre">${escapeHtml(m.body)}</div>${faSavedHtml(m.files, 'pm')}</div>`).join('') || '<div class="pm-empty">코멘트가 없습니다.</div>'}`;
   const hist = pmGoalHistory(g, d);
   const histFeed = hist.map(h=>`<div class="pm-feed"><div class="pm-feed-h"><span class="pm-av">${escapeHtml(String(h.who).slice(-2))}</span><b>${escapeHtml(h.who)}</b><span class="pm-meta">${pmDay(h.at)}</span><span class="pm-tag">${escapeHtml(h.act)}</span></div>
       ${h.lines.length ? `<ul class="pm-hist-ul">${h.lines.map(l=>`<li>${escapeHtml(l)}</li>`).join('')}</ul>` : ''}${h.note ? `<div class="pm-feed-b pm-pre">${escapeHtml(h.note)}</div>` : ''}</div>`).join('') || '<div class="pm-empty">변경 내역이 없습니다.</div>';
@@ -3079,7 +3162,7 @@ const OO_SUGGEST = ['이번 주 업무에서 막힌 점', '목표 진행 상황 
 function ooFresh(){ return { me:null, at:0, loading:false, pairId:null, meetingId:null, board:null, bkey:'', bLoading:false, tab:'act', modal:null, menu:false, view:'list', msg:null, open:{}, memo:{ s:null, p:null }, saving:{ s:'', p:'' }, timers:{}, draft:{ ag:'', act:'', due:'' }, emps:null, busy:false }; }
 let _oo = ooFresh();
 _oo.memoKey = null;
-function ooReset(){ Object.values(_oo.timers || {}).forEach(clearTimeout); _oo = ooFresh(); }
+function ooReset(){ delete _fa.ooag; delete _fa.oomemo; Object.values(_oo.timers || {}).forEach(clearTimeout); _oo = ooFresh(); }
 async function ooCall(body){
   try {
     const res = await fetch(OO_URL, { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${SUPA_CFG.key}` }, body: JSON.stringify({ portalToken: DB.getToken(), ...body }) });
@@ -3119,11 +3202,11 @@ ${acts.length ? `<div class="oo-sub" style="margin-top:10px">내 액션 아이�
 }
 function ooGo(pairId, meetingId){
   ooFlush();
-  _oo.pairId = pairId; _oo.meetingId = meetingId || null; _oo.board = null; _oo.bkey = ''; _oo.view = 'board'; _oo.memo = { s:null, p:null };
+  delete _fa.ooag; delete _fa.oomemo; _oo.pairId = pairId; _oo.meetingId = meetingId || null; _oo.board = null; _oo.bkey = ''; _oo.view = 'board'; _oo.memo = { s:null, p:null };
   nav('oneonone');
 }
-function ooSelectPair(id){ ooFlush(); _oo.pairId = id; _oo.meetingId = null; _oo.board = null; _oo.bkey = ''; _oo.view = 'board'; _oo.memo = { s:null, p:null }; _oo.menu = false; render(); }
-function ooPickMeeting(id){ ooFlush(); _oo.meetingId = Number(id); _oo.board = null; _oo.bkey = ''; _oo.memo = { s:null, p:null }; _oo.menu = false; render(); }
+function ooSelectPair(id){ ooFlush(); delete _fa.ooag; delete _fa.oomemo; _oo.pairId = id; _oo.meetingId = null; _oo.board = null; _oo.bkey = ''; _oo.view = 'board'; _oo.memo = { s:null, p:null }; _oo.menu = false; render(); }
+function ooPickMeeting(id){ ooFlush(); delete _fa.ooag; delete _fa.oomemo; _oo.meetingId = Number(id); _oo.board = null; _oo.bkey = ''; _oo.memo = { s:null, p:null }; _oo.menu = false; render(); }
 function ooView(v){ _oo.view = v; render(); }
 async function ooLoadBoard(){
   const key = `${_oo.pairId}:${_oo.meetingId || ''}`;
@@ -3155,8 +3238,9 @@ async function ooDo(body, okMsg){
 function ooDraft(key, v){ _oo.draft[key] = v; }
 async function ooAddAg(text){
   const t = String(text ?? _oo.draft.ag ?? '').trim(); if(!t || !_oo.meetingId) return;
-  const d = await ooDo({ action:'agenda_add', meetingId:_oo.meetingId, text:t }); if(!d) return;
-  _oo.draft.ag = ''; await ooLoadBoard();
+  if(faBusy('ooag')){ ooMsg('error', '파일을 올리는 중입니다. 올리기가 끝난 뒤 추가해 주세요.'); render(); return; }
+  const d = await ooDo({ action:'agenda_add', meetingId:_oo.meetingId, text:t, fileIds: faIds('ooag') }); if(!d) return;
+  _oo.draft.ag = ''; delete _fa.ooag; await ooLoadBoard();
 }
 async function ooToggleAg(id, done){ const d = await ooDo({ action:'agenda_update', id, done }); await ooLoadBoard(); }
 async function ooEditAg(id){
@@ -3191,6 +3275,17 @@ async function ooMemoSave(which){
   if(ok && _oo.board?.meeting){ if(which === 's') _oo.board.meeting.shared_memo = html; else _oo.board.meeting.private_memo = html; }
 }
 function ooFlush(){ ['s', 'p'].forEach(w => { if(_oo.timers[w]) ooMemoSave(w); }); }
+// 공유 메모 첨부: 올리기가 모두 끝나면 바로 이 미팅에 붙인다(메모 글자와 별개로 저장)
+async function ooMemoAttach(){
+  const st = _fa.oomemo; if(!st || faBusy('oomemo')) return;
+  const ids = faIds('oomemo'), mid = st.ctx; if(!ids.length || !mid || mid !== _oo.meetingId) return;
+  const { ok, data } = await ooCall({ action:'memo_save', meetingId:mid, fileIds: ids });
+  if(!ok){ st.items = st.items.filter(i => i.status !== 'ready'); st.err = data.error || '파일을 붙이지 못했습니다.'; render(); return; }
+  if(st.err) st.items = []; else delete _fa.oomemo; // 일부만 붙은 경우(개수 초과 등) 안내는 남겨 둔다
+  if(_oo.board?.meeting && _oo.board.meeting.id === mid) _oo.board.meeting.files = data.files || [];
+  render();
+}
+_faReady.oomemo = ooMemoAttach;
 // ── 미팅 ──
 async function ooPing(){ const d = await ooDo({ action:'ping', meetingId:_oo.meetingId }); if(d){ ooMsg('success', d.sent ? '상대에게 확인을 요청했습니다.' : '오늘은 이미 확인을 요청했습니다.'); render(); } }
 async function ooSetStatus(status){
@@ -3320,7 +3415,7 @@ function ooBoardHtml(){
       <button onclick="ooOpenMeet('recur')">반복 설정</button><button onclick="ooRefresh()">새로고침</button><button onclick="ooArchive()" style="color:#B91C1C">1:1 보관</button></div>` : ''}</div></div></div>`;
   if(!m) return head + `<div class="oo-empty">아직 미팅이 없습니다.<div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="ooOpenMeet('new')">+ 첫 미팅 추가</button></div></div>`;
   const ag = (m.agenda || []).map(a => `<div class="oo-ag ${a.done ? 'oo-done' : ''}"><label class="oo-chk"><input type="checkbox" ${a.done ? 'checked' : ''} onchange="ooToggleAg(${a.id}, this.checked)"></label>
-    <div class="oo-ag-b"><div class="oo-ag-t"><span class="oo-who ${a.mine ? 'oo-me' : ''}">${escapeHtml(a.author_name)}</span>${a.carried ? '<span class="oo-tag">지난 어젠다</span>' : ''}<span class="oo-ag-text">${escapeHtml(a.text)}</span></div>
+    <div class="oo-ag-b"><div class="oo-ag-t"><span class="oo-who ${a.mine ? 'oo-me' : ''}">${escapeHtml(a.author_name)}</span>${a.carried ? '<span class="oo-tag">지난 어젠다</span>' : ''}<span class="oo-ag-text">${escapeHtml(a.text)}</span></div>${faSavedHtml(a.files, 'oo')}
       <div class="oo-ag-a"><button class="oo-lnk" onclick="ooToggleCm(${a.id})">💬 ${a.comments.length}</button>${a.mine ? `<button class="oo-lnk" onclick="ooEditAg(${a.id})">수정</button><button class="oo-lnk" onclick="ooDelAg(${a.id})">삭제</button>` : ''}</div>
       ${_oo.open[a.id] ? `<div class="oo-cms">${a.comments.map(c => `<div class="oo-cm"><b>${escapeHtml(c.author_name)}</b> ${escapeHtml(c.text)} <span class="pm-meta">${ntAgo(c.created_at)}</span>${c.mine ? ` <button class="oo-lnk" onclick="ooDelCm(${c.id})">삭제</button>` : ''}</div>`).join('')}
         <input id="oo-cm-${a.id}" class="finput" style="padding:8px 12px;font-size:13px" placeholder="코멘트를 입력하고 Enter" onkeydown="if(event.key==='Enter')ooAddCm(${a.id})"></div>` : ''}</div></div>`).join('');
@@ -3330,8 +3425,10 @@ function ooBoardHtml(){
   <div class="oo-sec"><div class="oo-sec-h">어젠다 <span class="pm-meta">${(m.agenda || []).filter(a => a.done).length}/${(m.agenda || []).length} 완료</span></div>
     ${ag || '<div class="pm-tbl-empty">아직 어젠다가 없습니다. 아래에서 추가해 보세요.</div>'}
     <div class="oo-add"><input id="oo-ag-in" class="finput" placeholder="어젠다를 입력하고 Enter" value="${escapeHtml(_oo.draft.ag)}" oninput="ooDraft('ag', this.value)" onkeydown="if(event.key==='Enter')ooAddAg()" maxlength="500"><button class="btn btn-primary btn-sm" onclick="ooAddAg()">추가</button></div>
+    ${faBarHtml('ooag')}
     <div class="oo-chips">${OO_SUGGEST.map(s => `<button class="oo-chip" onclick="ooAddAg('${escapeHtml(s)}')">+ ${escapeHtml(s)}</button>`).join('')}</div></div>
   ${rte('s', '공유 메모', _oo.memo.s ?? m.shared_memo, '두 사람 모두 보고 고칠 수 있습니다')}
+  <div class="oo-memo-files">${faSavedHtml(m.files, 'oo')}${faBarHtml('oomemo')}</div>
   ${rte('p', '비공개 메모', _oo.memo.p ?? m.private_memo, '나만 볼 수 있습니다')}`;
 }
 function ooSideHtml(){
