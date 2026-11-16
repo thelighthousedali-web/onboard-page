@@ -1760,7 +1760,7 @@ async function pmCall(body){
     return { ok: false, status: 0, data: { error: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.' } };
   }
 }
-function pmReset(){ prReset(); ntReset(); ooReset(); _pmTeam = null; _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; _pmOpen = {}; _pmCk = null; _pmChange = null; _pmCm = {}; }
+function pmReset(){ prReset(); ntReset(); ooReset(); _pmVis = null; _pmTeam = null; _pmMe = null; _pmSheet = null; _pmDraft = null; _pmNotice = null; _pmOpen = {}; _pmCk = null; _pmChange = null; _pmCm = {}; }
 let _pmOpen = {};     // 펼친 목표(기록·코멘트) {goalId:true}
 let _pmCk = null;     // 작성 중인 체크인 {goalId, value, progress, state, note}
 let _pmChange = null; // 작성 중인 변경 요청 {reason}
@@ -1771,13 +1771,18 @@ async function loadPmMe(){
   _pmMeLoading = true;
   const { ok, data } = await pmCall({ action: 'me' });
   _pmMeLoading = false;
-  _pmMe = ok ? data : { cycles: [] };
-  if(ok && (data.cycles||[]).length) render(); // 메뉴·대시보드 안내가 생길 때만 다시 그림
+  _pmVis = !!(ok && data.visible === true);   // 서버가 정한 공개 범위(HR 허브 > 목표 관리 > 공개 설정)
+  _pmMe = _pmVis ? data : { cycles: [] };
+  render(); // 공개 대상이면 메뉴·알림·대시보드 안내를 그림(비공개면 아무것도 안 바뀜)
 }
 
-// 목표 메뉴는 완성 전까지 지정한 사람에게만(2026-11-13 사용자 지시: 김강현만)
-const PM_ALLOW = ['thelighthouse@hecto.co.kr'];
-function pmAllowed(){ return PM_ALLOW.includes(String(DB.getCurrent()?.email || '').toLowerCase()); }
+// 목표·평가·1:1 메뉴를 볼 수 있는지는 서버가 정함(pm 'me'의 visible). 처음엔 모르므로(null) 한 번 물어보고 그동안은 숨김.
+let _pmVis = null;
+function pmAllowed(){
+  if(!DB.getCurrent() || !DB.getToken()) return false;
+  if(_pmVis === null && !_pmMeLoading) loadPmMe();
+  return _pmVis === true;
+}
 function renderGoalNavItem(){
   if(!pmAllowed()) return '';
   if(_pmMe === null){ loadPmMe(); return ''; }
