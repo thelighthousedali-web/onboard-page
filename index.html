@@ -714,7 +714,10 @@ const SUPA_CFG = {
 // GATED_TABLES에 든 표의 /rest/v1 요청은 공개 키로 보내지 않고 db-gate 함수로 보낸다(포털 로그인 토큰으로 서버가 확인).
 // 화면의 supa.from('표')... 코드는 그대로. 표를 넘길 때는 db-gate의 POLICY와 DB의 anon 권한 회수를 같이 해야 한다.
 const GATED_TABLES = new Set(['login_log', // 2단계(11-17)
-  'survey_responses', 'survey_windows', 'mail_log', 'onboarding_mission_status', 'onboarding_schedule']); // 3단계(11-17): 본인 직원 행만
+  'survey_responses', 'survey_windows', 'mail_log', 'onboarding_mission_status', 'onboarding_schedule', // 3단계(11-17): 본인 직원 행만
+  'employees']); // 5단계(11-17): 이름·부서·메일·직위 같은 명부 열은 전 직원(1:1 상대 찾기), 그 밖의 열은 본인 행만
+// 읽기는 공개 키 그대로 두고(로그인 전 화면도 씀) 쓰기·삭제만 서버 함수로 보내는 표 — 화면 문구 수정은 온보딩 허브 관리자 계정만
+const GATED_WRITE_ONLY = new Set(['page_content']);
 const DB_GATE_URL = `${SUPA_CFG.url}/functions/v1/db-gate`;
 let _gateExpiredShown = false;
 function gatedFetch(input, init){
@@ -723,6 +726,7 @@ function gatedFetch(input, init){
     url = new URL(typeof input === 'string' ? input : input.url);
     const m = /^\/rest\/v1\/([a-z_][a-z0-9_]*)$/.exec(url.pathname);
     if (m && GATED_TABLES.has(m[1])) table = m[1];
+    else if (m && GATED_WRITE_ONLY.has(m[1]) && !['GET','HEAD'].includes(String((init && init.method) || 'GET').toUpperCase())) table = m[1];
   } catch(e){ /* 주소를 못 읽으면 원래 경로 */ }
   if (!table) return fetch(input, init);
   return gateRequest(url, init);
