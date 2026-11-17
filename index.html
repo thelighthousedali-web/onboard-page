@@ -710,7 +710,41 @@ const SUPA_CFG = {
   url: 'https://lzsfdbspvypljsyviakh.supabase.co',
   key: 'sb_publishable_pEMmU4vVPtn7EteLHpOByw_nJZiCpQc',
 };
-const supa = supabase.createClient(SUPA_CFG.url, SUPA_CFG.key);
+// ── 공개 키 잠금(2026-11-17, hr-hub 저장소 작업지시서_공개키_잠금.md) ──
+// GATED_TABLES에 든 표의 /rest/v1 요청은 공개 키로 보내지 않고 db-gate 함수로 보낸다(포털 로그인 토큰으로 서버가 확인).
+// 화면의 supa.from('표')... 코드는 그대로. 표를 넘길 때는 db-gate의 POLICY와 DB의 anon 권한 회수를 같이 해야 한다.
+const GATED_TABLES = new Set([]);
+const DB_GATE_URL = `${SUPA_CFG.url}/functions/v1/db-gate`;
+let _gateExpiredShown = false;
+function gatedFetch(input, init){
+  let table = null, url = null;
+  try {
+    url = new URL(typeof input === 'string' ? input : input.url);
+    const m = /^\/rest\/v1\/([a-z_][a-z0-9_]*)$/.exec(url.pathname);
+    if (m && GATED_TABLES.has(m[1])) table = m[1];
+  } catch(e){ /* 주소를 못 읽으면 원래 경로 */ }
+  if (!table) return fetch(input, init);
+  return gateRequest(url, init);
+}
+async function gateRequest(url, init){
+  const hd = new Headers((init && init.headers) || {});
+  const tok = DB.getToken();
+  const body = {
+    method: String((init && init.method) || 'GET').toUpperCase(), path: url.pathname, query: url.search.replace(/^\?/, ''),
+    headers: { prefer: hd.get('prefer'), accept: hd.get('accept'), range: hd.get('range') },
+    body: (init && typeof init.body === 'string') ? init.body : null,
+    portalToken: tok,
+  };
+  const res = tok
+    ? await fetch(DB_GATE_URL, { method: 'POST', signal: init && init.signal, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPA_CFG.key}`, apikey: SUPA_CFG.key }, body: JSON.stringify(body) })
+    : new Response(JSON.stringify({ message: '다시 로그인해야 이 데이터를 볼 수 있습니다', code: 'DBGATE401' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+  if (res.status === 401 && !_gateExpiredShown){ // 로그인이 만료된 경우 한 번만 안내
+    _gateExpiredShown = true;
+    setTimeout(() => alert('로그인이 만료됐습니다. 다시 로그인해주세요.'), 0);
+  }
+  return res;
+}
+const supa = supabase.createClient(SUPA_CFG.url, SUPA_CFG.key, { global: { fetch: gatedFetch } });
 // 로그인·가입·비밀번호 변경·계정 관리·대행 로그인은 portal-auth 함수(hr-hub 저장소 supabase/functions/portal-auth)를 거친다(2026-11-12).
 // 전에는 onboarding_users 전체(비밀번호 포함)를 공개 키로 받아 브라우저에서 비교했는데, 비밀번호를 서버에서만 다루도록 바꿈.
 const PORTAL_AUTH_URL = `${SUPA_CFG.url}/functions/v1/portal-auth`;
