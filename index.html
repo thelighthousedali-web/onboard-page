@@ -713,7 +713,8 @@ const SUPA_CFG = {
 // ── 공개 키 잠금(2026-11-17, hr-hub 저장소 작업지시서_공개키_잠금.md) ──
 // GATED_TABLES에 든 표의 /rest/v1 요청은 공개 키로 보내지 않고 db-gate 함수로 보낸다(포털 로그인 토큰으로 서버가 확인).
 // 화면의 supa.from('표')... 코드는 그대로. 표를 넘길 때는 db-gate의 POLICY와 DB의 anon 권한 회수를 같이 해야 한다.
-const GATED_TABLES = new Set(['login_log']); // 2단계(11-17)
+const GATED_TABLES = new Set(['login_log', // 2단계(11-17)
+  'survey_responses', 'survey_windows', 'mail_log', 'onboarding_mission_status', 'onboarding_schedule']); // 3단계(11-17): 본인 직원 행만
 const DB_GATE_URL = `${SUPA_CFG.url}/functions/v1/db-gate`;
 let _gateExpiredShown = false;
 function gatedFetch(input, init){
