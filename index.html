@@ -448,6 +448,11 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .pm-lv{display:inline-block;font-size:11px;font-weight:800;padding:1px 7px;border-radius:999px;margin-right:6px;background:#F3F4F6;color:#374151}
 .pm-lv-company{background:#FFF0EB;color:#C2410C}.pm-lv-division{background:#EFF6FF;color:#1D4ED8}.pm-lv-team{background:#ECFDF5;color:#047857}
 /* 내 리뷰(평가) */
+.pr-conv-note{background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;font-size:13px;color:#9A3412;margin-bottom:14px}
+.pr-skill-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 6px}
+.pr-skill-chip{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;background:#F3F4F6;color:#374151}
+.pr-skill-chip.pts{background:#FFF1E8;color:#C2410C}
+.pr-skill-note{font-size:12.5px;color:#4B5563;background:#F9FAFB;border-radius:8px;padding:7px 10px;margin:4px 0;line-height:1.5}
 .pr-dot{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:999px;background:var(--primary);color:#fff;font-size:11px;font-weight:800;text-align:center;line-height:18px}
 .pr-task{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:14px 4px;border-bottom:1px solid #F1F2F4}
 .pr-task-l{display:flex;align-items:center;gap:12px}.pr-task-r{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -2748,6 +2753,16 @@ const PR_STEP = { self:'셀프', d1:'하향 1차', d2:'하향 2차' };
 const PR_ST = { none:'작성 전', draft:'작성중', submitted:'제출 완료', returned:'반려 · 수정 필요' };
 const PR_GRADE_LIST = ['S', 'A', 'B', 'C'];
 let _prMe = null, _prMeLoading = false, _prList = null, _prCycleId = null, _prRv = null, _prBusy = false, _prRvY = 0;
+// 정규직 전환 심사(2026-11): 연말 평가와 같은 화면을 쓰되 사이클 kind가 'conversion'이면 규칙·문항이 다르다.
+// 연말 평가가 아직 공개 전이어도 전환 심사의 대상자·평가자는 이 메뉴를 쓴다(서버가 conv_cycles로 알려줌).
+const prCycles = () => { const m = new Map(); [...(_prMe?.cycles || []), ...(_prMe?.conv_cycles || [])].forEach(c => m.set(c.id, c)); return [...m.values()]; };
+const prIsConv = c => !!c && c.kind === 'conversion';
+function prAllowed(){ return pmAllowed() || (!!DB.getCurrent() && !!DB.getToken() && (_prMe?.conv_cycles || []).length > 0); }
+const PR_KIND_CONV = { self:'본인평가', d1:'1차 평가 · 팀장', d2:'2차 평가 · 실장' };
+const prKindName = (kind, c) => (prIsConv(c) ? PR_KIND_CONV : PR_KIND)[kind] || kind;
+const prSkillDefs = () => (_prRv?.d?.cycle?.settings?.skills || []);
+const prConvNow = () => prIsConv(_prRv?.d?.cycle);
+const prOverallLabel = () => (prConvNow() && _prRv.kind !== 'self' ? ((_prRv.d.cycle.settings.labels || {})[_prRv.kind] || '종합 의견') : '종합 의견');
 
 async function prCall(body){
   try {
@@ -2768,20 +2783,20 @@ async function prLoadMe(){
   _prMeLoading = true;
   const { ok, data } = await prCall({ action: 'me' });
   _prMeLoading = false;
-  _prMe = ok ? data : { cycles: [], tasks: [] };
-  if(ok && (data.cycles||[]).length) render(); // 메뉴가 새로 생길 때만 다시 그림
+  _prMe = ok ? data : { cycles: [], conv_cycles: [], tasks: [] };
+  if(ok && ((data.cycles||[]).length || (data.conv_cycles||[]).length) || state.page === 'reviews') render(); // 메뉴가 새로 생길 때만 다시 그림
 }
 function renderReviewNavItem(){
-  if(!pmAllowed()) return '';
+  if(!DB.getCurrent() || !DB.getToken()) return '';
   if(_prMe === null){ prLoadMe(); return ''; }
-  if(!(_prMe.cycles||[]).length) return '';
+  if(!prCycles().length || !prAllowed()) return '';
   const n = (_prMe.tasks||[]).filter(t => t.open).length;
   return `<div class="nav-item ${state.page==='reviews'?'active':''}" data-nav="reviews"><span class="ni">🧾</span>내 리뷰${n ? ` <span class="pr-dot">${n}</span>` : ''}</div>`;
 }
 const prMD = s => { if(!s) return ''; const [, m, d] = String(s).split('-'); return `${Number(m)}.${Number(d)}`; };
 const prRange = (a, b) => (a || b) ? `${prMD(a)} ~ ${prMD(b)}` : '';
 async function prLoadList(){
-  const cs = _prMe?.cycles || [];
+  const cs = prCycles();
   if(!_prCycleId || !cs.some(c => c.id === _prCycleId)) _prCycleId = (cs.find(c => c.status === 'open') || cs[0])?.id || null;
   if(!_prCycleId){ _prList = { cycle: null, tasks: [] }; render(); return; }
   const { ok, data } = await prCall({ action: 'my_reviews', cycleId: _prCycleId });
@@ -2794,12 +2809,12 @@ function renderReviews(user){
   if(_prMe === null){ prLoadMe(); return `<div class="content-block"><div class="loading"><div class="spinner"></div></div></div>`; }
   if(_prList === null){ prLoadList(); return `<div class="content-block"><div class="loading"><div class="spinner"></div></div></div>`; }
   if(_prList.error) return `<div class="page-head"><div class="page-title">🧾 내 리뷰</div></div><div class="content-block">${escapeHtml(_prList.error)}</div>`;
-  const d = _prList, c = d.cycle, cs = _prMe.cycles || [];
+  const d = _prList, c = d.cycle, cs = prCycles(), conv = prIsConv(c);
   if(!c) return `<div class="page-head"><div class="page-title">🧾 내 리뷰</div></div><div class="content-block">지금 진행 중인 평가가 없습니다.</div>`;
-  const sel = cs.length > 1 ? `<select class="fselect" style="width:auto;min-width:220px;margin-bottom:14px" onchange="prSetCycle(this.value)">${cs.map(x => `<option value="${x.id}" ${x.id===c.id?'selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select>` : '';
+  const sel = cs.length > 1 ? `<select class="fselect" style="width:auto;min-width:220px;margin-bottom:14px" onchange="prSetCycle(this.value)">${cs.map(x => `<option value="${x.id}" ${x.id===c.id?'selected':''}>${prIsConv(x) ? '[전환 심사] ' : ''}${escapeHtml(x.name)}</option>`).join('')}</select>` : '';
   const tasks = d.tasks || [];
   const row = t => {
-    const label = t.kind === 'self' ? '본인평가' : `${PR_KIND[t.kind]} · ${escapeHtml(t.reviewee.name)}님`;
+    const label = t.kind === 'self' ? '본인평가' : `${prKindName(t.kind, c)} · ${escapeHtml(t.reviewee.name)}님`;
     const act = t.status === 'submitted'
       ? `<button class="btn btn-sm pm-btn-ghost" onclick="prOpenReview(${c.id},'${escapeHtml(t.reviewee.email)}','${t.kind}')">보기</button>`
       : t.open ? `<button class="btn btn-sm btn-primary" onclick="prOpenReview(${c.id},'${escapeHtml(t.reviewee.email)}','${t.kind}')">${t.status === 'none' ? '작성하기' : '이어서 작성'}</button>`
@@ -2813,10 +2828,11 @@ function renderReviews(user){
   return `
 <div class="page-head">
   <div class="page-title">🧾 ${escapeHtml(c.name)}</div>
-  <div class="page-sub">본인평가 ${prRange(c.self_from, c.self_to)} · 1차 ${prRange(c.d1_from, c.d1_to)} · 2차 ${prRange(c.d2_from, c.d2_to)}${c.status === 'closed' ? ' · 마감됐습니다' : ''}</div>
+  <div class="page-sub">${conv ? '정규직 전환 심사 · ' : ''}본인평가 ${prRange(c.self_from, c.self_to)} · 1차 ${prRange(c.d1_from, c.d1_to)} · 2차 ${prRange(c.d2_from, c.d2_to)}${c.status === 'closed' ? ' · 마감됐습니다' : ''}</div>
 </div>
 ${(_pmNotice && Date.now() < _pmNotice.until) ? `<div class="pm-notice pm-notice-${_pmNotice.type}">${escapeHtml(_pmNotice.text)}</div>` : ''}
 ${sel}
+${conv ? '<div class="pr-conv-note">계약직 → 정규직 전환 심사입니다. 본인평가 → 팀장 평가·추천 → 실장 평가 순으로 진행되고, 이후 경영지원팀 심사와 대표 보고를 거쳐 결정됩니다. 점수·결과는 평가자에게 공개되지 않습니다.</div>' : ''}
 ${down.length && d.guide?.dist ? `<div class="content-block pr-guide"><div class="sec-title">등급 배분 가이드 <span class="pm-meta">참고용 · 최종 등급은 전사 캘리브레이션에서 정합니다</span></div>
   <div class="pm-meta" style="margin-bottom:8px">법인평가 ${escapeHtml(d.guide.corp_grade)}등급 기준 개인 등급 배분율(전사)</div>
   <div class="pr-dist">${['S', 'A', 'B', 'C'].map(g => `<div><b>${g}</b><span>${d.guide.dist[g][0]}~${d.guide.dist[g][1]}%</span></div>`).join('')}</div></div>` : ''}
@@ -2836,8 +2852,12 @@ async function prOpenReview(cid, email, kind){
   const { ok, data } = await prCall({ action: 'review_get', cycleId: cid, email, kind });
   if(!ok){ _prRv = null; render(); alert(data.error || '리뷰를 불러오지 못했습니다.'); return; }
   const rv = data.review;
+  const conv = prIsConv(data.cycle);
+  const exByKey = {}; (rv.extras || []).forEach(x => { exByKey[x.key] = x; });
   _prRv = { cycleId: cid, email, kind, d: data, items: JSON.parse(JSON.stringify(rv.items || [])), comps: JSON.parse(JSON.stringify(rv.comps || [])), overall: rv.overall || '',
-    refTab: 'goals', notice: null, attempt: false };
+    extras: conv && kind !== 'self' ? (data.cycle.settings.skills || []).map(s => ({ key: s.key, grade: exByKey[s.key]?.grade ?? null, comment: exByKey[s.key]?.comment ?? '' })) : [],
+    refTab: conv ? (kind === 'self' ? 'archive' : 'self') : 'goals', notice: null, attempt: false };
+  if(conv && kind === 'self' && !_prRv.items.length) _prRv.items = [{ goal_id: null, title: '', kind: null, weight: 0, summary: '', detail_html: '', grade: null }];
   if(kind !== 'self'){ // 하향 평가: 본인평가 항목마다 등급·의견 칸을 하나씩 보장
     const n = (data.ref.self?.items || []).length, by = {};
     _prRv.items.forEach(x => { by[x.ref] = x; });
@@ -2889,7 +2909,7 @@ function prRvClose(){
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && _prRv && !_prRv.loading && state.page === 'reviews' && !document.querySelector('.pm-drawer')) prRvClose(); });
 const prRvEditable = () => !!(_prRv && _prRv.d && _prRv.d.canEdit);
-function prRvSig(){ return JSON.stringify([_prRv.items, _prRv.comps, _prRv.overall]); }
+function prRvSig(){ return JSON.stringify([_prRv.items, _prRv.comps, _prRv.overall, _prRv.extras]); }
 function prRvDirty(){ return !!(_prRv && _prRv.d && _prRv.sig0 !== prRvSig()); }
 function prRerender(){ const el = document.querySelector('.pr-c'); if(el) _prRvY = el.scrollTop; render(); }
 function prCompDef(){ return _prRv.d.cycle.settings.comps || []; }
@@ -2902,21 +2922,20 @@ function prSelfRules(){
   const ai = items.filter(x => x.kind === 'ai'), aiSum = ai.reduce((a, x) => a + (Number(x.weight) || 0), 0);
   const mine = new Set((_prRv.d.ref.goals || []).filter(g => !g.parent_goal_id).map(g => g.id));
   const needLink = it.requireLink && _prRv.d.cycle.goal_cycle_id;
+  const rq = it.requireKind !== false, rw = it.requireWeight !== false;
   const bad = items.map((x, i) => {
     const p = [];
     if(!x.title) p.push('항목 이름');
-    if(x.kind !== 'kpi' && x.kind !== 'ai') p.push('KPI/AI 구분');
+    if(rq && x.kind !== 'kpi' && x.kind !== 'ai') p.push('KPI/AI 구분');
     if(needLink && (!x.goal_id || !mine.has(x.goal_id))) p.push('목표 연결');
     if(!x.summary && !prStrip(x.detail_html)) p.push('성과 내용');
     if(!x.grade) p.push('자기 등급');
     return p;
   });
   const compBad = comps.map(cp => { const p = []; if(!cp.grade) p.push('등급'); if(!String(cp.comment || '').trim()) p.push('의견'); return p; });
-  const rows = [
-    { ok: n >= it.min && n <= it.max, text: `성과 항목 ${it.min}~${it.max}개`, now: `지금 ${n}개` },
-    { ok: sum === 100, text: '가중치 합 100', now: `지금 ${sum}` },
-    { ok: items.every(x => x.kind === 'kpi' || x.kind === 'ai'), text: '모든 항목 KPI / AI 구분', now: '' },
-  ];
+  const rows = [{ ok: n >= it.min && n <= it.max, text: `성과 항목 ${it.min}~${it.max}개`, now: `지금 ${n}개` }];
+  if(rw) rows.push({ ok: sum === 100, text: '가중치 합 100', now: `지금 ${sum}` });
+  if(rq) rows.push({ ok: items.every(x => x.kind === 'kpi' || x.kind === 'ai'), text: '모든 항목 KPI / AI 구분', now: '' });
   if(st.w.aiShare > 0) rows.push({ ok: ai.length >= it.aiMin && ai.length <= it.aiMax && aiSum === st.w.aiShare, text: `AI 항목 ${it.aiMin}~${it.aiMax}개 · 가중치 합 ${st.w.aiShare}`, now: `지금 ${ai.length}개 · ${aiSum}` });
   if(needLink) rows.push({ ok: bad.every(p => !p.includes('목표 연결')), text: '모든 항목을 내 목표에 연결', now: `${bad.filter(p => p.includes('목표 연결')).length}개 미연결` });
   rows.push({ ok: bad.every(p => !p.includes('성과 내용') && !p.includes('자기 등급') && !p.includes('항목 이름')), text: '항목마다 이름·성과 내용·자기 등급', now: '' });
@@ -2953,7 +2972,7 @@ function prRvLink(i, gid){
 function prRvAdd(){
   const max = _prRv.d.cycle.settings.items.max;
   if(_prRv.items.length >= max) return;
-  _prRv.items.push({ goal_id: null, title: '', kind: 'kpi', weight: 0, summary: '', detail_html: '', grade: null });
+  _prRv.items.push({ goal_id: null, title: '', kind: prConvNow() ? null : 'kpi', weight: 0, summary: '', detail_html: '', grade: null });
   prRerender();
   setTimeout(() => { const c = document.querySelector('.pr-c'); if(c) c.scrollTop = c.scrollHeight; }, 0);
 }
@@ -2961,6 +2980,8 @@ function prRvDel(i){ if(!confirm('이 성과 항목을 삭제할까요?')) retur
 function prRvCompGrade(key, g){ const c = _prRv.comps.find(x => x.key === key); if(c){ c.grade = c.grade === g ? null : g; prRerender(); } }
 function prRvCompText(key, v){ const c = _prRv.comps.find(x => x.key === key); if(c){ c.comment = v; prRefreshRules(); } }
 function prRvOverall(v){ _prRv.overall = v; }
+function prSkillGrade(key, g){ const x = (_prRv.extras || []).find(y => y.key === key); if(x){ x.grade = x.grade === g ? null : g; prRerender(); } }
+function prSkillComment(key, v){ const x = (_prRv.extras || []).find(y => y.key === key); if(x) x.comment = v; }
 function prRte(i, cmd){
   const ed = document.getElementById('pr-rte-' + i); if(!ed) return;
   ed.focus();
@@ -2978,10 +2999,11 @@ function prItemCardHtml(x, i, rules, edit){
   const d = _prRv.d, st = d.cycle.settings, goals = (d.ref.goals || []).filter(g => !g.parent_goal_id);
   const probs = _prRv.attempt ? rules.bad[i] : [];
   const link = goals.find(g => g.id === x.goal_id);
+  const rq = st.items.requireKind !== false, rw = st.items.requireWeight !== false;
   return `<div class="pr-item ${probs.length ? 'pr-item-bad' : ''}">
     <div class="pr-item-top">
-      <span class="pr-wchip">가중치 ${edit ? `<input type="number" min="0" max="100" value="${x.weight || ''}" oninput="prRvField(${i},'weight',this.value)" aria-label="가중치"> %` : `${x.weight || 0}%`}</span>
-      ${edit ? `<span class="pr-kind"><button type="button" class="${x.kind==='kpi'?'on':''}" onclick="prRvKind(${i},'kpi')">KPI</button><button type="button" class="${x.kind==='ai'?'on ai':''}" onclick="prRvKind(${i},'ai')">AI</button></span>` : `<span class="pm-kind pm-kind-${x.kind==='ai'?'ai':'business'}" style="margin:0">${x.kind==='ai'?'AI':'KPI'}</span>`}
+      ${rw ? `<span class="pr-wchip">가중치 ${edit ? `<input type="number" min="0" max="100" value="${x.weight || ''}" oninput="prRvField(${i},'weight',this.value)" aria-label="가중치"> %` : `${x.weight || 0}%`}</span>` : `<span class="pr-wchip">성과 ${i + 1}</span>`}
+      ${!rq ? '' : edit ? `<span class="pr-kind"><button type="button" class="${x.kind==='kpi'?'on':''}" onclick="prRvKind(${i},'kpi')">KPI</button><button type="button" class="${x.kind==='ai'?'on ai':''}" onclick="prRvKind(${i},'ai')">AI</button></span>` : `<span class="pm-kind pm-kind-${x.kind==='ai'?'ai':'business'}" style="margin:0">${x.kind==='ai'?'AI':'KPI'}</span>`}
       ${edit && (d.cycle.goal_cycle_id) ? `<select class="pr-link" onchange="prRvLink(${i},this.value)" aria-label="연결할 목표"><option value="">목표 연결 안 함</option>${goals.map(g => `<option value="${g.id}" ${g.id===x.goal_id?'selected':''}>${escapeHtml(g.title)}</option>`).join('')}</select>` : (link ? `<span class="pm-meta">연결 목표: ${escapeHtml(link.title)}</span>` : '')}
       ${edit && _prRv.items.length > 0 ? `<button type="button" class="pr-x" onclick="prRvDel(${i})" title="항목 삭제">✕</button>` : ''}
     </div>
@@ -3011,15 +3033,16 @@ function prCenterSelfHtml(){
   const ro = !edit ? `<div class="pm-notice pr-notice-info">${rv.status === 'submitted' ? '제출한 평가입니다. 고칠 수 없습니다.' : escapeHtml(d.why || '지금은 작성할 수 없습니다.')}</div>` : '';
   const notice = _prRv.notice ? `<div class="pm-notice pm-notice-${_prRv.notice.type}">${escapeHtml(_prRv.notice.text)}</div>` : '';
   const max = st.items.max, goalsN = (d.ref.goals || []).filter(g => !g.parent_goal_id).length;
+  const convSelf = prIsConv(d.cycle);
   return `${notice}${returned}${ro}
-  <div class="pr-sec-h">① 성과 <span class="pm-meta">항목 ${st.items.min}~${max}개 · 가중치 합 <b id="pr-wsum">${_prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0)}</b> / 100</span></div>
+  ${convSelf ? `<div class="pr-sec-h">① 성과 기술 <span class="pm-meta">계약 기간 동안의 주요 성과 · 항목 ${st.items.min}~${max}개</span></div>` : `<div class="pr-sec-h">① 성과 <span class="pm-meta">항목 ${st.items.min}~${max}개 · 가중치 합 <b id="pr-wsum">${_prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0)}</b> / 100</span></div>`}
   ${d.cycle.goal_cycle_id && !goalsN ? `<div class="pm-notice pr-notice-info">승인된 목표가 없어 목표를 불러오지 못했습니다. 성과 항목에 연결할 목표가 필요합니다.</div>` : ''}
   ${_prRv.items.map((x, i) => prItemCardHtml(x, i, rules, edit)).join('') || '<div class="pm-tbl-empty">성과 항목이 없습니다.</div>'}
   ${edit && _prRv.items.length < max ? `<button class="btn btn-sm pm-btn-ghost" onclick="prRvAdd()">+ 성과 추가</button>` : ''}
   <div class="pr-sec-h" style="margin-top:28px">② 공통역량</div>
   ${_prRv.comps.map((cp, i) => prCompBlockHtml(cp, prCompDef().find(z => z.key === cp.key) || { name: cp.key, desc: '' }, i, rules, edit)).join('')}
   <div class="pr-sec-h" style="margin-top:28px">③ 종합 의견 <span class="pm-meta">(선택)</span></div>
-  ${edit ? `<textarea class="pr-in pr-ta" rows="4" maxlength="5000" placeholder="올해를 돌아보며 하고 싶은 말을 적어 주세요" oninput="prRvOverall(this.value)">${escapeHtml(_prRv.overall)}</textarea>` : (rv.overall ? `<div class="pr-rich">${escapeHtml(rv.overall).replace(/\n/g, '<br>')}</div>` : '<div class="pm-meta">작성한 종합 의견이 없습니다.</div>')}
+  ${edit ? `<textarea class="pr-in pr-ta" rows="4" maxlength="5000" placeholder="${convSelf ? '계약 기간을 돌아보며 하고 싶은 말을 적어 주세요' : '올해를 돌아보며 하고 싶은 말을 적어 주세요'}" oninput="prRvOverall(this.value)">${escapeHtml(_prRv.overall)}</textarea>` : (rv.overall ? `<div class="pr-rich">${escapeHtml(rv.overall).replace(/\n/g, '<br>')}</div>` : '<div class="pm-meta">작성한 종합 의견이 없습니다.</div>')}
   ${edit ? `<div class="pm-rules" id="pr-rules" style="margin-top:24px">${prRulesHtml()}</div>
   <div class="pm-actions" style="margin-top:14px"><button class="btn btn-sm pm-btn-ghost" onclick="prRvSave(false)" ${_prBusy?'disabled':''}>임시저장</button><button class="btn btn-primary btn-sm" onclick="prRvSave(true)" ${_prBusy?'disabled':''}>제출</button></div>` : ''}`;
 }
@@ -3028,12 +3051,15 @@ function prDownRules(){
   const si = _prRv.d.ref.self?.items || [], items = _prRv.items, comps = _prRv.comps, defs = prCompDef();
   const bad = si.map((_, i) => (items.find(x => x.ref === i)?.grade ? [] : ['등급']));
   const compBad = comps.map(cp => (cp.grade ? [] : ['등급']));
+  const sk = prSkillDefs(), exs = _prRv.extras || [];
+  const skBad = prConvNow() ? sk.map(s => (exs.find(x => x.key === s.key)?.grade ? [] : ['등급'])) : [];
   const rows = [
     { ok: bad.every(p => !p.length), text: `성과 항목 ${si.length}개 모두 등급`, now: `${bad.filter(p => p.length).length}개 미선택` },
     { ok: compBad.every(p => !p.length), text: `공통역량 ${comps.length}개 모두 등급`, now: `${compBad.filter(p => p.length).length}개 미선택` },
-    { ok: !!String(_prRv.overall || '').trim(), text: '종합 의견', now: '' },
   ];
-  return { rows, bad, compBad, ok: rows.every(r => r.ok) };
+  if(skBad.length) rows.push({ ok: skBad.every(p => !p.length), text: `업무 수행 능력 ${sk.length}개 모두 등급`, now: `${skBad.filter(p => p.length).length}개 미선택` });
+  rows.push({ ok: !!String(_prRv.overall || '').trim(), text: prOverallLabel(), now: '' });
+  return { rows, bad, compBad, skBad, ok: rows.every(r => r.ok) };
 }
 // 서버와 같은 식: 업적 = 항목 가중 평균(본인평가 가중치), 역량 = 등급 점수 평균
 function prPreviewCalc(){
@@ -3044,8 +3070,22 @@ function prPreviewCalc(){
   const r2 = n => Math.round(n * 100) / 100;
   return { perf: sw ? r2(s / sw) : null, comp: cs.length ? r2(cs.reduce((a, b) => a + b, 0) / cs.length) : null };
 }
+function prConvPreviewCalc(){
+  const st = _prRv.d.cycle.settings, sc = st.score || { comps: 30, skills: 70 };
+  const cs = _prRv.comps.map(c => (c.grade ? st.scale[c.grade] : null)).filter(x => x != null);
+  const comp = cs.length === _prRv.comps.length && cs.length ? cs.reduce((a, b) => a + b, 0) / cs.length : null;
+  let sw = 0, s = 0, miss = false;
+  (st.skills || []).forEach(sk => { const g = (_prRv.extras || []).find(x => x.key === sk.key)?.grade, v = g ? st.scale[g] : null; if(v == null){ miss = true; return; } const w = Number(sk.weight) || 0; sw += w; s += w * v; });
+  const skill = !miss && sw ? s / sw : null;
+  const total = comp != null && skill != null ? comp * sc.comps / 100 + skill * sc.skills / 100 : null;
+  return { comp, skill, total };
+}
 function prPreviewInner(){
   if(_prRv.kind === 'self') return '';
+  if(prConvNow()){
+    const p = prConvPreviewCalc(), f = v => (v == null ? '-' : (Math.round(v * 100) / 100).toString());
+    return `이 평가로 <b>공통역량 ${f(p.comp)}점</b> · <b>업무 수행 능력 ${f(p.skill)}점</b> · <b>합계 ${f(p.total)}점</b> <span class="pm-meta">(100점 만점 · 고른 등급까지 반영한 미리보기 · 최종 판정은 경영지원팀 심사에서 정합니다)</span>`;
+  }
   const p = prPreviewCalc(), f = v => (v == null ? '-' : v.toFixed(2).replace(/\.?0+$/, ''));
   return `이 평가로 <b>업적 ${f(p.perf)}점</b> · <b>역량 ${f(p.comp)}점</b> <span class="pm-meta">(고른 등급까지 반영한 미리보기 · 제출하면 서버가 확정합니다)</span>`;
 }
@@ -3058,7 +3098,7 @@ function prDownItemHtml(si, i, rules, edit){
   const probs = _prRv.attempt ? rules.bad[i] : [];
   const d1 = _prRv.kind === 'd2' ? (d.ref.d1?.items || []).find(y => y.ref === i) : null;
   return `<div class="pr-item ${probs.length ? 'pr-item-bad' : ''}">
-    <div class="pr-item-top"><span class="pr-wchip">가중치 ${si.weight || 0}%</span><span class="pm-kind pm-kind-${si.kind==='ai'?'ai':'business'}" style="margin:0">${si.kind==='ai'?'AI':'KPI'}</span></div>
+    ${prConvNow() ? `<div class="pr-item-top"><span class="pr-wchip">성과 ${i + 1}</span></div>` : `<div class="pr-item-top"><span class="pr-wchip">가중치 ${si.weight || 0}%</span><span class="pm-kind pm-kind-${si.kind==='ai'?'ai':'business'}" style="margin:0">${si.kind==='ai'?'AI':'KPI'}</span></div>`}
     <div class="pr-title-ro">${escapeHtml(si.title)}</div>
     ${prOtherBox('본인 평가', si.grade, si.summary, si.detail_html)}
     ${d1 ? prOtherBox('1차 평가자', d1.grade, d1.comment, '') : ''}
@@ -3082,6 +3122,23 @@ function prDownCompHtml(cp, def, i, rules, edit){
     ${probs.length ? `<div class="pr-bad-msg">빠진 것: ${probs.join(', ')}</div>` : ''}
   </div>`;
 }
+function prSkillBlockHtml(sk, i, rules, edit){
+  const d = _prRv.d, x = (_prRv.extras || []).find(y => y.key === sk.key) || { key: sk.key, grade: null, comment: '' };
+  const probs = _prRv.attempt ? (rules.skBad[i] || []) : [];
+  const d1 = _prRv.kind === 'd2' ? (d.ref.d1?.extras || []).find(y => y.key === sk.key) : null;
+  return `<div class="pr-item ${probs.length ? 'pr-item-bad' : ''}">
+    <div class="pr-q">${escapeHtml(sk.name)} <span class="pr-req">*</span></div>
+    <div class="pr-skill-chips"><span class="pr-skill-chip pts">배점 ${Number(sk.weight) || 0}점</span>${sk.basis ? `<span class="pr-skill-chip">${escapeHtml(sk.basis)}</span>` : ''}</div>
+    ${sk.desc ? `<div class="pr-desc">${escapeHtml(sk.desc).replace(/\n/g, '<br>')}</div>` : ''}
+    ${sk.quant ? `<div class="pr-skill-note"><b>정량 근거</b> · ${escapeHtml(sk.quant).replace(/\n/g, '<br>')}</div>` : ''}
+    ${sk.qual ? `<div class="pr-skill-note"><b>정성 근거</b> · ${escapeHtml(sk.qual).replace(/\n/g, '<br>')}</div>` : ''}
+    ${d1 ? prOtherBox('1차 평가자', d1.grade, d1.comment, '') : ''}
+    <div class="pr-glabel">내 등급 <span class="pm-meta">S ${d.cycle.settings.scale.S} · A ${d.cycle.settings.scale.A} · B ${d.cycle.settings.scale.B} · C ${d.cycle.settings.scale.C}</span></div>
+    ${prGradeBtns(x.grade, `prSkillGrade('${sk.key}','%G')`, !edit)}
+    ${edit ? `<textarea class="pr-in pr-ta" rows="3" maxlength="3000" placeholder="평가 근거 (선택) — 구체적인 사례나 수치가 있으면 적어 주세요" oninput="prSkillComment('${sk.key}',this.value)">${escapeHtml(x.comment)}</textarea>` : (x.comment ? `<div class="pr-rich">${escapeHtml(x.comment).replace(/\n/g, '<br>')}</div>` : '')}
+    ${probs.length ? `<div class="pr-bad-msg">빠진 것: ${probs.join(', ')}</div>` : ''}
+  </div>`;
+}
 function prDownGrade(ref, g){ const x = _prRv.items.find(y => y.ref === ref); if(x){ x.grade = x.grade === g ? null : g; prRerender(); } }
 function prDownComment(ref, v){ const x = _prRv.items.find(y => y.ref === ref); if(x) x.comment = v; }
 async function prRvReturn(){
@@ -3100,17 +3157,19 @@ function prCenterDownHtml(){
   const ro = !edit ? `<div class="pm-notice pr-notice-info">${rv.status === 'submitted' ? '제출한 평가입니다. 고칠 수 없습니다.' : escapeHtml(d.why || '지금은 작성할 수 없습니다.')}</div>` : '';
   const notice = _prRv.notice ? `<div class="pm-notice pm-notice-${_prRv.notice.type}">${escapeHtml(_prRv.notice.text)}</div>` : '';
   if(!si || !(si.items || []).length) return `${notice}<div class="pm-notice pr-notice-info">본인평가가 아직 없어 평가할 내용이 없습니다.</div>`;
-  const dOver = _prRv.kind === 'd2' && d.ref.d1 ? prOtherBox('1차 평가자 종합 의견', null, d.ref.d1.overall, '').replace(/<span class="pr-gtag[^>]*>-<\/span>/, '') : '';
+  const cv = prIsConv(d.cycle), sk = prSkillDefs(), ovl = prOverallLabel();
+  const dOver = _prRv.kind === 'd2' && d.ref.d1 ? prOtherBox(cv ? `${(d.cycle.settings.labels || {}).d1 || '1차 평가자 종합 의견'}(1차 평가자)` : '1차 평가자 종합 의견', null, d.ref.d1.overall, '').replace(/<span class="pr-gtag[^>]*>-<\/span>/, '') : '';
   return `${notice}${ro}
   <div class="pr-preview" id="pr-preview">${prPreviewInner()}</div>
   ${d.canReturn ? `<div class="pr-retbox"><span>본인평가에 보완이 필요하면 사유와 함께 돌려보낼 수 있습니다(본인 작성 기간 안에서만).</span><button class="btn btn-sm pm-btn-ghost" onclick="prRvReturn()">본인평가 반려</button></div>` : ''}
-  <div class="pr-sec-h">① 성과 <span class="pm-meta">본인평가 ${si.items.length}개 항목 · 가중치는 본인평가 값 그대로</span></div>
+  <div class="pr-sec-h">${cv ? '① 성과 기술' : '① 성과'} <span class="pm-meta">본인평가 ${si.items.length}개 항목${cv ? '' : ' · 가중치는 본인평가 값 그대로'}</span></div>
   ${si.items.map((it, i) => prDownItemHtml(it, i, rules, edit)).join('')}
   <div class="pr-sec-h" style="margin-top:28px">② 공통역량</div>
   ${_prRv.comps.map((cp, i) => prDownCompHtml(cp, defs.find(z => z.key === cp.key) || { name: cp.key, desc: '' }, i, rules, edit)).join('')}
-  <div class="pr-sec-h" style="margin-top:28px">③ 종합 의견 <span class="pr-req">*</span></div>
+  ${cv && sk.length ? `<div class="pr-sec-h" style="margin-top:28px">③ 업무 수행 능력 <span class="pm-meta">${sk.length}개 항목 · 배점 합 ${sk.reduce((a, x) => a + (Number(x.weight) || 0), 0)}점</span></div>${sk.map((x, i) => prSkillBlockHtml(x, i, rules, edit)).join('')}` : ''}
+  <div class="pr-sec-h" style="margin-top:28px">${cv ? '④' : '③'} ${escapeHtml(ovl)} <span class="pr-req">*</span></div>
   ${si.overall ? prOtherBox('본인 종합 의견', null, si.overall, '').replace(/<span class="pr-gtag[^>]*>-<\/span>/, '') : ''}${dOver}
-  ${edit ? `<textarea class="pr-in pr-ta ${_prRv.attempt && !String(_prRv.overall || '').trim() ? 'pr-in-bad' : ''}" rows="4" maxlength="5000" placeholder="종합 의견을 적어 주세요 (필수)" oninput="prRvOverall(this.value);prRefreshRules()">${escapeHtml(_prRv.overall)}</textarea>` : (rv.overall ? `<div class="pr-rich">${escapeHtml(rv.overall).replace(/\n/g, '<br>')}</div>` : '')}
+  ${edit ? `<textarea class="pr-in pr-ta ${_prRv.attempt && !String(_prRv.overall || '').trim() ? 'pr-in-bad' : ''}" rows="4" maxlength="5000" placeholder="${escapeHtml(ovl)}을 적어 주세요 (필수)" oninput="prRvOverall(this.value);prRefreshRules()">${escapeHtml(_prRv.overall)}</textarea>` : (rv.overall ? `<div class="pr-rich">${escapeHtml(rv.overall).replace(/\n/g, '<br>')}</div>` : '')}
   ${edit ? `<div class="pm-rules" id="pr-rules" style="margin-top:24px">${prRulesHtml()}</div>
   <div class="pm-actions" style="margin-top:14px"><button class="btn btn-sm pm-btn-ghost" onclick="prRvSave(false)" ${_prBusy?'disabled':''}>임시저장</button><button class="btn btn-primary btn-sm" onclick="prRvSave(true)" ${_prBusy?'disabled':''}>제출</button></div>` : ''}`;
 }
@@ -3121,7 +3180,7 @@ function prCenterHtml(){
 // 오른쪽 참고 정보
 function prRefHtml(){
   const d = _prRv.d, ref = d.ref, tab = _prRv.refTab;
-  const tabs = `<div class="pr-rtabs"><button class="${tab==='goals'?'on':''}" onclick="prRvRef('goals')">목표</button>${_prRv.kind !== 'self' ? `<button class="${tab==='self'?'on':''}" onclick="prRvRef('self')">본인평가</button>` : ''}<button class="${tab==='archive'?'on':''}" onclick="prRvRef('archive')">지난 리뷰</button>${_prRv.kind !== 'self' ? `<button class="${tab==='oo'?'on':''}" onclick="prRvRef('oo')">1:1</button>` : ''}</div>`;
+  const tabs = `<div class="pr-rtabs">${prConvNow() ? '' : `<button class="${tab==='goals'?'on':''}" onclick="prRvRef('goals')">목표</button>`}${_prRv.kind !== 'self' ? `<button class="${tab==='self'?'on':''}" onclick="prRvRef('self')">본인평가</button>` : ''}<button class="${tab==='archive'?'on':''}" onclick="prRvRef('archive')">지난 리뷰</button>${_prRv.kind !== 'self' ? `<button class="${tab==='oo'?'on':''}" onclick="prRvRef('oo')">1:1</button>` : ''}</div>`;
   if(tab === 'oo' && _prRv.kind !== 'self'){
     const list = ref.oneonones || [];
     if(!list.length) return tabs + '<div class="pm-tbl-empty">이 구성원과 기록된 1:1이 없습니다.</div>';
@@ -3129,7 +3188,7 @@ function prRefHtml(){
   }
   if(tab === 'self' && _prRv.kind !== 'self'){
     const s = ref.self; if(!s) return tabs + '<div class="pm-tbl-empty">본인평가가 없습니다.</div>';
-    return tabs + (s.items || []).map(x => `<div class="pr-refcard"><div class="pr-refcard-h">${escapeHtml(x.title)} <span class="pm-meta">${x.weight}%</span> ${prGradeTag(x.grade)}</div>${x.summary ? `<div class="pr-rich">${escapeHtml(x.summary)}</div>` : ''}</div>`).join('')
+    return tabs + (s.items || []).map(x => `<div class="pr-refcard"><div class="pr-refcard-h">${escapeHtml(x.title)} ${prConvNow() ? '' : `<span class="pm-meta">${x.weight}%</span>`} ${prGradeTag(x.grade)}</div>${x.summary ? `<div class="pr-rich">${escapeHtml(x.summary)}</div>` : ''}</div>`).join('')
       + `<div class="pr-refcard"><div class="pr-refcard-h">공통역량</div>${(s.comps || []).map(c => `<div class="pm-meta" style="margin:3px 0">${escapeHtml((prCompDef().find(z => z.key === c.key) || {}).name || c.key)} ${prGradeTag(c.grade)}</div>`).join('')}</div>`;
   }
   if(tab === 'archive'){
@@ -3160,7 +3219,7 @@ function prPayloadHtml(p, depth = 0){
 function prStepperHtml(){
   const d = _prRv.d, c = d.cycle, cur = _prRv.kind;
   const done = k => k === cur ? d.review.status === 'submitted' : (k === 'self' && cur !== 'self' ? d.ref.self?.status === 'submitted' : (k === 'd1' && cur === 'd2' ? d.ref.d1?.status === 'submitted' : false));
-  return `<div class="pr-steps">${['self', 'd1', 'd2'].map(k => `<div class="pr-step ${k === cur ? 'on' : ''}"><span class="pr-dotc ${done(k) ? 'done' : ''}">${done(k) ? '✓' : ''}</span><div><div class="pr-step-n">${PR_STEP[k]}</div><div class="pm-meta">${prRange(c[k + '_from'], c[k + '_to'])}</div></div></div>`).join('')}</div>`;
+  return `<div class="pr-steps">${['self', 'd1', 'd2'].filter(k => !(prIsConv(c) && d.d2_none && k === 'd2')).map(k => `<div class="pr-step ${k === cur ? 'on' : ''}"><span class="pr-dotc ${done(k) ? 'done' : ''}">${done(k) ? '✓' : ''}</span><div><div class="pr-step-n">${PR_STEP[k]}</div><div class="pm-meta">${prRange(c[k + '_from'], c[k + '_to'])}</div></div></div>`).join('')}</div>`;
 }
 function prRvOverlayHtml(){
   if(!_prRv) return '';
@@ -3168,7 +3227,7 @@ function prRvOverlayHtml(){
   const d = _prRv.d, c = d.cycle, who = _prRv.kind === 'self' ? '' : ` · ${escapeHtml(d.target.name)}님`;
   requestAnimationFrame(() => { const el = document.querySelector('.pr-c'); if(el && _prRvY) el.scrollTop = _prRvY; });
   return `<div class="pr-ov" role="dialog" aria-label="리뷰 작성">
-  <div class="pr-top"><button class="pr-back" onclick="prRvClose()" aria-label="뒤로 (Esc)">←</button><b>${escapeHtml(c.name)}</b><span class="pm-meta" style="margin-left:8px">${PR_KIND[_prRv.kind]}${who}</span></div>
+  <div class="pr-top"><button class="pr-back" onclick="prRvClose()" aria-label="뒤로 (Esc)">←</button><b>${escapeHtml(c.name)}</b><span class="pm-meta" style="margin-left:8px">${prKindName(_prRv.kind, c)}${who}</span></div>
   <div class="pr-main">
     <div class="pr-l">${prStepperHtml()}</div>
     <div class="pr-c"><div class="pr-c-in">${prCenterHtml()}</div></div>
@@ -3185,16 +3244,16 @@ async function prRvSave(submit){
     if(!confirm('제출하면 수정할 수 없습니다. 제출할까요?')) return;
   }
   _prBusy = true; prRerender();
-  const { ok, data } = await prCall({ action: 'review_save', cycleId: _prRv.cycleId, email: _prRv.email, kind: _prRv.kind, items: _prRv.items, comps: _prRv.comps, overall: _prRv.overall, submit });
+  const { ok, data } = await prCall({ action: 'review_save', cycleId: _prRv.cycleId, email: _prRv.email, kind: _prRv.kind, items: _prRv.items, comps: _prRv.comps, overall: _prRv.overall, extras: _prRv.extras || [], submit });
   _prBusy = false;
   if(!ok){
     _prRv.notice = { type: 'error', text: (data.problems && data.problems.length ? data.problems.join(' · ') : data.error) || '저장하지 못했습니다.' };
     _prRv.attempt = true; prRerender(); document.querySelector('.pr-c')?.scrollTo({ top: 0 }); return;
   }
   if(submit){
-    _prRv = null; _prMe = null; _prList = null; _prRvY = 0; pmNotify('success', '평가를 제출했습니다.'); render(); return;
+    _prRv = null; _prMe = null; _prList = null; _prRvY = 0; pmNotify('success', prConvNow() ? '정규직 전환 심사 평가를 제출했습니다.' : '평가를 제출했습니다.'); render(); return;
   }
-  _prRv.d.review.status = data.status; _prRv.d.review.items = JSON.parse(JSON.stringify(_prRv.items)); _prRv.d.review.comps = JSON.parse(JSON.stringify(_prRv.comps)); _prRv.d.review.overall = _prRv.overall;
+  _prRv.d.review.status = data.status; _prRv.d.review.items = JSON.parse(JSON.stringify(_prRv.items)); _prRv.d.review.comps = JSON.parse(JSON.stringify(_prRv.comps)); _prRv.d.review.overall = _prRv.overall; _prRv.d.review.extras = JSON.parse(JSON.stringify(_prRv.extras || []));
   _prRv.sig0 = prRvSig(); _prRv.notice = { type: 'success', text: '임시저장했습니다.' }; prRerender();
 }
 
@@ -3520,7 +3579,7 @@ ${me.error ? `<div class="pm-notice pm-notice-error">${escapeHtml(me.error)}</di
 
 // ── 🔔 알림함(목표·평가·1:1): 폴링 없이 로그인 직후·화면 전환 때 60초가 지났으면 다시 읽음 ──
 let _nt = { items: null, unread: 0, open: false, at: 0, loading: false, more: true };
-const NT_ACTION_KINDS = new Set(['goal_submitted', 'goal_rejected', 'change_requested', 'change_rejected', 'review_returned', 'review_ready_d1', 'review_ready_d2', 'result_open', 'oo_ping']);
+const NT_ACTION_KINDS = new Set(['goal_submitted', 'goal_rejected', 'change_requested', 'change_rejected', 'review_returned', 'review_ready_d1', 'review_ready_d2', 'result_open', 'oo_ping', 'conv_self', 'conv_reopened']);
 const ntActionKind = k => NT_ACTION_KINDS.has(k) || k.startsWith('remind_') || k.startsWith('due_');
 function ntReset(){ _nt = { items: null, unread: 0, open: false, at: 0, loading: false, more: true }; }
 function ntEnabled(){ return pmAllowed(); }
@@ -3545,7 +3604,7 @@ function ntEnabled(){ return pmAllowed(); }
 function ntDeepLink(){
   let link = null;
   try { link = JSON.parse(sessionStorage.getItem('hq_go') || 'null'); sessionStorage.removeItem('hq_go'); } catch(e){}
-  if(!link || !link.page || !ntEnabled()) return false;
+  if(!link || !link.page || !(ntEnabled() || link.page === 'reviews')) return false;
   if(!['reviews', 'team', 'goals', 'oneonone'].includes(link.page)) return false;
   // 평가 화면인데 대상자·단계가 없으면 '결과 공개' 안내 메일 → 내 결과 열기
   ntGo({ kind: link.page === 'reviews' && !link.email ? 'result_open' : 'deep', link });
@@ -3587,7 +3646,9 @@ function ntWhen(cond, fn, tries = 25){ if(cond()) return fn(); if(tries > 0) set
 function ntGo(item){
   const l = item.link || {};
   if(l.page === 'reviews'){
-    _nt.open = false; nav('reviews');
+    _nt.open = false;
+    if(l.cycleId){ _prCycleId = Number(l.cycleId); _prList = null; } // 전환 심사 등 해당 사이클을 바로 연다
+    nav('reviews');
     if(item.kind === 'result_open') ntWhen(() => _prList && _prList.result, () => { if(_prList.result.open && _prList.result.target) prOpenResult(); });
     else if(l.email && l.kind && l.cycleId) ntWhen(() => _prList && !_prList.error && _prList.cycle, () => prOpenReview(l.cycleId, l.email, l.kind));
     return;
@@ -3637,7 +3698,7 @@ function renderUserPage(user){
   const p = state.page;
   if(p==='survey') return renderSurveyPage(user, state.sub);
   if(p==='goals' && pmAllowed()) return renderGoals(user);
-  if(p==='reviews' && pmAllowed()) return renderReviews(user);
+  if(p==='reviews' && (pmAllowed() || prAllowed() || _prMe === null)) return renderReviews(user);
   if(p==='oneonone' && pmAllowed()) return renderOneOnOne(user);
   if(_pageContent[p]) return _pageContent[p].content_html;
   if(p==='firstday')    return renderFirstDay(user);
