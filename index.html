@@ -1145,6 +1145,7 @@ async function sendChatMessage(){
    RENDER DISPATCHER
 ════════════════════════════════════════ */
 function render(){
+  if(_convTok){ renderConvPage(); return; }
   const user = DB.getCurrent();
   const app  = document.getElementById('app');
 
@@ -2753,11 +2754,11 @@ const PR_STEP = { self:'셀프', d1:'하향 1차', d2:'하향 2차' };
 const PR_ST = { none:'작성 전', draft:'작성중', submitted:'제출 완료', returned:'반려 · 수정 필요' };
 const PR_GRADE_LIST = ['S', 'A', 'B', 'C'];
 let _prMe = null, _prMeLoading = false, _prList = null, _prCycleId = null, _prRv = null, _prBusy = false, _prRvY = 0;
-// 정규직 전환 심사(2026-11): 연말 평가와 같은 화면을 쓰되 사이클 kind가 'conversion'이면 규칙·문항이 다르다.
-// 연말 평가가 아직 공개 전이어도 전환 심사의 대상자·평가자는 이 메뉴를 쓴다(서버가 conv_cycles로 알려줌).
-const prCycles = () => { const m = new Map(); [...(_prMe?.cycles || []), ...(_prMe?.conv_cycles || [])].forEach(c => m.set(c.id, c)); return [...m.values()]; };
+// 정규직 전환 심사(2026-11): 직원 본인평가 화면은 이 작성 화면을 그대로 쓰되, 메뉴 없이 메일 링크(?conv=토큰)로만 열린다.
+// 팀장·실장의 1·2차 평가는 HR 허브(계약직 관리 > 정규직 전환)에서 한다. 사이클 kind가 'conversion'이면 규칙·문항이 다르다.
+const prCycles = () => [...(_prMe?.cycles || [])];
 const prIsConv = c => !!c && c.kind === 'conversion';
-function prAllowed(){ return pmAllowed() || (!!DB.getCurrent() && !!DB.getToken() && (_prMe?.conv_cycles || []).length > 0); }
+function prAllowed(){ return pmAllowed(); }
 const PR_KIND_CONV = { self:'본인평가', d1:'1차 평가 · 팀장', d2:'2차 평가 · 실장' };
 const prKindName = (kind, c) => (prIsConv(c) ? PR_KIND_CONV : PR_KIND)[kind] || kind;
 const prSkillDefs = () => (_prRv?.d?.cycle?.settings?.skills || []);
@@ -2769,13 +2770,44 @@ async function prCall(body){
     const res = await fetch(PR_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPA_CFG.key}` },
-      body: JSON.stringify({ portalToken: DB.getToken(), ...body }),
+      body: JSON.stringify({ ...(_convTok ? { convToken: _convTok } : { portalToken: DB.getToken() }), ...body }),
     });
     const data = await res.json().catch(()=>({}));
     return { ok: res.ok, status: res.status, data };
   } catch(e){
     return { ok: false, status: 0, data: { error: '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.' } };
   }
+}
+// ── 정규직 전환 심사 본인평가 링크(?conv=토큰) ─────────────────────────────
+// 온보딩 허브에 가입·로그인하지 않아도, 메일의 링크 하나로 '내 본인평가' 작성 화면만 열린다(메뉴·다른 화면 없음).
+// 토큰은 서버가 서명한 그 심사·그 사람 전용이고 본인평가 조회·저장 외에는 서버가 거부한다. 내용은 pr_* 테이블에 그대로 쌓인다.
+let _convTok = null, _convPage = null, _convAuto = false;
+function convTokenInfo(){ try { return JSON.parse(atob(String(_convTok).split('.')[0])); } catch(e){ return null; } }
+async function convPageLoad(){
+  const info = convTokenInfo();
+  if(!info || !info.uid || !info.r){ _convPage = { error: '링크가 올바르지 않습니다. 메일의 버튼을 다시 눌러 주세요.' }; return; }
+  _convPage = { loading: true };
+  const { ok, data } = await prCall({ action: 'review_get', cycleId: info.uid, kind: 'self', email: info.r });
+  if(!ok){ _convPage = { error: data.error || '불러오지 못했습니다. 잠시 후 다시 시도해 주세요.' }; render(); return; }
+  _convPage = { d: data };
+  if(!_convAuto && data.canEdit){ _convAuto = true; prOpenReview(info.uid, info.r, 'self'); return; } // 링크를 누르면 바로 작성 화면
+  render();
+}
+function renderConvPage(){
+  const app = document.getElementById('app');
+  if(_convPage === null) convPageLoad();
+  const info = convTokenInfo() || {}, p = _convPage || { loading: true };
+  let body;
+  if(p.loading) body = '<div class="loading" style="margin:30px 0"><div class="spinner"></div></div>';
+  else if(p.error) body = `<div style="font-weight:800;font-size:17px;margin-bottom:8px">열 수 없는 링크입니다</div><div style="color:#6B7280;font-size:13.5px;line-height:1.7">${escapeHtml(p.error)}<br>문제가 계속되면 경영지원팀에 문의해 주세요.</div>`;
+  else {
+    const d = p.d, rv = d.review || {}, due = d.due ? String(d.due).slice(5).replace('-', '월 ') + '일' : '';
+    if(rv.status === 'submitted') body = `<div style="font-size:44px;margin-bottom:10px">✅</div><div style="font-weight:800;font-size:18px;margin-bottom:8px">제출이 완료되었습니다</div><div style="color:#6B7280;font-size:13.5px;line-height:1.7">${escapeHtml(d.target?.name || '')}님의 본인평가가 접수되었습니다.<br>이후 평가는 담당 팀장·실장님과 경영지원팀에서 진행하며, 결과는 경영지원팀에서 따로 안내드립니다.<br>이 창은 닫으셔도 됩니다.</div>`;
+    else if(d.canEdit) body = `<div style="font-weight:800;font-size:18px;margin-bottom:8px">정규직 전환 심사 · 본인평가</div><div style="color:#6B7280;font-size:13.5px;line-height:1.7;margin-bottom:6px">${escapeHtml(d.target?.name || '')}님, 계약 기간 동안의 업무를 돌아보며 본인평가를 작성해 주세요.${due ? `<br><b>${due}까지</b> 제출해 주세요.` : ''}</div>${rv.status === 'returned' && rv.return_reason ? `<div class="pr-return" style="margin:10px 0;text-align:left">보완 요청: ${escapeHtml(rv.return_reason)}</div>` : ''}<button class="btn btn-primary" style="margin-top:14px" onclick="prOpenReview(${info.uid},'${escapeHtml(info.r)}','self')">본인평가 작성하기</button>`;
+    else body = `<div style="font-weight:800;font-size:17px;margin-bottom:8px">지금은 작성할 수 없습니다</div><div style="color:#6B7280;font-size:13.5px;line-height:1.7">${escapeHtml(d.why || '작성 기간이 아닙니다.')}<br>기한이 지났다면 경영지원팀에 문의해 주세요.</div>`;
+  }
+  app.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F3F4F6;padding:20px"><div style="background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.08);padding:36px 30px;max-width:460px;width:100%;text-align:center"><img src="logo-vertical.png" alt="" style="height:56px;margin-bottom:18px;opacity:.9">${body}</div></div>${_prRv ? prRvOverlayHtml() : ''}`;
+  requestAnimationFrame(() => { const el = document.querySelector('.pr-c'); if(el && _prRvY) el.scrollTop = _prRvY; });
 }
 function prReset(){ _prMe = null; _prList = null; _prCycleId = null; _prRv = null; _prRes = null; _prRvY = 0; }
 async function prLoadMe(){
@@ -2905,7 +2937,7 @@ function prResOverlayHtml(){
 }
 function prRvClose(){
   if(_prRv && !_prRv.loading && prRvEditable() && prRvDirty() && !confirm('저장하지 않은 내용이 있습니다. 닫을까요?')) return;
-  _prRv = null; _prRvY = 0; render();
+  _prRv = null; _prRvY = 0; if(_convTok) _convPage = null; render();
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && _prRv && !_prRv.loading && state.page === 'reviews' && !document.querySelector('.pm-drawer')) prRvClose(); });
 const prRvEditable = () => !!(_prRv && _prRv.d && _prRv.d.canEdit);
@@ -3251,7 +3283,7 @@ async function prRvSave(submit){
     _prRv.attempt = true; prRerender(); document.querySelector('.pr-c')?.scrollTo({ top: 0 }); return;
   }
   if(submit){
-    _prRv = null; _prMe = null; _prList = null; _prRvY = 0; pmNotify('success', prConvNow() ? '정규직 전환 심사 평가를 제출했습니다.' : '평가를 제출했습니다.'); render(); return;
+    _prRv = null; _prMe = null; _prList = null; _prRvY = 0; if(_convTok) _convPage = null; pmNotify('success', prConvNow() ? '정규직 전환 심사 평가를 제출했습니다.' : '평가를 제출했습니다.'); render(); return;
   }
   _prRv.d.review.status = data.status; _prRv.d.review.items = JSON.parse(JSON.stringify(_prRv.items)); _prRv.d.review.comps = JSON.parse(JSON.stringify(_prRv.comps)); _prRv.d.review.overall = _prRv.overall; _prRv.d.review.extras = JSON.parse(JSON.stringify(_prRv.extras || []));
   _prRv.sig0 = prRvSig(); _prRv.notice = { type: 'success', text: '임시저장했습니다.' }; prRerender();
@@ -3616,7 +3648,7 @@ async function ntLoad(force){
   _nt.loading = true;
   const { ok, data } = await pmCall({ action: 'notif_list', limit: 30 });
   _nt.loading = false; _nt.at = Date.now();
-  if(ok){ _nt.items = data.items || []; _nt.unread = data.unread || 0; _nt.more = (data.items || []).length >= 30; }
+  if(ok){ _nt.items = (data.items || []).filter(x => !(x.link || {}).conv); _nt.unread = data.unread || 0; _nt.more = (data.items || []).length >= 30; }
   else if(_nt.items === null){ _nt.items = []; _nt.unread = 0; _nt.more = false; } // 서버가 아직 없어도 화면은 정상
   render();
 }
@@ -3626,7 +3658,7 @@ async function ntMore(){
   _nt.loading = true;
   const { ok, data } = await pmCall({ action: 'notif_list', limit: 30, before: last.id });
   _nt.loading = false;
-  if(ok){ _nt.items = _nt.items.concat(data.items || []); _nt.more = (data.items || []).length >= 30; }
+  if(ok){ _nt.items = _nt.items.concat((data.items || []).filter(x => !(x.link || {}).conv)); _nt.more = (data.items || []).length >= 30; }
   render();
 }
 function ntToggle(){ if(!ntEnabled()) return; _nt.open = !_nt.open; if(_nt.open) ntLoad(true); else render(); }
@@ -5434,6 +5466,10 @@ function formatDate(iso){
         <div style="color:#6B7280;font-size:14px">로딩 중...</div>
       </div>
     </div>`;
+
+  // 정규직 전환 심사 본인평가 메일 링크(?conv=토큰): 로그인·메뉴 없이 본인평가 작성 화면만
+  const convParam = new URLSearchParams(location.search).get('conv');
+  if(convParam){ _convTok = convParam; state.page = 'reviews'; render(); return; }
 
   // 구 localStorage 데이터 정리
   localStorage.removeItem('hq_users');
