@@ -3684,13 +3684,13 @@ function ntPanelHtml(){
     ${_nt.more && items.length ? `<button class="btn btn-sm pm-btn-ghost nt-more" onclick="ntMore()">더 보기</button>` : ''}</div>
 </aside>`;
 }
-// 대시보드 '확인할 일': 안 읽은 알림 중 행동이 필요한 것만 최대 5개
+// 대시보드 '새 안내': 안 읽은 알림 중 행동이 필요한 것만 최대 5개
 function renderNtCard(){
   if(!ntEnabled()) return '';
   ntEnsure();
   const todo = (_nt.items || []).filter(x => !x.read_at && ntActionKind(x.kind)).slice(0, 5);
   if(!todo.length) return '';
-  return `<div class="content-block nt-todo"><div class="sec-title">📬 확인할 일 <span class="pm-meta">${todo.length}건</span></div>
+  return `<div class="content-block nt-todo"><div class="sec-title">📬 새 안내 <span class="pm-meta">${todo.length}건</span></div>
 ${todo.map(x => `<div class="nt-todo-row" onclick="ntOpenItem(${x.id})"><div><b>${escapeHtml(x.title)}</b>${x.body ? `<span class="pm-meta"> · ${escapeHtml(x.body)}</span>` : ''}</div><span class="pm-meta">${ntAgo(x.created_at)}</span></div>`).join('')}</div>`;
 }
 
