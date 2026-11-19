@@ -438,7 +438,7 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .pm-dates{display:flex;align-items:center;gap:6px}.pm-dates .pm-in{margin-bottom:0}
 .pm-rules{display:grid;gap:6px;margin-bottom:16px}
 .pm-rule{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 12px;border-radius:8px}
-.pm-rule span{font-weight:800;width:16px;text-align:center}.pm-rule b{font-weight:600;flex:1}.pm-rule em{font-style:normal;font-size:12px;white-space:nowrap}
+.pm-rule span{font-weight:800;width:16px;text-align:center}.pm-rule span.pm-meta{width:auto;font-weight:400;text-align:left}.pm-rule b{font-weight:600;flex:1}.pm-rule em{font-style:normal;font-size:12px;white-space:nowrap}
 .pm-rule-ok{background:#ECFDF5;color:#047857}.pm-rule-bad{background:#FFF7ED;color:#B45309}
 .pm-kind{display:inline-block;font-size:11px;font-weight:800;padding:1px 7px;border-radius:999px;margin-right:4px;vertical-align:1px}
 .pm-kind-business{background:#EFF6FF;color:#1D4ED8}.pm-kind-ai{background:#F5F3FF;color:#6D28D9}
@@ -514,6 +514,29 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .pr-in-bad{border-color:#FCA5A5;background:#FFFBFB}
 .pr-guide{margin-bottom:16px}.pr-dist{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:420px}.pr-dist div{border:1px solid var(--border);border-radius:8px;text-align:center;padding:8px 0}.pr-dist b{display:block;font-size:16px}.pr-dist span{font-size:12.5px;color:var(--gray)}
 .pr-main-res{grid-template-columns:minmax(0,1fr) 240px}
+/* 정규직 전환 심사 본인평가(메일 링크) 전용 화면 */
+.cvs{position:fixed;inset:0;z-index:9200;background:#F7F8FA;display:flex;flex-direction:column}
+.cvs-top{flex:none;display:flex;align-items:center;gap:12px;height:60px;padding:0 24px;background:#fff;border-bottom:1px solid var(--border)}
+.cvs-top img{height:30px}.cvs-top .cvs-t{font-weight:800;font-size:15px}.cvs-top .cvs-due{margin-left:auto;font-size:13px;font-weight:700;color:var(--primary-dark);background:var(--primary-light);border-radius:999px;padding:5px 12px}
+.cvs-body{flex:1;overflow:auto;padding:26px 16px 40px}.cvs-in{max-width:760px;margin:0 auto}
+.cvs-hero{background:#fff;border:1px solid var(--border);border-radius:16px;padding:26px 28px;margin-bottom:18px}
+.cvs-hero h1{font-size:21px;font-weight:800;margin:0 0 6px;letter-spacing:-.3px}.cvs-hero p{margin:0;color:#4B5563;font-size:14px;line-height:1.7}
+.cvs-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 6px}
+.cvs-fact{background:#F9FAFB;border-radius:10px;padding:11px 13px}.cvs-fact b{display:block;font-size:12px;color:#6B7280;font-weight:600;margin-bottom:3px}.cvs-fact span{font-size:14px;font-weight:800}
+.cvs-flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:16px;font-size:12.5px}
+.cvs-flow span{padding:5px 11px;border-radius:999px;background:#F3F4F6;color:#6B7280;font-weight:600}.cvs-flow span.on{background:var(--primary);color:#fff;font-weight:800}.cvs-flow i{color:#D1D5DB;font-style:normal}
+.cvs-tips{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:6px;font-size:13px;color:#4B5563}.cvs-tips li:before{content:'•';color:var(--primary);font-weight:900;margin-right:8px}
+.cvs-sec{display:flex;align-items:baseline;gap:10px;margin:26px 0 12px}.cvs-sec b{font-size:17px;font-weight:800}.cvs-sec span{font-size:12.5px;color:#6B7280}
+.cvs-sec .cvs-n{flex:none;width:24px;height:24px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+.cvs .pr-item{border-radius:14px;padding:18px 20px}.cvs .pr-grades button.on{background:var(--primary)}.cvs .pr-grades button:hover:not(:disabled){background:var(--primary-light)}
+.cvs-bar{flex:none;background:#fff;border-top:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:16px}
+.cvs-prog{flex:1;min-width:0}.cvs-prog-t{font-size:12.5px;color:#4B5563;margin-bottom:5px}.cvs-prog-t b{color:var(--primary-dark)}.cvs-prog-bar{height:6px;border-radius:999px;background:#E5E7EB;overflow:hidden}.cvs-prog-bar i{display:block;height:100%;background:var(--primary);border-radius:999px;transition:width .2s}
+.cvs-rules{margin-top:22px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:4px 16px}.cvs-rules summary{cursor:pointer;padding:12px 0;font-weight:700;font-size:13.5px}
+.cvs-done{max-width:520px;margin:0 auto;background:#fff;border:1px solid var(--border);border-radius:16px;padding:34px 30px;text-align:center}
+.cvs-done .ck{width:56px;height:56px;border-radius:50%;background:#10B981;color:#fff;font-size:30px;line-height:56px;margin:0 auto 14px}
+.cvs-done h2{font-size:19px;margin:0 0 8px}.cvs-done p{color:#4B5563;font-size:13.5px;line-height:1.75;margin:0}
+.cvs-next{text-align:left;margin-top:20px;background:#F9FAFB;border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.8;color:#374151}.cvs-next b{display:block;margin-bottom:4px}
+@media(max-width:720px){.cvs-top{padding:0 14px}.cvs-top .cvs-t{font-size:13.5px}.cvs-hero{padding:20px 18px}.cvs-facts{grid-template-columns:1fr}.cvs-bar{padding:10px 14px;gap:10px;flex-wrap:wrap}.cvs-prog{flex-basis:100%}.cvs-bar .btn{flex:1}}
 .pr-bigg{flex:none;width:84px;height:84px;border-radius:50%;background:#1E90FF;color:#fff;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900}.pr-bigg-none{background:#E5E7EB;color:#9CA3AF}
 .pr-toc{display:grid;gap:4px}.pr-toc button{border:0;background:none;text-align:left;padding:9px 10px;border-radius:8px;font-size:14px;font-weight:600;color:#374151;cursor:pointer}.pr-toc button:hover{background:#F3F4F6}
 .pr-resbox{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border:1px solid #BFDBFE;background:#F0F7FF}
@@ -2802,12 +2825,13 @@ function renderConvPage(){
   else if(p.error) body = `<div style="font-weight:800;font-size:17px;margin-bottom:8px">열 수 없는 링크입니다</div><div style="color:#6B7280;font-size:13.5px;line-height:1.7">${escapeHtml(p.error)}<br>문제가 계속되면 경영지원팀에 문의해 주세요.</div>`;
   else {
     const d = p.d, rv = d.review || {}, due = d.due ? String(d.due).slice(5).replace('-', '월 ') + '일' : '';
-    if(rv.status === 'submitted') body = `<div style="font-size:44px;margin-bottom:10px">✅</div><div style="font-weight:800;font-size:18px;margin-bottom:8px">제출이 완료되었습니다</div><div style="color:#6B7280;font-size:13.5px;line-height:1.7">${escapeHtml(d.target?.name || '')}님의 본인평가가 접수되었습니다.<br>이후 평가는 담당 팀장·실장님과 경영지원팀에서 진행하며, 결과는 경영지원팀에서 따로 안내드립니다.<br>이 창은 닫으셔도 됩니다.</div>`;
+    if(rv.status === 'submitted') body = `<div class="ck">✓</div><h2>제출이 완료되었습니다</h2><p>${escapeHtml(d.target?.name || '')}님의 본인평가가 접수되었습니다.<br>수고하셨습니다.</p><div class="cvs-next"><b>앞으로의 진행</b>① 담당 팀장님 평가 → ② 담당 실장님 평가 → ③ 경영지원팀 심사 → ④ 대표 보고·품의<br>결과는 경영지원팀에서 따로 안내드립니다. 이 창은 닫으셔도 됩니다.</div>`;
     else if(d.canEdit) body = `<div style="font-weight:800;font-size:18px;margin-bottom:8px">정규직 전환 심사 · 본인평가</div><div style="color:#6B7280;font-size:13.5px;line-height:1.7;margin-bottom:6px">${escapeHtml(d.target?.name || '')}님, 계약 기간 동안의 업무를 돌아보며 본인평가를 작성해 주세요.${due ? `<br><b>${due}까지</b> 제출해 주세요.` : ''}</div>${rv.status === 'returned' && rv.return_reason ? `<div class="pr-return" style="margin:10px 0;text-align:left">보완 요청: ${escapeHtml(rv.return_reason)}</div>` : ''}<button class="btn btn-primary" style="margin-top:14px" onclick="prOpenReview(${info.uid},'${escapeHtml(info.r)}','self')">본인평가 작성하기</button>`;
     else body = `<div style="font-weight:800;font-size:17px;margin-bottom:8px">지금은 작성할 수 없습니다</div><div style="color:#6B7280;font-size:13.5px;line-height:1.7">${escapeHtml(d.why || '작성 기간이 아닙니다.')}<br>기한이 지났다면 경영지원팀에 문의해 주세요.</div>`;
   }
-  app.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F3F4F6;padding:20px"><div style="background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.08);padding:36px 30px;max-width:460px;width:100%;text-align:center"><img src="logo-vertical.png" alt="" style="height:56px;margin-bottom:18px;opacity:.9">${body}</div></div>${_prRv ? prRvOverlayHtml() : ''}`;
-  requestAnimationFrame(() => { const el = document.querySelector('.pr-c'); if(el && _prRvY) el.scrollTop = _prRvY; });
+  const done = !p.loading && !p.error && p.d && (p.d.review || {}).status === 'submitted';
+  app.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F7F8FA;padding:20px">${done ? `<div class="cvs-done"><img src="logo-vertical.png" alt="HectoQ&M" style="height:44px;margin-bottom:16px">${body}</div>` : `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:34px 30px;max-width:460px;width:100%;text-align:center"><img src="logo-vertical.png" alt="HectoQ&M" style="height:48px;margin-bottom:16px">${body}</div>`}</div>${_prRv ? prRvOverlayHtml() : ''}`;
+  requestAnimationFrame(() => { const el = document.querySelector('.cvs-body') || document.querySelector('.pr-c'); if(el && _prRvY) el.scrollTop = _prRvY; });
 }
 function prReset(){ _prMe = null; _prList = null; _prCycleId = null; _prRv = null; _prRes = null; _prRvY = 0; }
 async function prLoadMe(){
@@ -2943,7 +2967,7 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape' && _prRv && !_
 const prRvEditable = () => !!(_prRv && _prRv.d && _prRv.d.canEdit);
 function prRvSig(){ return JSON.stringify([_prRv.items, _prRv.comps, _prRv.overall, _prRv.extras]); }
 function prRvDirty(){ return !!(_prRv && _prRv.d && _prRv.sig0 !== prRvSig()); }
-function prRerender(){ const el = document.querySelector('.pr-c'); if(el) _prRvY = el.scrollTop; render(); }
+function prRerender(){ const el = document.querySelector('.cvs-body') || document.querySelector('.pr-c'); if(el) _prRvY = el.scrollTop; render(); }
 function prCompDef(){ return _prRv.d.cycle.settings.comps || []; }
 const prStrip = h => String(h || '').replace(/<[^>]*>/g, '').trim();
 
@@ -2984,6 +3008,7 @@ function prRefreshRules(){
   const el = document.getElementById('pr-rules'); if(el) el.innerHTML = prRulesHtml();
   const w = document.getElementById('pr-wsum'); if(w) w.textContent = _prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0);
   const pv = document.getElementById('pr-preview'); if(pv) pv.innerHTML = prPreviewInner();
+  const pt = document.getElementById('cvs-prog-t'); if(pt){ const r = prRvRules(), n = r.rows.filter(x => x.ok).length; pt.innerHTML = `필수 항목 <b>${n} / ${r.rows.length}</b> 완료`; document.getElementById('cvs-prog-i').style.width = Math.round(n / r.rows.length * 100) + '%'; }
 }
 
 // 입력 반영(글자 입력은 다시 그리지 않음, 구조가 바뀌면 다시 그림)
@@ -3006,7 +3031,7 @@ function prRvAdd(){
   if(_prRv.items.length >= max) return;
   _prRv.items.push({ goal_id: null, title: '', kind: prConvNow() ? null : 'kpi', weight: 0, summary: '', detail_html: '', grade: null });
   prRerender();
-  setTimeout(() => { const c = document.querySelector('.pr-c'); if(c) c.scrollTop = c.scrollHeight; }, 0);
+  setTimeout(() => { const c = document.querySelector('.cvs-body') || document.querySelector('.pr-c'); if(c) c.scrollTop = c.scrollHeight; }, 0);
 }
 function prRvDel(i){ if(!confirm('이 성과 항목을 삭제할까요?')) return; _prRv.items.splice(i, 1); prRerender(); }
 function prRvCompGrade(key, g){ const c = _prRv.comps.find(x => x.key === key); if(c){ c.grade = c.grade === g ? null : g; prRerender(); } }
@@ -3044,7 +3069,7 @@ function prItemCardHtml(x, i, rules, edit){
     ${edit ? `<div class="pr-rte-box"><div id="pr-rte-${i}" class="pr-rte" contenteditable="true" data-ph="성과 상세 내용을 적어 주세요 (결과·기여·수치 등)" oninput="prRteInput(${i},this)">${pmSafeHtml(x.detail_html)}</div>
       <div class="pr-rte-bar"><button type="button" onmousedown="event.preventDefault();prRte(${i},'bold')"><b>B</b></button><button type="button" onmousedown="event.preventDefault();prRte(${i},'italic')"><i>I</i></button><button type="button" onmousedown="event.preventDefault();prRte(${i},'underline')"><u>U</u></button><button type="button" onmousedown="event.preventDefault();prRte(${i},'insertUnorderedList')">• 목록</button><button type="button" onmousedown="event.preventDefault();prRte(${i},'link')">링크</button></div></div>`
       : (x.detail_html ? `<div class="pr-rich">${pmSafeHtml(x.detail_html)}</div>` : '')}
-    <div class="pr-glabel">자기 등급 ${st.scale ? `<span class="pm-meta">S ${st.scale.S} · A ${st.scale.A} · B ${st.scale.B} · C ${st.scale.C}</span>` : ''}</div>
+    <div class="pr-glabel">${prConvNow() ? '이 성과에 대한 나의 등급' : '자기 등급'} ${st.scale && !prConvNow() ? `<span class="pm-meta">S ${st.scale.S} · A ${st.scale.A} · B ${st.scale.B} · C ${st.scale.C}</span>` : ''}</div>
     ${prGradeBtns(x.grade, `prRvGrade(${i},'%G')`, !edit)}
     ${probs.length ? `<div class="pr-bad-msg">빠진 것: ${probs.map(escapeHtml).join(', ')}</div>` : ''}
   </div>`;
@@ -3253,10 +3278,52 @@ function prStepperHtml(){
   const done = k => k === cur ? d.review.status === 'submitted' : (k === 'self' && cur !== 'self' ? d.ref.self?.status === 'submitted' : (k === 'd1' && cur === 'd2' ? d.ref.d1?.status === 'submitted' : false));
   return `<div class="pr-steps">${['self', 'd1', 'd2'].filter(k => !(prIsConv(c) && d.d2_none && k === 'd2')).map(k => `<div class="pr-step ${k === cur ? 'on' : ''}"><span class="pr-dotc ${done(k) ? 'done' : ''}">${done(k) ? '✓' : ''}</span><div><div class="pr-step-n">${PR_STEP[k]}</div><div class="pm-meta">${prRange(c[k + '_from'], c[k + '_to'])}</div></div></div>`).join('')}</div>`;
 }
+// 정규직 전환 심사 본인평가(메일 링크) 전용 화면: 한 줄 흐름 안내 + 한 칼럼 입력 + 하단 진행 바. 점수·내부 단계명·참고 패널은 보여주지 않는다.
+const cvsDue = s => { if(!s) return ''; const d = new Date(String(s).slice(0, 10) + 'T00:00:00Z'); return `${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일(${'일월화수목금토'[d.getUTCDay()]})`; };
+function prConvSelfHtml(){
+  const d = _prRv.d, c = d.cycle, rv = d.review, edit = prRvEditable(), rules = prSelfRules(), st = c.settings;
+  const name = escapeHtml(d.target?.name || ''), due = cvsDue(d.due), max = st.items.max;
+  const okN = rules.rows.filter(x => x.ok).length;
+  const returned = rv.status === 'returned' && rv.return_reason ? `<div class="pr-return" style="margin-bottom:16px">본인평가 보완 요청이 있습니다 — ${escapeHtml(rv.return_reason)}</div>` : '';
+  const notice = _prRv.notice ? `<div class="pm-notice pm-notice-${_prRv.notice.type}" style="margin-bottom:14px">${escapeHtml(_prRv.notice.text)}</div>` : '';
+  const ro = !edit ? `<div class="pm-notice pr-notice-info" style="margin-bottom:14px">${rv.status === 'submitted' ? '제출한 평가입니다. 고칠 수 없습니다.' : escapeHtml(d.why || '지금은 작성할 수 없습니다.')}</div>` : '';
+  const flow = ['본인평가', '팀장 평가', '실장 평가', '경영지원팀 심사', '결과 안내'].map((t, i) => `<span class="${i === 0 ? 'on' : ''}">${t}</span>`).join('<i>›</i>');
+  return `<div class="cvs" role="dialog" aria-label="본인평가 작성">
+  <div class="cvs-top"><img src="logo-vertical.png" alt="HectoQ&M"><span class="cvs-t">정규직 전환 심사 · 본인평가</span>${due ? `<span class="cvs-due">${due}까지</span>` : ''}</div>
+  <div class="cvs-body"><div class="cvs-in">
+    <div class="cvs-hero">
+      <h1>${name}님, 계약 기간을 돌아보며 본인평가를 작성해 주세요</h1>
+      <p>정규직 전환 심사의 첫 단계입니다. 계약 기간 동안 내가 한 일과 일하는 방식을 솔직하고 구체적으로 적어 주세요.</p>
+      <div class="cvs-facts">
+        <div class="cvs-fact"><b>제출 기한</b><span>${due || '-'}</span></div>
+        <div class="cvs-fact"><b>작성 시간</b><span>약 15~20분</span></div>
+        <div class="cvs-fact"><b>작성 내용</b><span>성과 · 공통역량 · 종합 의견</span></div>
+      </div>
+      <div class="cvs-flow">${flow}</div>
+      <ul class="cvs-tips"><li>중간에 <b>임시저장</b>하고 나갔다가, 메일의 같은 링크로 다시 들어와 이어서 쓸 수 있습니다.</li><li><b>제출하면 수정할 수 없습니다.</b> 제출 전에 한 번 더 읽어 보세요.</li><li>문의는 경영지원팀으로 해 주세요.</li></ul>
+    </div>
+    ${notice}${returned}${ro}
+    <div class="cvs-sec"><span class="cvs-n">1</span><b>성과 기술</b><span>계약 기간 동안의 주요 성과 · ${st.items.min}~${max}개</span></div>
+    ${_prRv.items.map((x, i) => prItemCardHtml(x, i, rules, edit)).join('') || '<div class="pm-tbl-empty">성과 항목이 없습니다.</div>'}
+    ${edit && _prRv.items.length < max ? `<button class="btn btn-sm pm-btn-ghost" onclick="prRvAdd()">+ 성과 추가</button>` : ''}
+    <div class="cvs-sec"><span class="cvs-n">2</span><b>공통역량</b><span>${_prRv.comps.length}가지 역량마다 등급과 이유를 적어 주세요</span></div>
+    ${_prRv.comps.map((cp, i) => prCompBlockHtml(cp, prCompDef().find(z => z.key === cp.key) || { name: cp.key, desc: '' }, i, rules, edit)).join('')}
+    <div class="cvs-sec"><span class="cvs-n">3</span><b>종합 의견</b><span>선택 · 계약 기간을 돌아보며 하고 싶은 말</span></div>
+    ${edit ? `<textarea class="pr-in pr-ta" rows="4" maxlength="5000" placeholder="계약 기간을 돌아보며 하고 싶은 말을 적어 주세요" oninput="prRvOverall(this.value)">${escapeHtml(_prRv.overall)}</textarea>` : (rv.overall ? `<div class="pr-rich">${escapeHtml(rv.overall).replace(/\n/g, '<br>')}</div>` : '<div class="pm-meta">작성한 종합 의견이 없습니다.</div>')}
+    ${edit ? `<details class="cvs-rules" ${rules.ok ? '' : 'open'}><summary>제출 전 점검</summary><div class="pm-rules" id="pr-rules" style="margin:0 0 12px">${prRulesHtml()}</div></details>` : ''}
+  </div></div>
+  ${edit ? `<div class="cvs-bar"><div class="cvs-prog"><div class="cvs-prog-t" id="cvs-prog-t">필수 항목 <b>${okN} / ${rules.rows.length}</b> 완료</div><div class="cvs-prog-bar"><i id="cvs-prog-i" style="width:${Math.round(okN / rules.rows.length * 100)}%"></i></div></div>
+    <button class="btn btn-sm pm-btn-ghost" onclick="prRvSave(false)" ${_prBusy ? 'disabled' : ''}>임시저장</button><button class="btn btn-primary" onclick="prRvSave(true)" ${_prBusy ? 'disabled' : ''}>제출하기</button></div>` : ''}
+  </div>`;
+}
 function prRvOverlayHtml(){
   if(!_prRv) return '';
   if(_prRv.loading) return `<div class="pr-ov"><div class="pr-top"><button class="pr-back" onclick="prRvClose()" aria-label="뒤로">←</button><b>불러오는 중…</b></div><div class="loading" style="margin-top:80px"><div class="spinner"></div></div></div>`;
   const d = _prRv.d, c = d.cycle, who = _prRv.kind === 'self' ? '' : ` · ${escapeHtml(d.target.name)}님`;
+  if(_convTok && _prRv.kind === 'self'){
+    requestAnimationFrame(() => { const el = document.querySelector('.cvs-body'); if(el && _prRvY) el.scrollTop = _prRvY; });
+    return prConvSelfHtml();
+  }
   requestAnimationFrame(() => { const el = document.querySelector('.pr-c'); if(el && _prRvY) el.scrollTop = _prRvY; });
   return `<div class="pr-ov" role="dialog" aria-label="리뷰 작성">
   <div class="pr-top"><button class="pr-back" onclick="prRvClose()" aria-label="뒤로 (Esc)">←</button><b>${escapeHtml(c.name)}</b><span class="pm-meta" style="margin-left:8px">${prKindName(_prRv.kind, c)}${who}</span></div>
@@ -3272,7 +3339,7 @@ async function prRvSave(submit){
   if(submit){
     _prRv.attempt = true;
     const r = prRvRules();
-    if(!r.ok){ _prRv.notice = { type: 'error', text: '제출 전 점검에서 빠진 항목이 있습니다. 빨간 표시를 채워 주세요.' }; prRerender(); document.querySelector('.pr-c')?.scrollTo({ top: 0 }); return; }
+    if(!r.ok){ _prRv.notice = { type: 'error', text: '제출 전 점검에서 빠진 항목이 있습니다. 빨간 표시를 채워 주세요.' }; prRerender(); (document.querySelector('.cvs-body') || document.querySelector('.pr-c'))?.scrollTo({ top: 0 }); return; }
     if(!confirm('제출하면 수정할 수 없습니다. 제출할까요?')) return;
   }
   _prBusy = true; prRerender();
@@ -3280,7 +3347,7 @@ async function prRvSave(submit){
   _prBusy = false;
   if(!ok){
     _prRv.notice = { type: 'error', text: (data.problems && data.problems.length ? data.problems.join(' · ') : data.error) || '저장하지 못했습니다.' };
-    _prRv.attempt = true; prRerender(); document.querySelector('.pr-c')?.scrollTo({ top: 0 }); return;
+    _prRv.attempt = true; prRerender(); (document.querySelector('.cvs-body') || document.querySelector('.pr-c'))?.scrollTo({ top: 0 }); return;
   }
   if(submit){
     _prRv = null; _prMe = null; _prList = null; _prRvY = 0; if(_convTok) _convPage = null; pmNotify('success', prConvNow() ? '정규직 전환 심사 평가를 제출했습니다.' : '평가를 제출했습니다.'); render(); return;
