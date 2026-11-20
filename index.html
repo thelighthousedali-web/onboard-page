@@ -684,10 +684,13 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 #pc-page{width:100%;max-width:640px;background:#fff;border-radius:16px;padding:40px 40px 32px;box-shadow:0 2px 16px rgba(0,0,0,.06)}
 #pc-page h1{margin:0 0 6px;font-size:24px;font-weight:700;color:#111318}
 #pc-page .pc-sub{margin:0 0 26px;font-size:14px;color:#6b7280;line-height:1.6}
-#pc-page table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:14px}
+#pc-page{box-sizing:border-box}
+#pc-page table{width:100% !important;max-width:100%;table-layout:fixed;border-collapse:collapse;margin:0 0 20px;font-size:14px}
+#pc-page th,#pc-page td{white-space:normal !important;word-break:keep-all;overflow-wrap:anywhere;box-sizing:border-box}
+#pc-page th:nth-child(1),#pc-page td:nth-child(1){width:24%}#pc-page th:nth-child(3),#pc-page td:nth-child(3){width:28%}
 #pc-page th{background:#111318;color:#fff;font-weight:600;padding:10px 12px;text-align:left;border:1px solid #111318}
 #pc-page td{padding:12px;border:1px solid #d1d5db;vertical-align:top;line-height:1.6}
-#pc-page td:first-child{font-weight:600;white-space:nowrap;background:#f9fafb}
+#pc-page td:first-child{font-weight:600;background:#f9fafb}
 #pc-page ul{margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.8}
 .pc-check{display:flex;align-items:center;gap:10px;padding:14px 16px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;cursor:pointer;margin-bottom:18px}
 .pc-check input{width:18px;height:18px;accent-color:#FF6114;flex:none}
