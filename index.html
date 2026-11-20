@@ -715,7 +715,7 @@ const PrivacyConsent = (() => {
   const BODY = `
     <p>입사 시 동의하신 「개인정보 수집 동의서」(개인정보·고유식별정보·민감정보·제3자 제공) 내용은 그대로 적용되며 다시 받지 않습니다. 아래는 <b>허브 이용으로 새로 처리되는 항목</b>만 안내합니다.</p>
 
-    <h3>1. 허브에서 새로 수집·이용하는 개인정보 (필수)</h3>
+    <h3>허브에서 새로 수집·이용하는 개인정보 (필수)</h3>
     <table><thead><tr><th>구분</th><th>항목</th><th>목적</th></tr></thead><tbody>
     ${T([
       ['계정·로그인','이메일(ID), 비밀번호(암호화 저장), 네이버웍스 연동 이메일','본인 확인, 권한 관리'],
@@ -727,16 +727,7 @@ const PrivacyConsent = (() => {
     <ul>
       <li><b>보유기간:</b> 입사 시 동의서와 같고, 퇴직 시 허브 접속을 차단한 뒤 퇴직 후 1년이 지나면 삭제합니다(법령상 보존 의무가 있는 정보는 해당 기간 보관).</li>
       <li><b>거부 시 불이익:</b> 허브를 이용할 수 없어 근태·평가·온보딩 등을 서면·대면으로 처리해야 합니다.</li>
-    </ul>
-
-    <h3>2. 개인정보 처리 위탁 및 국외 이전 (필수)</h3>
-    <table><thead><tr><th>수탁자</th><th>위탁 업무</th><th>이전 국가</th></tr></thead><tbody>
-    ${T([
-      ['Supabase Inc.','허브 데이터베이스·로그인 운영','국가 확인 후 안내'],
-      ['Vercel Inc.','허브 화면 제공, 사내 IP 접속 제한','미국 등'],
-      ['Google LLC','안내 메일 발송(Gmail), 챗봇 질문 처리(Gemini)','미국 등'],
-      ['WORKS MOBILE(네이버웍스)','네이버웍스 계정 로그인','대한민국']
-    ])}</tbody></table>`;
+    </ul>`;
 
   function el(html){ const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstChild; }
   function close(){ document.getElementById('pc-overlay')?.remove(); document.body.style.overflow = cfg?._prevOverflow ?? ''; }
@@ -755,18 +746,16 @@ const PrivacyConsent = (() => {
         <div id="pc-head"><h2 id="pc-title">개인정보 수집·이용 동의</h2><p>HR 허브·온보딩 허브 이용 전에 아래 내용을 확인하고 동의해 주세요.</p></div>
         <div id="pc-body">${BODY}</div>
         <div id="pc-foot">
-          <label class="pc-check"><input type="checkbox" id="pc-all"><b>전체 동의</b></label>
-          <label class="pc-check"><input type="checkbox" class="pc-r" id="pc-r1"><span><span class="pc-tag pc-req">필수</span>허브 이용에 필요한 개인정보 수집·이용에 동의합니다. (1항)</span></label>
-          <label class="pc-check"><input type="checkbox" class="pc-r" id="pc-r2"><span><span class="pc-tag pc-req">필수</span>개인정보 처리 위탁 및 국외 이전에 동의합니다. (2항)</span></label>
+          <label class="pc-check"><input type="checkbox" class="pc-r" id="pc-r1"><span><span class="pc-tag pc-req">필수</span>허브 이용에 필요한 개인정보 수집·이용에 동의합니다.</span></label>
           <div class="pc-err" id="pc-err"></div>
           <div class="pc-actions"><button class="pc-btn" id="pc-no">동의하지 않음</button><button class="pc-btn primary" id="pc-yes" disabled>동의하고 시작</button></div>
         </div></div></div>`);
       document.body.appendChild(o);
       const $ = id => document.getElementById(id);
       const rs = () => [...o.querySelectorAll('.pc-r')], os = () => [...o.querySelectorAll('.pc-o')];
-      const sync = () => { $('pc-yes').disabled = !rs().every(x => x.checked); $('pc-all').checked = [...rs(), ...os()].every(x => x.checked); };
+      const sync = () => { $('pc-yes').disabled = !rs().every(x => x.checked);  };
       o.addEventListener('change', e => {
-        if (e.target.id === 'pc-all') [...rs(), ...os()].forEach(x => x.checked = e.target.checked);
+        
         sync();
       });
       $('pc-no').onclick = () => {
