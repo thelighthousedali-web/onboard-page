@@ -151,7 +151,7 @@ body.impersonating .layout{margin-top:38px}
 .logout-btn:hover{background:rgba(239,68,68,.2);color:#FCA5A5}
 
 /* ── MAIN ── */
-.main{margin-left:256px;flex:1;padding:30px 36px;min-height:100vh}
+.main{margin-left:256px;flex:1;min-width:0;padding:30px 36px;min-height:100vh}
 /* MY | 리더용 전환 스위치(2026-11-13) */
 .mode-switch-wrap{display:flex;justify-content:center;margin:-14px 0 18px}
 .mode-switch{display:inline-flex;background:#F3F4F6;border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px}
@@ -395,7 +395,21 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 .chat-input{flex:1;resize:none;border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;font-family:inherit;max-height:80px;-webkit-user-select:text;user-select:text}
 .chat-send{background:var(--primary);color:#fff;border:none;border-radius:10px;width:40px;flex-shrink:0;cursor:pointer;font-size:16px}
 .chat-send:disabled{opacity:.5;cursor:default}
-@media(max-width:520px){.chat-panel{right:12px;left:12px;width:auto;bottom:74px}.chat-fab{right:16px;bottom:16px;height:46px;font-size:14px}}
+@media(max-width:768px){
+  .chat-fab{right:16px;bottom:calc(16px + env(safe-area-inset-bottom));height:46px;font-size:14px}
+  /* 휴대폰: 전체 화면 패널 — 주소창·키보드로 100vh가 어긋나므로 visualViewport 값(--chat-top/--chat-h)을 JS가 채움 */
+  .chat-panel{left:0;right:0;top:var(--chat-top,0px);bottom:auto;width:100%;max-width:100%;height:var(--chat-h,100dvh);max-height:none;border-radius:0;box-shadow:none}
+  body.chat-open{overflow:hidden;position:fixed;width:100%;left:0;right:0}
+  body.chat-open .chat-fab{display:none !important}
+  .chat-head{padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top))}
+  .chat-head-title{font-size:15px}
+  .chat-head-close{font-size:22px;padding:6px 12px;opacity:1}
+  .chat-body{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .chat-msg{max-width:88%;font-size:14px}
+  .chat-foot{padding:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+  .chat-input{font-size:16px;min-width:0}
+  .chat-send{width:46px}
+}
 /* 내 목표(성과관리) */
 .pm-banner .sec-title{margin-bottom:10px}
 .pm-banner-warn{border-color:#FCA5A5;background:#FEF2F2}
@@ -1187,14 +1201,38 @@ function setChatVisible(show){
     const panel = document.getElementById('chat-panel');
     if(panel) panel.classList.remove('open');
     _chatOpen = false;
+    document.body.classList.remove('chat-open');
   }
 }
+
+// 휴대폰에서 주소창·키보드 때문에 화면 높이가 변하므로 실제 보이는 영역(visualViewport)에 패널을 맞춘다
+function syncChatViewport(){
+  const panel = document.getElementById('chat-panel');
+  if(!panel) return;
+  const vv = window.visualViewport;
+  if(_chatOpen && vv && window.innerWidth <= 768){
+    panel.style.setProperty('--chat-top', vv.offsetTop + 'px');
+    panel.style.setProperty('--chat-h', vv.height + 'px');
+    const body = document.getElementById('chat-body');
+    if(body) body.scrollTop = body.scrollHeight;
+  } else {
+    panel.style.removeProperty('--chat-top');
+    panel.style.removeProperty('--chat-h');
+  }
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', syncChatViewport);
+  window.visualViewport.addEventListener('scroll', syncChatViewport);
+}
+window.addEventListener('orientationchange', () => setTimeout(syncChatViewport, 200));
 
 function toggleChatPanel(){
   // 챗봇은 선택 동의(외부 AI 전송) — 동의 안 한 사람은 여기서 동의를 받고 연다(2026-11-20)
   if(!_chatOpen && !PrivacyConsent.optionalOk('chatbot')){ PrivacyConsent.askOptional('chatbot').then(ok=>{ if(ok) toggleChatPanel(); }); return; }
   _chatOpen = !_chatOpen;
   document.getElementById('chat-panel').classList.toggle('open', _chatOpen);
+  document.body.classList.toggle('chat-open', _chatOpen);
+  syncChatViewport();
   if(_chatOpen){
     const body = document.getElementById('chat-body');
     if(!body.childElementCount){
