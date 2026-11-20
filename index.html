@@ -314,6 +314,12 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
   .welcome-banner{padding:20px 18px}
   .cards{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
   .t-wrap{font-size:12px}
+  /* Wi-Fi 표: 스크롤 없이 한 화면에 보이도록 글자·여백 축소 */
+  .wifi-tbl{font-size:11.5px;table-layout:fixed}
+  .wifi-tbl{font-size:11px}
+  .wifi-tbl th,.wifi-tbl td{padding:8px 3px;overflow-wrap:anywhere}
+  .wifi-tbl td[rowspan]{overflow-wrap:normal;word-break:keep-all;font-size:10.5px}
+  .wifi-tbl th:nth-child(1){width:26%}.wifi-tbl th:nth-child(3){width:30%}
 }
 /* ── CMS EDITOR ── */
 .cms-editor-wrap{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;height:calc(100vh - 260px);min-height:440px}
@@ -5319,7 +5325,7 @@ function renderWifi(){
 <div class="content-block">
   <div class="sec-title">🏢 Office 1 · PNM타워 4층</div>
   <div class="t-wrap">
-  <table class="info-tbl">
+  <table class="info-tbl wifi-tbl">
     <thead><tr><th>구분</th><th>SSID</th><th>비밀번호</th></tr></thead>
     <tbody>
       <tr><td rowspan="2">일반</td><td>Q_Qffice 5G</td><td>qoffice1!</td></tr>
@@ -5336,7 +5342,7 @@ function renderWifi(){
 <div class="content-block">
   <div class="sec-title">🏢 Office 2 · 스타팅빌딩 3층</div>
   <div class="t-wrap">
-  <table class="info-tbl">
+  <table class="info-tbl wifi-tbl">
     <thead><tr><th>구분</th><th>SSID</th><th>비밀번호</th></tr></thead>
     <tbody>
       <tr><td rowspan="2">일반</td><td>qoffice_stt</td><td>qoffice1!</td></tr>
@@ -5349,7 +5355,7 @@ function renderWifi(){
 <div class="content-block">
   <div class="sec-title">🏢 Office 3 · 혜성빌딩 4층</div>
   <div class="t-wrap">
-  <table class="info-tbl">
+  <table class="info-tbl wifi-tbl">
     <thead><tr><th>구분</th><th>SSID</th><th>비밀번호</th></tr></thead>
     <tbody>
       <tr><td rowspan="2">일반</td><td>HectoQ&amp;M 2.4G</td><td>qoffice1!</td></tr>
