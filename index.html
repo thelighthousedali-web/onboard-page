@@ -676,124 +676,71 @@ table.info-tbl{width:100%;border-collapse:collapse;font-size:13px}
 </head>
 <body>
 <!-- PRIVACY-CONSENT:BEGIN
-     최초 로그인 개인정보 수집·이용 동의 화면 (2026-11-20). 이 블록은 hr-hub/index.html과 onboarding-hub/index.html에 똑같이 들어 있다.
-     원본은 이 파일 — 고치면 두 허브 index.html의 BEGIN~END 사이를 같이 바꾼다. 동의서 버전(VERSION)은 서버 함수
-     privacy-consent의 CONSENT_VERSION과 같아야 한다(문안을 바꾸면 둘 다 올려서 전원 재동의).
-     허브별 연결은 각 index.html에서 PrivacyConsent.init({...})로 한다. -->
+     최초 로그인 개인정보 수집·이용 동의 페이지 (2026-11-20). 이 블록은 hr-hub/index.html과 onboarding-hub/index.html에 똑같이 들어 있다.
+     원본은 이 파일 — 고치면 두 허브 index.html의 BEGIN~END 사이를 같이 바꾼다. VERSION은 서버 함수 privacy-consent의
+     CONSENT_VERSION과 같아야 한다(문안을 바꾸면 둘 다 올려서 전원 재동의). 허브별 연결은 각 index.html의 PrivacyConsent.init({...}). -->
 <style>
-#pc-overlay{position:fixed;inset:0;z-index:99999;background:rgba(17,19,24,.62);display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Malgun Gothic','맑은 고딕',-apple-system,sans-serif}
-#pc-card{background:#fff;color:#1f2937;width:100%;max-width:780px;max-height:94vh;border-radius:14px;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}
-#pc-head{padding:18px 22px 14px;border-bottom:1px solid #e5e7eb}
-#pc-head h2{margin:0 0 4px;font-size:18px;font-weight:700}
-#pc-head p{margin:0;font-size:12.5px;color:#6b7280;line-height:1.5}
-#pc-body{padding:16px 22px;overflow-y:auto;font-size:13px;line-height:1.65;flex:1}
-#pc-body h3{margin:18px 0 6px;font-size:14px;font-weight:700;color:#111318}
-#pc-body h3:first-child{margin-top:0}
-#pc-body p{margin:0 0 8px}
-#pc-body table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:12.5px}
-#pc-body th{background:#111318;color:#fff;font-weight:600;padding:6px 8px;text-align:left;border:1px solid #111318}
-#pc-body td{padding:6px 8px;border:1px solid #d1d5db;vertical-align:top}
-#pc-body td:first-child{font-weight:600;white-space:nowrap;background:#f9fafb}
-#pc-body ul{margin:4px 0 8px;padding-left:18px}
-#pc-foot{padding:12px 22px 16px;border-top:1px solid #e5e7eb;background:#fafafa}
-.pc-check{display:flex;align-items:flex-start;gap:8px;margin:6px 0;font-size:13px;line-height:1.5;cursor:pointer}
-.pc-check input{margin-top:3px;width:16px;height:16px;accent-color:#FF6114;flex:none}
-.pc-tag{display:inline-block;font-size:11px;font-weight:700;padding:0 6px;border-radius:4px;margin-right:4px;vertical-align:1px}
-.pc-req{background:#fff1ea;color:#d94a00}.pc-opt{background:#eef2f7;color:#4b5563}
-.pc-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
-.pc-btn{border:1px solid #d1d5db;background:#fff;color:#374151;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:inherit}
+#pc-overlay{position:fixed;inset:0;z-index:99999;background:#f3f4f6;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:6vh 20px;font-family:'Malgun Gothic','맑은 고딕',-apple-system,sans-serif;color:#1f2937}
+#pc-page{width:100%;max-width:640px;background:#fff;border-radius:16px;padding:40px 40px 32px;box-shadow:0 2px 16px rgba(0,0,0,.06)}
+#pc-page h1{margin:0 0 6px;font-size:24px;font-weight:700;color:#111318}
+#pc-page .pc-sub{margin:0 0 26px;font-size:14px;color:#6b7280;line-height:1.6}
+#pc-page table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:14px}
+#pc-page th{background:#111318;color:#fff;font-weight:600;padding:10px 12px;text-align:left;border:1px solid #111318}
+#pc-page td{padding:12px;border:1px solid #d1d5db;vertical-align:top;line-height:1.6}
+#pc-page td:first-child{font-weight:600;white-space:nowrap;background:#f9fafb}
+#pc-page ul{margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.8}
+.pc-check{display:flex;align-items:center;gap:10px;padding:14px 16px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;cursor:pointer;margin-bottom:18px}
+.pc-check input{width:18px;height:18px;accent-color:#FF6114;flex:none}
+.pc-actions{display:flex;gap:10px}
+.pc-btn{flex:1;border:1px solid #d1d5db;background:#fff;color:#374151;border-radius:10px;padding:13px 16px;font-size:15px;cursor:pointer;font-family:inherit}
 .pc-btn.primary{background:#FF6114;border-color:#FF6114;color:#fff;font-weight:700}
-.pc-btn:disabled{opacity:.45;cursor:not-allowed}
-.pc-err{color:#dc2626;font-size:12px;margin-top:6px;min-height:16px}
+.pc-btn:disabled{opacity:.4;cursor:not-allowed}
+.pc-err{color:#dc2626;font-size:13px;min-height:18px;margin-bottom:8px}
+@media(max-width:560px){#pc-overlay{padding:0}#pc-page{border-radius:0;min-height:100%;padding:28px 20px}}
 </style>
 <script>
 const PrivacyConsent = (() => {
   const VERSION = '2026-11-20';
   let cfg = null, state = null, busy = false, doneFor = '';
 
-  const T = (rows) => rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
-  const BODY = `
-    <p>입사 시 동의하신 「개인정보 수집 동의서」(개인정보·고유식별정보·민감정보·제3자 제공) 내용은 그대로 적용되며 다시 받지 않습니다. 아래는 <b>허브 이용으로 새로 처리되는 항목</b>만 안내합니다.</p>
-
-    <h3>허브에서 새로 수집·이용하는 개인정보 (필수)</h3>
-    <table><thead><tr><th>구분</th><th>항목</th><th>목적</th></tr></thead><tbody>
-    ${T([
-      ['계정·로그인','이메일(ID), 비밀번호(암호화 저장), 네이버웍스 연동 이메일','본인 확인, 권한 관리'],
-      ['접속·보안','접속 IP, 접속 기기·브라우저 정보, 기기 등록 쿠키, 2차 인증 정보(OTP 키, 패스키 공개키)','부정 접속 방지, 사내망 접속 제한'],
-      ['근태·휴가','출퇴근 시각, 근무일정, 지각 판정, 주간 근로시간, 휴가 사용 내역(총무 시스템 연동)','근태·휴가 관리, 근로시간 준수 점검'],
-      ['평가·성과','수습·전환 심사, 인사평가, 동료평가, 목표·성과 평가, 1:1 면담 기록','수습·전환 판정, 인사평가·성과 관리'],
-      ['온보딩·퇴직','온보딩 미션 진행 현황·설문 응답, 안내 메일 발송 이력, 퇴직 서베이 응답','온보딩 지원, 퇴직 사유 파악']
-    ])}</tbody></table>
-    <ul>
-      <li><b>보유기간:</b> 입사 시 동의서와 같고, 퇴직 시 허브 접속을 차단한 뒤 퇴직 후 1년이 지나면 삭제합니다(법령상 보존 의무가 있는 정보는 해당 기간 보관).</li>
-      <li><b>거부 시 불이익:</b> 허브를 이용할 수 없어 근태·평가·온보딩 등을 서면·대면으로 처리해야 합니다.</li>
-    </ul>`;
-
   function el(html){ const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstChild; }
-  function close(){ document.getElementById('pc-overlay')?.remove(); document.body.style.overflow = cfg?._prevOverflow ?? ''; }
+  function close(){ document.getElementById('pc-overlay')?.remove(); }
   function post(body){
     return fetch(cfg.url, { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + cfg.key },
       body: JSON.stringify({ kind: cfg.kind, token: cfg.getToken(), ...body }) })
       .then(async r => ({ ok: r.ok, status: r.status, data: await r.json().catch(() => ({})) }))
       .catch(() => ({ ok:false, status:0, data:{ error:'서버에 연결할 수 없습니다' } }));
   }
-  function setState(c){ state = c; try { cfg.onChange && cfg.onChange(state); } catch(e){} }
 
-  function showMain(){
+  // 확인하는 동안 메뉴가 먼저 비치지 않도록 빈 페이지로 가려 둔다
+  function cover(){ if (!document.getElementById('pc-overlay')) document.body.appendChild(el('<div id="pc-overlay"></div>')); }
+
+  function showPage(){
     return new Promise(resolve => {
-      cfg._prevOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden';
-      const o = el(`<div id="pc-overlay" role="dialog" aria-modal="true" aria-labelledby="pc-title"><div id="pc-card">
-        <div id="pc-head"><h2 id="pc-title">개인정보 수집·이용 동의</h2><p>HR 허브·온보딩 허브 이용 전에 아래 내용을 확인하고 동의해 주세요.</p></div>
-        <div id="pc-body">${BODY}</div>
-        <div id="pc-foot">
-          <label class="pc-check"><input type="checkbox" class="pc-r" id="pc-r1"><span><span class="pc-tag pc-req">필수</span>허브 이용에 필요한 개인정보 수집·이용에 동의합니다.</span></label>
-          <div class="pc-err" id="pc-err"></div>
-          <div class="pc-actions"><button class="pc-btn" id="pc-no">동의하지 않음</button><button class="pc-btn primary" id="pc-yes" disabled>동의하고 시작</button></div>
-        </div></div></div>`);
-      document.body.appendChild(o);
+      cover();
+      const o = document.getElementById('pc-overlay');
+      o.innerHTML = `<div id="pc-page" role="dialog" aria-labelledby="pc-title">
+        <h1 id="pc-title">개인정보 수집·이용 동의</h1>
+        <p class="pc-sub">HR 허브·온보딩 허브를 이용하기 전에 확인해 주세요. 입사 시 동의하신 내용은 그대로 적용됩니다.</p>
+        <table><thead><tr><th>구분</th><th>수집·이용 항목</th><th>이용 목적</th></tr></thead><tbody>
+          <tr><td>계정·로그인</td><td>이메일(ID), 비밀번호(암호화 저장), 네이버웍스 연동 이메일</td><td>본인 확인, 권한 관리</td></tr>
+        </tbody></table>
+        <ul>
+          <li><b>보유기간:</b> 입사 시 동의서와 같고, 퇴직 후 1년이 지나면 삭제합니다(법령상 보존 의무가 있는 정보는 해당 기간 보관).</li>
+          <li><b>동의 거부 시 불이익:</b> 서비스를 이용하지 못합니다.</li>
+        </ul>
+        <label class="pc-check"><input type="checkbox" id="pc-r1"><span><b>[필수]</b> 개인정보 수집·이용에 동의합니다.</span></label>
+        <div class="pc-err" id="pc-err"></div>
+        <div class="pc-actions"><button class="pc-btn" id="pc-no">동의하지 않음</button><button class="pc-btn primary" id="pc-yes" disabled>동의하고 시작</button></div>
+      </div>`;
       const $ = id => document.getElementById(id);
-      const rs = () => [...o.querySelectorAll('.pc-r')], os = () => [...o.querySelectorAll('.pc-o')];
-      const sync = () => { $('pc-yes').disabled = !rs().every(x => x.checked);  };
-      o.addEventListener('change', e => {
-        
-        sync();
-      });
-      $('pc-no').onclick = () => {
-        if (!confirm('필수 항목에 동의하지 않으면 허브를 이용할 수 없어 로그아웃됩니다. 동의하지 않고 나가시겠어요?')) return;
-        close(); resolve(false);
-      };
+      $('pc-r1').onchange = e => { $('pc-yes').disabled = !e.target.checked; };
+      $('pc-no').onclick = () => { close(); resolve(false); };
       $('pc-yes').onclick = async () => {
         $('pc-yes').disabled = true; $('pc-err').textContent = '';
         const r = await post({ action:'agree', version:VERSION, required:true, push:true, chatbot:true });
-        if (r.ok) { close(); setState(r.data.consent); resolve(true); }
+        if (r.ok) { close(); state = r.data.consent; resolve(true); }
         else { $('pc-err').textContent = r.data.error || '저장하지 못했습니다. 잠시 후 다시 시도해 주세요'; $('pc-yes').disabled = false; }
-      };
-    });
-  }
-
-  const OPT = {
-    push: ['푸시 알림 수신 동의', '평가 요청·승인 등 업무 알림을 이 기기로 받기 위해 브라우저 알림 구독 정보(수신 주소·암호화 키)를 저장합니다. 동의하지 않아도 허브는 이용할 수 있습니다.', '푸시 알림 수신에 동의합니다.'],
-    chatbot: ['챗봇 이용 및 외부 AI 전송 동의', '챗봇 "헥토 도우미"에 입력한 질문은 외부 AI 서비스(Google Gemini)로 전송되어 답변을 만들고, 질문·답변·이름·이메일·직원유형은 대화 기록으로 회사에 보관되며 관리자가 조회할 수 있습니다. 주민등록번호 등 민감한 정보는 입력하지 마세요. 동의하지 않아도 허브는 이용할 수 있습니다.', '챗봇 이용 및 외부 AI 전송에 동의합니다.']
-  };
-  function askOptional(key){
-    return new Promise(resolve => {
-      const [title, desc, label] = OPT[key];
-      const o = el(`<div id="pc-overlay" role="dialog" aria-modal="true"><div id="pc-card" style="max-width:460px">
-        <div id="pc-head"><h2>${title}</h2></div>
-        <div id="pc-body"><p>${desc}</p></div>
-        <div id="pc-foot"><label class="pc-check"><input type="checkbox" id="pc-q"><span><span class="pc-tag pc-opt">선택</span>${label}</span></label>
-        <div class="pc-err" id="pc-err"></div>
-        <div class="pc-actions"><button class="pc-btn" id="pc-cancel">취소</button><button class="pc-btn primary" id="pc-ok" disabled>동의하고 사용</button></div></div></div></div>`);
-      document.body.appendChild(o);
-      const $ = id => document.getElementById(id);
-      $('pc-q').onchange = e => { $('pc-ok').disabled = !e.target.checked; };
-      $('pc-cancel').onclick = () => { o.remove(); resolve(false); };
-      $('pc-ok').onclick = async () => {
-        $('pc-ok').disabled = true;
-        const next = { push: !!state?.push, chatbot: !!state?.chatbot, [key]: true };
-        const r = await post({ action:'update_optional', push: next.push, chatbot: next.chatbot });
-        if (r.ok) { o.remove(); setState(r.data.consent); resolve(true); }
-        else { $('pc-err').textContent = r.data.error || '저장하지 못했습니다'; $('pc-ok').disabled = false; }
       };
     });
   }
@@ -808,11 +755,12 @@ const PrivacyConsent = (() => {
     if (busy || (doneFor === id && state)) return;
     busy = true;
     try {
+      cover();
       const r = await post({ action:'status' });
-      if (!r.ok) { console.warn('[privacy-consent] 상태 확인 실패(동의 화면 건너뜀):', r.status, r.data?.error); return; }
+      if (!r.ok) { close(); console.warn('[privacy-consent] 상태 확인 실패(동의 화면 건너뜀):', r.status, r.data?.error); return; }
       doneFor = id;
-      if (!r.data.needed) { setState(r.data.consent); return; }
-      const agreed = await showMain();
+      if (!r.data.needed) { close(); state = r.data.consent; return; }
+      const agreed = await showPage();
       if (!agreed) { doneFor = ''; state = null; cfg.onDecline && cfg.onDecline(); }
     } finally { busy = false; }
   }
@@ -821,9 +769,8 @@ const PrivacyConsent = (() => {
     VERSION,
     init(c){ cfg = c; },
     ensure,
-    askOptional,
-    // 선택 항목 동의 여부. 상태를 아직 모르면(서버 확인 전·함수 미배포) 막지 않는다
-    optionalOk(key){ return true; },
+    askOptional(){ return Promise.resolve(true); }, // 선택 동의는 없음(예전 호출 호환)
+    optionalOk(){ return true; },
   };
 })();
 </script>
