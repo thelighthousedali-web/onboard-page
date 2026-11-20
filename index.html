@@ -734,15 +734,8 @@ const PrivacyConsent = (() => {
     ${T([
       ['Supabase Inc.','허브 데이터베이스·로그인 운영','국가 확인 후 안내'],
       ['Vercel Inc.','허브 화면 제공, 사내 IP 접속 제한','미국 등'],
-      ['Google LLC','안내 메일 발송(Gmail)','미국 등'],
+      ['Google LLC','안내 메일 발송(Gmail), 챗봇 질문 처리(Gemini)','미국 등'],
       ['WORKS MOBILE(네이버웍스)','네이버웍스 계정 로그인','대한민국']
-    ])}</tbody></table>
-
-    <h3>3. 선택 동의 (동의하지 않아도 허브 이용 가능)</h3>
-    <table><thead><tr><th>구분</th><th>내용</th><th>동의하지 않으면</th></tr></thead><tbody>
-    ${T([
-      ['푸시 알림','알림 구독 정보를 저장해 업무 알림을 휴대폰·PC로 전달','알림을 받지 않음'],
-      ['챗봇 "헥토 도우미"','질문이 외부 AI(Google Gemini)로 전송되고, 대화 내용(이름·이메일 포함)이 회사에 기록됨. 민감한 정보는 입력하지 마세요.','챗봇만 사용 불가']
     ])}</tbody></table>`;
 
   function el(html){ const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstChild; }
@@ -762,11 +755,9 @@ const PrivacyConsent = (() => {
         <div id="pc-head"><h2 id="pc-title">개인정보 수집·이용 동의</h2><p>HR 허브·온보딩 허브 이용 전에 아래 내용을 확인하고 동의해 주세요.</p></div>
         <div id="pc-body">${BODY}</div>
         <div id="pc-foot">
-          <label class="pc-check"><input type="checkbox" id="pc-all"><b>전체 동의 (선택 항목 포함)</b></label>
+          <label class="pc-check"><input type="checkbox" id="pc-all"><b>전체 동의</b></label>
           <label class="pc-check"><input type="checkbox" class="pc-r" id="pc-r1"><span><span class="pc-tag pc-req">필수</span>허브 이용에 필요한 개인정보 수집·이용에 동의합니다. (1항)</span></label>
           <label class="pc-check"><input type="checkbox" class="pc-r" id="pc-r2"><span><span class="pc-tag pc-req">필수</span>개인정보 처리 위탁 및 국외 이전에 동의합니다. (2항)</span></label>
-          <label class="pc-check"><input type="checkbox" class="pc-o" id="pc-o1"><span><span class="pc-tag pc-opt">선택</span>푸시 알림 수신에 동의합니다. (3항)</span></label>
-          <label class="pc-check"><input type="checkbox" class="pc-o" id="pc-o2"><span><span class="pc-tag pc-opt">선택</span>챗봇 이용 및 외부 AI(Google Gemini) 전송에 동의합니다. (3항)</span></label>
           <div class="pc-err" id="pc-err"></div>
           <div class="pc-actions"><button class="pc-btn" id="pc-no">동의하지 않음</button><button class="pc-btn primary" id="pc-yes" disabled>동의하고 시작</button></div>
         </div></div></div>`);
@@ -784,7 +775,7 @@ const PrivacyConsent = (() => {
       };
       $('pc-yes').onclick = async () => {
         $('pc-yes').disabled = true; $('pc-err').textContent = '';
-        const r = await post({ action:'agree', version:VERSION, required:true, push: $('pc-o1').checked, chatbot: $('pc-o2').checked });
+        const r = await post({ action:'agree', version:VERSION, required:true, push:true, chatbot:true });
         if (r.ok) { close(); setState(r.data.consent); resolve(true); }
         else { $('pc-err').textContent = r.data.error || '저장하지 못했습니다. 잠시 후 다시 시도해 주세요'; $('pc-yes').disabled = false; }
       };
@@ -843,7 +834,7 @@ const PrivacyConsent = (() => {
     ensure,
     askOptional,
     // 선택 항목 동의 여부. 상태를 아직 모르면(서버 확인 전·함수 미배포) 막지 않는다
-    optionalOk(key){ return state ? !!state[key] : true; },
+    optionalOk(key){ return true; },
   };
 })();
 </script>
