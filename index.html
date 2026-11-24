@@ -3244,7 +3244,7 @@ function prCenterSelfHtml(){
   const max = st.items.max, goalsN = (d.ref.goals || []).filter(g => !g.parent_goal_id).length;
   const convSelf = prIsConv(d.cycle);
   return `${notice}${returned}${ro}
-  ${convSelf ? `<div class="pr-sec-h">① 성과 기술 <span class="pm-meta">계약 기간 동안의 주요 성과 · 항목 ${st.items.min}~${max}개</span></div>` : `<div class="pr-sec-h">① 성과 <span class="pm-meta">항목 ${st.items.min}~${max}개 · 가중치 합 <b id="pr-wsum">${_prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0)}</b> / 100</span></div>`}
+  ${convSelf ? `<div class="pr-sec-h">① 성과 기술 <span class="pm-meta">계약 기간 동안의 주요 성과 · 항목 ${st.items.min}~${max}개${st.items.requireWeight !== false ? ` · 비중 합 <b id="pr-wsum">${_prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0)}</b> / 100` : ''}</span></div>` : `<div class="pr-sec-h">① 성과 <span class="pm-meta">항목 ${st.items.min}~${max}개 · 가중치 합 <b id="pr-wsum">${_prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0)}</b> / 100</span></div>`}
   ${d.cycle.goal_cycle_id && !goalsN ? `<div class="pm-notice pr-notice-info">승인된 목표가 없어 목표를 불러오지 못했습니다. 성과 항목에 연결할 목표가 필요합니다.</div>` : ''}
   ${_prRv.items.map((x, i) => prItemCardHtml(x, i, rules, edit)).join('') || '<div class="pm-tbl-empty">성과 항목이 없습니다.</div>'}
   ${edit && _prRv.items.length < max ? `<button class="btn btn-sm pm-btn-ghost" onclick="prRvAdd()">+ 성과 추가</button>` : ''}
@@ -3280,20 +3280,27 @@ function prPreviewCalc(){
   return { perf: sw ? r2(s / sw) : null, comp: cs.length ? r2(cs.reduce((a, b) => a + b, 0) / cs.length) : null };
 }
 function prConvPreviewCalc(){
-  const st = _prRv.d.cycle.settings, sc = st.score || { comps: 30, skills: 70 };
+  const st = _prRv.d.cycle.settings, sc = st.score || { perf: 0, comps: 30, skills: 70 };
+  // 성과: 본인평가 항목 가중치로 가중 평균(가중치가 없으면 균등). 등급 빠진 항목이 있으면 아직 계산 안 함
+  const si = _prRv.d.ref.self?.items || [], noW = si.every(it => !(Number(it.weight) > 0));
+  let pw = 0, ps = 0, pmiss = !si.length;
+  si.forEach((it, i) => { const g = _prRv.items.find(x => x.ref === i)?.grade, v = g ? st.scale[g] : null; if(v == null){ pmiss = true; return; } const w = noW ? 1 : (Number(it.weight) || 0); pw += w; ps += w * v; });
+  const usePerf = Number(sc.perf) > 0, perf = !pmiss && pw ? ps / pw : null;
   const cs = _prRv.comps.map(c => (c.grade ? st.scale[c.grade] : null)).filter(x => x != null);
   const comp = cs.length === _prRv.comps.length && cs.length ? cs.reduce((a, b) => a + b, 0) / cs.length : null;
   let sw = 0, s = 0, miss = false;
   (st.skills || []).forEach(sk => { const g = (_prRv.extras || []).find(x => x.key === sk.key)?.grade, v = g ? st.scale[g] : null; if(v == null){ miss = true; return; } const w = Number(sk.weight) || 0; sw += w; s += w * v; });
   const skill = !miss && sw ? s / sw : null;
-  const total = comp != null && skill != null ? comp * sc.comps / 100 + skill * sc.skills / 100 : null;
-  return { comp, skill, total };
+  const total = comp != null && skill != null && (!usePerf || perf != null) ? (usePerf ? perf * sc.perf / 100 : 0) + comp * sc.comps / 100 + skill * sc.skills / 100 : null;
+  return { perf, comp, skill, total, usePerf, sc };
 }
 function prPreviewInner(){
   if(_prRv.kind === 'self') return '';
   if(prConvNow()){
     const p = prConvPreviewCalc(), f = v => (v == null ? '-' : (Math.round(v * 100) / 100).toString());
-    return `이 평가로 <b>공통역량 ${f(p.comp)}점</b> · <b>업무 수행 능력 ${f(p.skill)}점</b> · <b>합계 ${f(p.total)}점</b> <span class="pm-meta">(100점 만점 · 고른 등급까지 반영한 미리보기 · 최종 판정은 경영지원팀 심사에서 정합니다)</span>`;
+    // 배점을 반영한 환산 점수로 보여 준다: 성과 /20 · 공통역량 /30 · 업무 수행 능력 /50
+    const pt = (v, w) => (v == null ? '-' : f(v * w / 100));
+    return `이 평가로 ${p.usePerf ? `<b>성과 ${pt(p.perf, p.sc.perf)}점</b> <span class="pm-meta">(/${p.sc.perf})</span> · ` : ''}<b>공통역량 ${pt(p.comp, p.sc.comps)}점</b> <span class="pm-meta">(/${p.sc.comps})</span> · <b>업무 수행 능력 ${pt(p.skill, p.sc.skills)}점</b> <span class="pm-meta">(/${p.sc.skills})</span> · <b>합계 ${f(p.total)}점</b> <span class="pm-meta">(100점 만점 · 고른 등급까지 반영한 미리보기 · 최종 판정은 경영지원팀 심사에서 정합니다)</span>`;
   }
   const p = prPreviewCalc(), f = v => (v == null ? '-' : v.toFixed(2).replace(/\.?0+$/, ''));
   return `이 평가로 <b>업적 ${f(p.perf)}점</b> · <b>역량 ${f(p.comp)}점</b> <span class="pm-meta">(고른 등급까지 반영한 미리보기 · 제출하면 서버가 확정합니다)</span>`;
@@ -3307,7 +3314,7 @@ function prDownItemHtml(si, i, rules, edit){
   const probs = _prRv.attempt ? rules.bad[i] : [];
   const d1 = _prRv.kind === 'd2' ? (d.ref.d1?.items || []).find(y => y.ref === i) : null;
   return `<div class="pr-item ${probs.length ? 'pr-item-bad' : ''}">
-    ${prConvNow() ? `<div class="pr-item-top"><span class="pr-wchip">성과 ${i + 1}</span></div>` : `<div class="pr-item-top"><span class="pr-wchip">가중치 ${si.weight || 0}%</span><span class="pm-kind pm-kind-${si.kind==='ai'?'ai':'business'}" style="margin:0">${si.kind==='ai'?'AI':'KPI'}</span></div>`}
+    ${prConvNow() ? `<div class="pr-item-top"><span class="pr-wchip">성과 ${i + 1}${Number(si.weight) > 0 && Number(d.cycle.settings.score?.perf) > 0 ? ` · 비중 ${Number(si.weight)}% (${Math.round(Number(si.weight) * d.cycle.settings.score.perf) / 100}점)` : ''}</span></div>` : `<div class="pr-item-top"><span class="pr-wchip">가중치 ${si.weight || 0}%</span><span class="pm-kind pm-kind-${si.kind==='ai'?'ai':'business'}" style="margin:0">${si.kind==='ai'?'AI':'KPI'}</span></div>`}
     <div class="pr-title-ro">${escapeHtml(si.title)}</div>
     ${prOtherBox('본인 평가', si.grade, si.summary, si.detail_html)}
     ${d1 ? prOtherBox('1차 평가자', d1.grade, d1.comment, '') : ''}
@@ -3371,7 +3378,7 @@ function prCenterDownHtml(){
   return `${notice}${ro}
   <div class="pr-preview" id="pr-preview">${prPreviewInner()}</div>
   ${d.canReturn ? `<div class="pr-retbox"><span>본인평가에 보완이 필요하면 사유와 함께 돌려보낼 수 있습니다(본인 작성 기간 안에서만).</span><button class="btn btn-sm pm-btn-ghost" onclick="prRvReturn()">본인평가 반려</button></div>` : ''}
-  <div class="pr-sec-h">${cv ? '① 성과 기술' : '① 성과'} <span class="pm-meta">본인평가 ${si.items.length}개 항목${cv ? '' : ' · 가중치는 본인평가 값 그대로'}</span></div>
+  <div class="pr-sec-h">${cv ? '① 성과 기술' : '① 성과'} <span class="pm-meta">본인평가 ${si.items.length}개 항목${cv ? (Number(d.cycle.settings.score?.perf) > 0 ? ` · 배점 ${d.cycle.settings.score.perf}점(항목 비중으로 환산)` : '') : ' · 가중치는 본인평가 값 그대로'}</span></div>
   ${si.items.map((it, i) => prDownItemHtml(it, i, rules, edit)).join('')}
   <div class="pr-sec-h" style="margin-top:28px">② 공통역량</div>
   ${_prRv.comps.map((cp, i) => prDownCompHtml(cp, defs.find(z => z.key === cp.key) || { name: cp.key, desc: '' }, i, rules, edit)).join('')}
@@ -3397,7 +3404,7 @@ function prRefHtml(){
   }
   if(tab === 'self' && _prRv.kind !== 'self'){
     const s = ref.self; if(!s) return tabs + '<div class="pm-tbl-empty">본인평가가 없습니다.</div>';
-    return tabs + (s.items || []).map(x => `<div class="pr-refcard"><div class="pr-refcard-h">${escapeHtml(x.title)} ${prConvNow() ? '' : `<span class="pm-meta">${x.weight}%</span>`} ${prGradeTag(x.grade)}</div>${x.summary ? `<div class="pr-rich">${escapeHtml(x.summary)}</div>` : ''}</div>`).join('')
+    return tabs + (s.items || []).map(x => `<div class="pr-refcard"><div class="pr-refcard-h">${escapeHtml(x.title)} ${prConvNow() && !(Number(x.weight) > 0) ? '' : `<span class="pm-meta">${x.weight}%</span>`} ${prGradeTag(x.grade)}</div>${x.summary ? `<div class="pr-rich">${escapeHtml(x.summary)}</div>` : ''}</div>`).join('')
       + `<div class="pr-refcard"><div class="pr-refcard-h">공통역량</div>${(s.comps || []).map(c => `<div class="pm-meta" style="margin:3px 0">${escapeHtml((prCompDef().find(z => z.key === c.key) || {}).name || c.key)} ${prGradeTag(c.grade)}</div>`).join('')}</div>`;
   }
   if(tab === 'archive'){
@@ -3455,7 +3462,7 @@ function prConvSelfHtml(){
       <ul class="cvs-tips"><li>중간에 <b>임시저장</b>하고 나갔다가, 메일의 같은 링크로 다시 들어와 이어서 쓸 수 있습니다.</li><li><b>제출하면 수정할 수 없습니다.</b> 제출 전에 한 번 더 읽어 보세요.</li><li>문의는 경영지원팀으로 해 주세요.</li></ul>
     </div>
     ${notice}${returned}${ro}
-    <div class="cvs-sec"><span class="cvs-n">1</span><b>성과 기술</b><span>계약 기간 동안의 주요 성과 · ${st.items.min}~${max}개</span></div>
+    <div class="cvs-sec"><span class="cvs-n">1</span><b>성과 기술</b><span>계약 기간 동안의 주요 성과 · ${st.items.min}~${max}개${st.items.requireWeight !== false ? ' · 항목마다 비중(%)을 정해 합이 100이 되게 해 주세요' : ''}</span></div>${st.items.requireWeight !== false ? `<div class="pm-meta" style="margin:-4px 0 10px">비중 합 <b id="pr-wsum">${_prRv.items.reduce((a, x) => a + (Number(x.weight) || 0), 0)}</b> / 100 · 중요한 성과일수록 비중을 크게 주세요</div>` : ''}
     ${_prRv.items.map((x, i) => prItemCardHtml(x, i, rules, edit)).join('') || '<div class="pm-tbl-empty">성과 항목이 없습니다.</div>'}
     ${edit && _prRv.items.length < max ? `<button class="btn btn-sm pm-btn-ghost" onclick="prRvAdd()">+ 성과 추가</button>` : ''}
     <div class="cvs-sec"><span class="cvs-n">2</span><b>공통역량</b><span>${_prRv.comps.length}가지 역량마다 등급과 이유를 적어 주세요</span></div>
