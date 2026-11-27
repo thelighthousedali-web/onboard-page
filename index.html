@@ -830,20 +830,6 @@ if(EMAIL_READY) emailjs.init({ publicKey: EMAIL_CFG.publicKey });
 /* ════════════════════════════════════════
    EMAIL FUNCTIONS
 ════════════════════════════════════════ */
-async function sendRegistrationEmail(user){
-  if(!EMAIL_READY) return;
-  try {
-    await emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.adminTplId, {
-      to_email:      EMAIL_CFG.adminEmail,
-      user_name:     user.name,
-      user_email:    user.email,
-      employee_type: user.employeeType === 'regular' ? '정규직' : '계약직',
-      applied_at:    new Date().toLocaleDateString('ko-KR'),
-      login_url:     window.location.href,
-    });
-  } catch(e){ console.error('[EmailJS] 가입 알림 발송 실패:', e); }
-}
-
 async function sendApprovalEmail(user){
   if(!EMAIL_READY) return;
   try {
@@ -1328,8 +1314,7 @@ function render(){
   PrivacyConsent.ensure(); // 최초 로그인 개인정보 동의(이미 했으면 바로 통과)
 
   if(!user){
-    if(state.page==='register') app.innerHTML = renderRegister();
-    else app.innerHTML = renderLogin();
+    app.innerHTML = renderLogin(); // 자가 회원가입 없음(2026-11-27) — 네이버웍스 로그인만
     bindAuth();
     return;
   }
@@ -1388,65 +1373,6 @@ function renderLogin(){
       <button class="btn btn-full" id="nw-login-btn" style="background:#fff;color:#374151;border:1.5px solid #EE5A0E;font-weight:700;padding:15px;font-size:15px;border-radius:10px">네이버웍스로 로그인</button>
       <div class="auth-footer">
         계정 생성 문의는 김강현 책임에게 연락해 주세요
-      </div>
-    </div>
-  </div>
-</div>`;
-}
-
-function renderRegister(){
-  return `
-<div class="auth-wrap">
-  <div class="auth-hero">
-    <img src="slogan.png" alt="" class="auth-hero-bg-slogan">
-    <div class="auth-hero-emoji">🥳</div>
-    <div style="height:12px"></div>
-    <div class="auth-hero-title">헥토큐앤엠과 함께할<br>새로운 시작을 환영합니다!</div>
-    <div class="auth-hero-desc">처음이라 궁금한 것들이 많으실 텐데요.<br>입사 전후 꼭 필요한 정보를 한곳에 모아두었습니다.</div>
-    <div class="auth-hero-desc">회사 소개부터 복리후생, 업무 시스템, 연차 신청까지 편하게 둘러보시고 하나씩 확인해보세요.</div>
-    <div class="auth-hero-tags">
-      <span class="auth-hero-tag">🏢 회사 소개</span>
-      <span class="auth-hero-tag">🎁 복리후생</span>
-      <span class="auth-hero-tag">💻 업무 시스템</span>
-      <span class="auth-hero-tag">📅 연차 신청</span>
-    </div>
-  </div>
-  <div class="auth-panel">
-    <div class="auth-card">
-      <div class="auth-logo">
-        <img src="logo-vertical.png" alt="Hecto Q&M" class="auth-logo-img">
-        <div class="tagline">헥토큐앤엠 신규입사자 온보딩 허브</div>
-      </div>
-      <h2 class="auth-h">회원가입</h2>
-      <p class="auth-sub">입사 정보를 입력하여 계정을 생성하세요</p>
-      <div id="reg-msg"></div>
-      <div class="fgroup">
-        <label class="flabel">이름</label>
-        <input class="finput" id="r-name" type="text" placeholder="성명 입력">
-        <div class="err" id="err-name"></div>
-      </div>
-      <div class="fgroup">
-        <label class="flabel">이메일</label>
-        <input class="finput" id="r-email" type="email" placeholder="회사 이메일 입력">
-        <div class="err" id="err-email"></div>
-      </div>
-      <div class="fgroup">
-        <label class="flabel">비밀번호</label>
-        <input class="finput" id="r-pw" type="password" placeholder="8자 이상 입력">
-        <div class="err" id="err-pw"></div>
-      </div>
-      <div class="fgroup">
-        <label class="flabel">고용형태</label>
-        <select class="fselect" id="r-type">
-          <option value="">선택하세요</option>
-          <option value="regular">정규직</option>
-          <option value="contract">계약직</option>
-        </select>
-        <div class="err" id="err-type"></div>
-      </div>
-      <button class="btn btn-primary btn-full" id="reg-btn">가입 신청</button>
-      <div class="auth-footer">
-        이미 계정이 있으신가요? <a id="go-login">로그인</a>
       </div>
     </div>
   </div>
@@ -1556,7 +1482,6 @@ function bindChangePw(){
 }
 
 function bindAuth(){
-  document.getElementById('go-register')?.addEventListener('click', ()=>nav('register'));
   document.getElementById('go-login')?.addEventListener('click', ()=>nav('login'));
   document.getElementById('logout-pending')?.addEventListener('click', logout);
 
@@ -1578,32 +1503,6 @@ function bindAuth(){
   });
   document.getElementById('l-pw')?.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-btn').click(); });
   document.getElementById('nw-login-btn')?.addEventListener('click', startNaverWorksLogin);
-
-  document.getElementById('reg-btn')?.addEventListener('click', async ()=>{
-    const name  = document.getElementById('r-name').value.trim();
-    const email = document.getElementById('r-email').value.trim();
-    const pw    = document.getElementById('r-pw').value;
-    const type  = document.getElementById('r-type').value;
-    let ok = true;
-    clearErrs();
-    if(!name){ setErr('err-name','이름을 입력하세요'); ok=false; }
-    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setErr('err-email','올바른 이메일을 입력하세요'); ok=false; }
-    if(!pw||pw.length<8){ setErr('err-pw','비밀번호는 8자 이상이어야 합니다'); ok=false; }
-    if(!type){ setErr('err-type','고용형태를 선택하세요'); ok=false; }
-    if(!ok) return;
-    const btn = document.getElementById('reg-btn');
-    btn.disabled = true;
-    const { ok: registered, data } = await portalCall({ action: 'register', name, email, password: pw, employee_type: type });
-    btn.disabled = false;
-    if(!registered){
-      if(data.code === 'exists') setErr('err-email','이미 사용 중인 이메일입니다');
-      else showMsg('reg-msg','error', data.error || '가입 처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
-      return;
-    }
-    DB.setCurrent(data.user, data.token);
-    sendRegistrationEmail(data.user);
-    render();
-  });
 }
 
 /* ════════════════════════════════════════
